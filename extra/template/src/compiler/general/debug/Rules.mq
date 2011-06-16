@@ -1,0 +1,10 @@
+library general_debug {
+	sources {
+		debug.c
+	}
+
+	link {
+		port_cport
+		port_opsys
+	}
+}

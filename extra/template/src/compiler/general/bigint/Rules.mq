@@ -1,0 +1,13 @@
+library general_bigint {
+	sources {
+		bigint.c
+		integer.c
+	}
+
+	link {
+		general_dword
+		general_store
+		general_util
+		port_cport
+	}
+}

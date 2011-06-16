@@ -1,0 +1,265 @@
+library algebra : aldor-user-library {
+	sources {
+		src/algext/sit_algext.as
+		src/algext/sit_sae.as
+		src/algext/sit_saexcpt.as
+		src/algext/sit_upmod.as
+		src/basic/compbug/sit_interp.as
+		src/basic/compbug/sit_shell.as
+		src/basic/sit_complex.as
+		src/basic/sit_indvar.as
+		src/basic/sit_mkpring.as
+		src/basic/sit_permut.as
+		src/basic/sit_pring.as
+		src/basic/sit_product.as
+		src/categories/alg_cansimp.as
+		src/categories/alg_ffield.as
+		src/categories/alg_frering.as
+		src/categories/alg_idxfrng.as
+		src/categories/alg_modcmp.as
+		src/categories/alg_primsrc.as
+		src/categories/alg_rescls.as
+		src/categories/alg_rring.as
+		src/categories/sit_abgroup.as
+		src/categories/sit_abmon.as
+		src/categories/sit_algebra.as
+		src/categories/sit_automor.as
+		src/categories/sit_basic.as
+		src/categories/sit_char0.as
+		src/categories/sit_charp.as
+		src/categories/sit_chrem.as
+		src/categories/sit_comring.as
+		src/categories/sit_dcmprng.as
+		src/categories/sit_deriv.as
+		src/categories/sit_diffext.as
+		src/categories/sit_difring.as
+		src/categories/sit_euclid.as
+		src/categories/sit_field.as
+		src/categories/sit_freealg.as
+		src/categories/sit_freelar.as
+		src/categories/sit_freelc.as
+		src/categories/sit_freemod.as
+		src/categories/sit_fset.as
+		src/categories/sit_gcd.as
+		src/categories/sit_gexpcat.as
+		src/categories/sit_group.as
+		src/categories/sit_idxfalg.as
+		src/categories/sit_idxflar.as
+		src/categories/sit_idxflc.as
+		src/categories/sit_idxfmod.as
+		src/categories/sit_intdom.as
+		src/categories/sit_integer.as
+		src/categories/sit_linarit.as
+		src/categories/sit_module.as
+		src/categories/sit_monoid.as
+		src/categories/sit_ncid.as
+		src/categories/sit_pable.as
+		src/categories/sit_prfcat0.as
+		src/categories/sit_ptools.as
+		src/categories/sit_qring.as
+		src/categories/sit_ring.as
+		src/categories/sit_spf0.as
+		src/categories/sit_spfcat0.as
+		src/categories/sit_spzble.as
+		src/extree/operators/sit_OPand.as
+		src/extree/operators/sit_OPassgn.as
+		src/extree/operators/sit_OPbigO.as
+		src/extree/operators/sit_OPcase.as
+		src/extree/operators/sit_OPcplex.as
+		src/extree/operators/sit_OPequal.as
+		src/extree/operators/sit_OPexpt.as
+		src/extree/operators/sit_OPfact.as
+		src/extree/operators/sit_OPif.as
+		src/extree/operators/sit_OPless.as
+		src/extree/operators/sit_OPlist.as
+		src/extree/operators/sit_OPllist.as
+		src/extree/operators/sit_OPmatrx.as
+		src/extree/operators/sit_OPminus.as
+		src/extree/operators/sit_OPmore.as
+		src/extree/operators/sit_OPnoteq.as
+		src/extree/operators/sit_OPplus.as
+		src/extree/operators/sit_OPprefx.as
+		src/extree/operators/sit_OPquot.as
+		src/extree/operators/sit_OPsubsc.as
+		src/extree/operators/sit_OPtimes.as
+		src/extree/operators/sit_OPvect.as
+		src/extree/parser/sit_infexpr.as
+		src/extree/parser/sit_lspexpr.as
+		src/extree/parser/sit_maple.as
+		src/extree/parser/sit_parser.as
+		src/extree/parser/sit_scanner.as
+		src/extree/parser/sit_token.as
+		src/extree/sit_extree.as
+		src/extree/sit_optools.as
+		src/ffield/alg_pf2.as
+		src/ffield/sit_prfcat.as
+		src/ffield/sit_spf.as
+		src/ffield/sit_sprfcat.as
+		src/ffield/sit_sprfgcd.as
+		src/ffield/sit_sprfmat.as
+		src/ffield/sit_zpf.as
+		src/fraction/sit_lcqotct.as
+		src/fraction/sit_matquot.as
+		src/fraction/sit_qotbyc0.as
+		src/fraction/sit_qotbyct.as
+		src/fraction/sit_qotfcat.as
+		src/fraction/sit_qotfct0.as
+		src/fraction/sit_qotient.as
+		src/fraction/sit_quotby.as
+		src/fraction/sit_quotcat.as
+		src/fraction/sit_uflgqot.as
+		src/fraction/sit_vecquot.as
+		src/mat/gauss/sit_dfge.as
+		src/mat/gauss/sit_ff2ge.as
+		src/mat/gauss/sit_ffge.as
+		src/mat/gauss/sit_hermge.as
+		src/mat/gauss/sit_linelim.as
+		src/mat/gauss/sit_oge.as
+		src/mat/linalg2/alg_ffupla.as
+		src/mat/linalg2/sit_popov.as
+		src/mat/linalg2/sit_upcrtla.as
+		src/mat/linalg3/sit_hensela.as
+		src/mat/linalg/sit_bsolve.as
+		src/mat/linalg/sit_laring.as
+		src/mat/linalg/sit_linalg.as
+		src/mat/linalg/sit_overdet.as
+		src/mat/modular/compbug/sit_speclin.as
+		src/mat/modular/sit_modpoge.as
+		src/mat/sit_dnsemat.as
+		src/mat/sit_matcat.as
+		src/mat/sit_vector.as
+		src/multpoly/exponent/sm_dirprod.as
+		src/multpoly/exponent/sm_dirprodc.as
+		src/multpoly/exponent/sm_expocat.as
+		src/multpoly/exponent/sm_fvt.as
+		src/multpoly/exponent/sm_listovar.as
+		src/multpoly/exponent/sm_midl.as
+		src/multpoly/exponent/sm_midrl.as
+		src/multpoly/exponent/sm_mievc.as
+		src/multpoly/exponent/sm_milex.as
+		src/multpoly/exponent/sm_osymbol.as
+		src/multpoly/exponent/sm_tuplovar.as
+		src/multpoly/exponent/sm_vt.as
+		src/multpoly/exponent/sm_zevc.as
+		src/multpoly/multpolycat/alg_defgcd.as
+		src/multpoly/multpolycat/alg_poltype.as
+		src/multpoly/multpolycat/alg_stdfrng.as
+		src/multpoly/multpolycat/sm_famr0.as
+		src/multpoly/multpolycat/sm_polring0.as
+		src/multpoly/multpolydata/sm_delist.as
+		src/multpoly/multpolydom/sm_dmp0.as
+		src/multpoly/multpolydom/sm_dmp1.as
+		src/multpoly/multpolypkg/alg_bivarpk.as
+		src/multpoly/multpolypkg/alg_mresbiv.as
+		src/multpoly/multpolypkg/alg_ZpUVres.as
+		src/multpoly/multpolytest/alg_bivtst1.as
+		src/multpoly/multpolytest/alg_bivtst2.as
+		src/multpoly/multpolytest/alg_bivtst3.as
+		src/multpoly/multpolytest/sm_dmp0pkgt.as
+		src/multpoly/multpolytest/sm_exppkgt.as
+		src/multpoly/multpolytest/sm_pr0pkgt.as
+		src/numbers/sit_primes.as
+		src/numbers/sit_primgen.as
+		src/numbers/sit_prmroot.as
+		src/numbers/sit_prmtabl.as
+		src/polyfactor0/sit_fhensel.as
+		src/polyfactor0/sit_zfactor.as
+		src/polyfactor0/sit_zfring.as
+		src/polyfactorp/sit_upfactp.as
+		src/series/alg_serpoly.as
+		src/series/compbug/sit_duts.as
+		src/series/sit_seqence.as
+		src/series/sit_sercat.as
+		src/univpoly/alg_sup0.as
+		src/univpoly/alg_sup1.as
+		src/univpoly/alg_sup.as
+		src/univpoly/alg_unitool.as
+		src/univpoly/alg_uprcr.as
+		src/univpoly/categories/alg_chrem2.as
+		src/univpoly/categories/alg_modgcdp.as
+		src/univpoly/categories/alg_polydio.as
+		src/univpoly/categories/sit_fftring.as
+		src/univpoly/categories/sit_fring.as
+		src/univpoly/categories/sit_froot.as
+		src/univpoly/categories/sit_resprs.as
+		src/univpoly/categories/sit_sqfree.as
+		src/univpoly/categories/sit_ufalg.as
+		src/univpoly/categories/sit_uffalg.as
+		src/univpoly/categories/sit_ugring.as
+		src/univpoly/categories/sit_umonom.as
+		src/univpoly/categories/sit_upolalg.as
+		src/univpoly/categories/sit_upolc0.as
+		src/univpoly/categories/sit_zring.as
+		src/univpoly/gcd/sit_gcdint.as
+		src/univpoly/gcd/sit_heugcd.as
+		src/univpoly/gcd/sit_modgcd.as
+		src/univpoly/gcd/sit_modpgcd.as
+		src/univpoly/sit_dup.as
+		src/univpoly/sit_polkara.as
+		src/univpoly/sit_spread.as
+		src/univpoly/sit_ufacpol.as
+		src/univpoly/sit_upolc.as
+		src/util/alg_version.as
+	}
+
+	# Included files
+	extra_dist {
+		src/categories/sit_power.as
+		src/extree/parser/alg_tokens.as
+		src/extree/alg_leaf.as
+		src/extree/alg_op.as
+		src/mat/modular/sit_fullge.as
+		src/mat/modular/sit_halfge.as
+		src/multpoly/multpolypkg/alg_disolve.as
+		src/multpoly/multpolypkg/alg_expo.as
+		src/multpoly/multpolypkg/alg_ezgcd.as
+		src/multpoly/multpolypkg/alg_mhensel.as
+		src/polyfactor0/sit_zfring0.as
+		src/univpoly/alg_debugdup.as
+		src/univpoly/gcd/sit_fullgcd.as
+		src/univpoly/gcd/sit_gcdint0.as
+		src/univpoly/gcd/sit_halfgcd.as
+		src/univpoly/gcd/sit_loggcd.as
+	}
+
+	# Aldor compilation
+	aflags {
+		-Q1
+	}
+
+	link {
+		aldor
+	}
+
+	# Additional files when GMP is available
+	sources if GMP {
+		src/categories/sit_intgmp.as
+		src/mat/modular/sit_zcrtla.as
+		src/multpoly/multpolycat/sm_polring.as
+		src/multpoly/multpolycat/sm_rmpcat0.as
+		src/multpoly/multpolydom/alg_smp.as
+		src/multpoly/multpolydom/sm_rmp.as
+		src/multpoly/multpolydom/sm_rmpz.as
+		src/multpoly/multpolydom/sm_rmpzx.as
+		src/polyfactor0/sit_zfringg.as
+		src/univpoly/gcd/sit_gcdintg.as
+	}
+
+	link if GMP {
+		-lgmp
+	}
+
+	verbatim {
+		# Dependencies not seen by aldep
+		$(CURDIR)/src/univpoly/categories/sit_ufalg.c: sit_integer.lo
+		$(CURDIR)/src/univpoly/categories/sit_froot.c: sit_integer.lo
+		$(CURDIR)/src/multpoly/exponent/sm_expocat.c: sit_integer.lo
+		$(CURDIR)/src/basic/sit_product.c: sit_integer.lo
+		$(CURDIR)/src/categories/sit_fset.c: sit_integer.lo
+		$(CURDIR)/src/univpoly/categories/sit_umonom.c: sit_integer.lo
+		$(CURDIR)/src/univpoly/gcd/sit_gcdintg.c: sit_intgmp.lo
+		$(CURDIR)/src/univpoly/gcd/sit_gcdint.c: sit_heugcd.lo sit_modgcd.lo
+		$(CURDIR)/src/polyfactor0/sit_zfring.c: sit_zfactor.lo
+		$(CURDIR)/src/polyfactor0/sit_zfringg.c: sit_intgmp.lo sit_zfactor.lo
+	}
+}

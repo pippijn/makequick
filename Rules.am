@@ -1,0 +1,9 @@
+include automake/init.am
+include automake/cppinc.am
+
+AM_YFLAGS += -d
+AM_CPPFLAGS += -ggdb3
+AM_LDFLAGS += -lboost_filesystem-mt
+AM_LDFLAGS += -lboost_system-mt
+
+include automake/stdinc.am

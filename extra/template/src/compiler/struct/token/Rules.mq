@@ -1,0 +1,15 @@
+library struct_token {
+	sources {
+		token.c
+	}
+
+	link {
+		struct_lists
+		general_format
+		general_store
+		general_strops
+		general_symbol
+		general_util
+		port_cport
+	}
+}

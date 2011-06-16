@@ -1,0 +1,13 @@
+library general_msg {
+	sources {
+		msg.c
+	}
+
+	link {
+		general_file
+		general_strops
+		general_store
+		port_cport
+		port_opsys
+	}
+}

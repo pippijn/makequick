@@ -1,0 +1,8 @@
+EXTRA_DIST +=		\
+	lexer.h		\
+	node.h		\
+	nopvisitor.h	\
+	parser.h	\
+	visitor.h	\
+	y.tab.h		\
+	ylcode.h

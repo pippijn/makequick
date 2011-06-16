@@ -1,0 +1,12 @@
+library general_symbol {
+	sources {
+		symbol.c
+	}
+
+	link {
+		general_store
+		general_strops
+		general_table
+		port_cport
+	}
+}

@@ -1,0 +1,10 @@
+library general_texthp {
+	sources {
+		texthp.c
+	}
+
+	link {
+		general_termtype
+		port_cport
+	}
+}

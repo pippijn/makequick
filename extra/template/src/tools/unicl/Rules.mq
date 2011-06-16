@@ -1,0 +1,27 @@
+program unicl -> pkglibexec {
+	sources {
+		unicl.c
+	}
+
+	link {
+		# In the link section of a target, you may refer to libraries built
+		# within this project. The installation order of libraries is calculated
+		# using the dependency information (libraries are topologically sorted
+		# and installed in inverse sort order).
+		# It is an error to refer to a non-existent internal library.
+		general_buffer
+		general_cfgfile
+		general_file
+		general_list
+		general_store
+		general_strops
+		port_cport
+		port_opsys
+
+		# In order to link against external libraries, you must add the "-l"
+		# prefix. Libraries linked like this are automatically checked in configure.
+		# If you also want to check whether certain symbols are defined in the
+		# library, you need to add those checks, manually.
+		-lm
+	}
+}

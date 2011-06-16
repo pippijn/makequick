@@ -1,0 +1,9 @@
+library struct_axlobs {
+	sources {
+		symco.c
+	}
+
+	link {
+		general_store
+	}
+}

@@ -1,0 +1,11 @@
+library general_textansi {
+	sources {
+		textansi.c
+	}
+
+	link {
+		general_strops
+		general_termtype
+		port_cport
+	}
+}

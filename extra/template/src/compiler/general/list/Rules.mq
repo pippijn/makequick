@@ -1,0 +1,10 @@
+library general_list {
+	sources {
+		list.c
+	}
+
+	link {
+		general_store
+		port_cport
+	}
+}

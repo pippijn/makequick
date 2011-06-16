@@ -1,0 +1,11 @@
+library general_srcpos {
+	sources {
+		srcpos.c
+	}
+
+	link {
+		general_file
+		general_store
+		port_cport
+	}
+}

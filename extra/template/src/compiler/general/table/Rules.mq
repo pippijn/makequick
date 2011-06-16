@@ -1,0 +1,12 @@
+library general_table {
+	sources {
+		table.c
+	}
+
+	link {
+		general_format
+		general_store
+		general_util
+		port_cport
+	}
+}

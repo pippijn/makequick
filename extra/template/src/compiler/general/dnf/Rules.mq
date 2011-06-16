@@ -1,0 +1,11 @@
+library general_dnf {
+	sources {
+		dnf.c
+	}
+
+	link {
+		general_debug
+		general_store
+		port_cport
+	}
+}

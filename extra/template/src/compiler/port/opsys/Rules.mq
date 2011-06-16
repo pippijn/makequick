@@ -1,0 +1,14 @@
+library port_opsys {
+	sources {
+		opsys.c
+	}
+
+	extra_dist {
+		os_unix.h
+		os_win32.h
+	}
+
+	link {
+		port_cport
+	}
+}

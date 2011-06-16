@@ -1,0 +1,13 @@
+library general_buffer {
+	sources {
+		buffer.c
+	}
+
+	link {
+		general_format
+		general_store
+		general_strops
+		general_xfloat
+		port_cport
+	}
+}

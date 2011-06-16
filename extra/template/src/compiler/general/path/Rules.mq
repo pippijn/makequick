@@ -1,0 +1,14 @@
+library general_path {
+	sources {
+		path.c
+	}
+
+	link {
+		general_file
+		general_list
+		general_store
+		general_strops
+		port_cport
+		port_opsys
+	}
+}

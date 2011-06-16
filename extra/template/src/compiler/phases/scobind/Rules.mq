@@ -1,0 +1,25 @@
+library phases_scobind {
+	sources {
+		scobind.c
+	}
+
+	link {
+		phases_abuse
+		struct_absyn
+		struct_axlobs
+		struct_doc
+		struct_foam
+		struct_lists
+		struct_spesym
+		struct
+		general_debug
+		general_format
+		general_list
+		general_srcpos
+		general_store
+		general_strops
+		general_table
+		general_util
+		port_cport
+	}
+}

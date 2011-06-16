@@ -1,0 +1,18 @@
+library phases_linear {
+	sources {
+		linear.c
+	}
+
+	link {
+		struct_absyn
+		struct_lists
+		struct_token
+		struct
+		general_debug
+		general_format
+		general_list
+		general_srcpos
+		general_store
+		port_cport
+	}
+}

@@ -1,0 +1,20 @@
+library foam : aldor-library {
+	sources {
+		src/runtime.as
+	}
+
+	# Custom flag sets can be defined. As opposed to variables of the form
+	# AFLAGS = ...
+	# multiply defined flag sets are combined instead of being an error.
+	aflags {
+		-Qinline-all
+		-Wruntime
+		-Csmax=0
+		-Qno-cc
+		-WD-all
+	}
+
+	link {
+		foamlib
+	}
+}

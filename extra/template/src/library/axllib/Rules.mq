@@ -1,0 +1,63 @@
+library axllib : aldor-user-library {
+	sources {
+		src/axl_array.as
+		src/axl_axlcat.as
+		src/axl_basic.as
+		src/axl_boolean.as
+		src/axl_bpower.as
+		src/axl_byte.as
+		src/axl_char.as
+		src/axl_complex.as
+		src/axl_debug.as
+		src/axl_dfloat.as
+		src/axl_efuns.as
+		src/axl_except.as
+		src/axl_file.as
+		src/axl_float.as
+		src/axl_fmtout.as
+		src/axl_fname.as
+		src/axl_format.as
+		src/axl_fprint.as
+		src/axl_fstring.as
+		src/axl_gener.as
+		src/axl_hinteger.as
+		src/axl_imod.as
+		src/axl_integer.as
+		src/axl_lang.as
+		src/axl_langx.as
+		src/axl_list.as
+		src/axl_machine.as
+		src/axl_object.as
+		src/axl_opsys.as
+		src/axl_oslow.as
+		src/axl_parray.as
+		src/axl_partial.as
+		src/axl_pfloat.as
+		src/axl_pkarray.as
+		src/axl_pointer.as
+		src/axl_ratio.as
+		src/axl_ref.as
+		src/axl_segment.as
+		src/axl_sfloat.as
+		src/axl_sinteger.as
+		src/axl_sort.as
+		src/axl_string.as
+		src/axl_table.as
+		src/axl_textread.as
+		src/axl_textwrit.as
+		src/axl_tuple.as
+		src/axl_uarray.as
+		src/rtexns.as
+	}
+
+	extra_dist {
+		src/axl_axllib.as
+		src/axl_farray.as
+		src/axl_fmdarray.as
+		src/axl_list2.as
+	}
+
+	link {
+		-lm
+	}
+}

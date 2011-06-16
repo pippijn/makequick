@@ -1,0 +1,11 @@
+library general_strops {
+	sources {
+		strops.c
+	}
+
+	link {
+		general_format
+		general_store
+		port_cport
+	}
+}

@@ -1,0 +1,10 @@
+library general_xfloat {
+	sources {
+		xfloat.c
+	}
+
+	link {
+		general_util
+		port_cport
+	}
+}

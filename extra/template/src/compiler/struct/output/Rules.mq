@@ -1,0 +1,12 @@
+library struct_output {
+	sources {
+		output.c
+	}
+
+	link {
+		general_bigint
+		general_store
+		port_cport
+		port_opsys
+	}
+}

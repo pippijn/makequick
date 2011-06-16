@@ -1,0 +1,28 @@
+# Templates define common flags and sources for targets. Multiple templates
+# can be inherited by targets. Templates do not define targets. Targets
+# themselves may not be inherited.
+#
+# This template defines a base for all Aldor libraries, including the
+# two core libraries "foam" and "foamlib". See foamlib/Rules.mq for details.
+template aldor-library {
+	# Define libraries all Aldor libraries link against.
+	# A diagnostic will be issued, if derived templates or targets link against
+	# a library, more than once. Thus, derived templates or targets should not
+	# explicitly link against runtime, again.
+	link {
+		# Link against the C side of the runtime
+		runtime
+	}
+}
+
+# Templates can inherit from other templates to create a combined template.
+# This template is for all non-core Aldor libraries.
+template aldor-user-library : aldor-library {
+	# XXX: Alternative syntax?
+	#extend { aldor-library }
+
+	link {
+		# Link against the Aldor side of the runtime
+		foam
+	}
+}

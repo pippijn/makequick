@@ -1,0 +1,11 @@
+library struct_depdag {
+	sources {
+		depdag.c
+	}
+
+	link {
+		struct_lists
+		general_store
+		port_cport
+	}
+}

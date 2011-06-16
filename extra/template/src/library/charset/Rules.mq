@@ -1,0 +1,96 @@
+library charset : aldor-user-library {
+	# You can add a description to a library. This is used in the configure
+	# summary and generated pkg-config files.
+	'Library for characteristic sets'
+
+	sources {
+		src/algos/cs_astls.as
+		src/algos/cs_bssts.as
+		src/algos/cs_bstls.as
+		src/algos/cs_castl.as
+		src/algos/cs_ccomp.as
+		src/algos/cs_decom.as
+		src/algos/cs_gbalg.as
+		src/algos/cs_gbtls.as
+		src/algos/cs_msat.as
+		src/algos/cs_resum.as
+		src/algos/cs_rgbal.as
+		src/algos/cs_rgbtl.as
+		src/algos/cs_sdecm.as
+		src/algos/cs_sgbal.as
+		src/algos/cs_sgbpr.as
+		src/algos/cs_srgba.as
+		src/algos/cs_trang.as
+		src/algos/cs_umsat.as
+		src/algos/cs_zdchi.as
+		src/dpoly/cs_detot.as
+		src/dpoly/cs_dprpt.as
+		src/dpoly/cs_dprt.as
+		src/dpoly/cs_dr.as
+		src/dpoly/cs_dt.as
+		src/exponent/cs_cpde.as
+		src/exponent/cs_ect.as
+		src/exponent/cs_le.as
+		src/exponent/cs_lse.as
+		src/exponent/cs_sle.as
+		src/order/cs_dveot.as
+		src/order/cs_dvleo.as
+		src/order/cs_dvlo.as
+		src/order/cs_dvmo.as
+		src/order/cs_dvoeo.as
+		src/order/cs_dvoo.as
+		src/order/cs_dvot.as
+		src/poly/cs_dpcom.as
+		src/poly/cs_dplto.as
+		src/reduction/cs_as.as
+		src/reduction/cs_prem.as
+		src/reduction/cs_prwd.as
+		src/reduction/cs_redut.as
+		src/reduction/cs_trred.as
+		src/util/cs_integ.as
+		src/util/cs_rank.as
+		src/util/cs_versi.as
+		src/vars/cs_dv.as
+		src/vars/cs_dvt.as
+		src/vars/cs_dvtls.as
+		src/vars/cs_eodvt.as
+		src/vars/cs_mvt.as
+		src/vars/cs_odv.as
+		src/vars/cs_odvt.as
+		src/vars/cs_ovl2.as
+		src/vars/cs_ovlh.as
+		src/vars/cs_vmrgr.as
+		src/vars/cs_vmtls.as
+
+		#src/dpoly/cs_dedpr.as
+		#src/poly/cs_dmain.as
+		#src/poly/cs_rcarr.as
+		#src/poly/cs_rarr.as
+		#src/poly/cs_rarpr.as
+		#src/poly/cs_plain.as
+		#src/poly/cs_pgcd.as
+		#src/poly/cs_dpgcd.as
+		#src/poly/cs_dmdgs.as
+		#src/poly/cs_dmdeg.as
+		#src/exponent/cs_ce.as
+		#src/reduction/cs_dpred.as
+		#src/reduction/cs_pred.as
+		#src/poly/cs_ddegs.as
+		#src/poly/cs_dpidm.as
+		#src/util/cs_difpr.as
+		#src/algos/cs_chide.as
+		#src/algos/cs_cstls.as
+	}
+
+	# Depends on PolynomialRing, which depends on GMPInteger
+	sources if GMP {
+		src/dpoly/cs_depr.as
+	}
+
+	# Aldor library dependency
+	link {
+		extio
+		algebra
+		aldor
+	}
+}

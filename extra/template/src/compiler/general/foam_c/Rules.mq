@@ -1,0 +1,17 @@
+library general_foam_c {
+	sources {
+		foam_c.c
+		foam_i.c
+	}
+
+	link {
+		general_bigint
+		general_dword
+		general_store
+		general_table
+		general_util
+		general_xfloat
+		port_cport
+		port_opsys
+	}
+}

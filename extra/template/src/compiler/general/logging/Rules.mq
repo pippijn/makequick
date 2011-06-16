@@ -1,0 +1,10 @@
+library general_logging {
+	sources {
+		logging.c
+	}
+
+	link {
+		general_strops
+		port_cport
+	}
+}

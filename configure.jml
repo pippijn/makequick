@@ -1,0 +1,16 @@
+project {
+	name: "Parser"
+	version: "0.1"
+	contact: "parser@xinutec.org"
+
+	lang: "C++"
+
+	libtool: no
+
+	ac_prog {
+		li { LEX }
+		li { YACC }
+	}
+
+	output;
+}

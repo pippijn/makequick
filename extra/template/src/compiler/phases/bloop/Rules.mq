@@ -1,0 +1,19 @@
+library phases_bloop {
+	sources {
+		bloop.c
+	}
+
+	link {
+		struct_absyn
+		struct_lists
+		struct
+		general_file
+		general_srcpos
+		general_store
+		general_strops
+		general_table
+		general_util
+		port_cport
+		port_opsys
+	}
+}

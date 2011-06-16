@@ -1,0 +1,19 @@
+library phases_parse {
+	sources {
+		axl.z
+		parseby.c
+	}
+
+	# Linking
+	link {
+		struct_absyn 
+		struct_lists 
+		struct_spesym
+		struct_token
+		struct
+		general_debug
+		general_srcpos
+		general_strops
+		port_cport
+	}
+}

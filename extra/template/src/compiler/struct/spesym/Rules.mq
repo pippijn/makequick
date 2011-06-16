@@ -1,0 +1,9 @@
+library struct_spesym {
+	sources {
+		spesym.c
+	}
+
+	link {
+		general_symbol
+	}
+}

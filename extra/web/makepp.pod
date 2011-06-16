@@ -1,0 +1,5 @@
+=head1 Make++
+
+This is the future development of L<Autoproj|autoproj>. While Autoproj is a
+working piece of software, C<Make++> is nowhere, yet. At the moment, there are
+only ideas, but no code.

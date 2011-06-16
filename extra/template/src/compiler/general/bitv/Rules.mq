@@ -1,0 +1,12 @@
+library general_bitv {
+	sources {
+		bitv.c
+	}
+
+	link {
+		general_debug
+		general_store
+		general_util
+		port_cport
+	}
+}

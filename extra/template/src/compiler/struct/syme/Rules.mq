@@ -1,0 +1,6 @@
+extra_dist {
+	bits.c
+	fields.c
+	kinds.c
+	new.c
+}

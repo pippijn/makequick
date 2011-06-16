@@ -1,0 +1,30 @@
+# This library inherits all flags from the aldor-library template.
+library foamlib : aldor-library {
+	sources {
+		src/fm_array.as
+		src/fm_basic.as
+		src/fm_boolean.as
+		src/fm_boot.as
+		src/fm_char.as
+		src/fm_file.as
+		src/fm_fname.as
+		src/fm_foamcat.as
+		src/fm_format.as
+		src/fm_gener.as
+		src/fm_lang.as
+		src/fm_langx.as
+		src/fm_list.as
+		src/fm_machine.as
+		src/fm_opsys.as
+		src/fm_oslow.as
+		src/fm_parray.as
+		src/fm_partial.as
+		src/fm_pointer.as
+		src/fm_segment.as
+		src/fm_sfloat.as
+		src/fm_sinteger.as
+		src/fm_string.as
+		src/fm_textwrit.as
+		src/fm_tuple.as
+	}
+}

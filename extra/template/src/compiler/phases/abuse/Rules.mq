@@ -1,0 +1,12 @@
+library phases_abuse {
+	sources {
+		abuse.c
+	}
+
+	link {
+		struct_absyn
+		struct_spesym
+		struct
+		port_cport
+	}
+}

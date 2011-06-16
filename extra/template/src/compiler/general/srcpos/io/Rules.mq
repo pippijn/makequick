@@ -1,0 +1,18 @@
+library general_srcpos_io {
+	sources {
+		spos-buffer.c
+		spos-stack.c
+	}
+
+	link {
+		general_buffer
+		general_debug
+		general_file
+		general_srcpos
+		general_store
+		general_strops
+		general_util
+		port_cport
+		port_opsys
+	}
+}

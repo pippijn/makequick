@@ -1,0 +1,10 @@
+library general_util {
+	sources {
+		util.c
+	}
+
+	link {
+		port_cport
+		port_opsys
+	}
+}

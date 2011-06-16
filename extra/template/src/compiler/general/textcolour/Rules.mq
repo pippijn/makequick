@@ -1,0 +1,15 @@
+library general_textcolour {
+	sources {
+		textcolour.c
+	}
+
+	link {
+		general_file
+		general_strops
+		general_termtype
+		general_textansi
+		general_texthp
+		port_cport
+		port_opsys
+	}
+}

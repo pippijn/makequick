@@ -1,0 +1,13 @@
+library general_ftype {
+	sources {
+		ftype.c
+	}
+
+	link {
+		general_file
+		general_sexpr
+		general_strops
+		general_util
+		port_opsys
+	}
+}

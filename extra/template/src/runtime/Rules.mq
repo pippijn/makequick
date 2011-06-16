@@ -1,0 +1,31 @@
+library runtime {
+	sources {
+		# Sources from other targets may be imported using the "sources" keyword.
+		sources (port_cport)
+		# Filenames can either be specified relative to the currently processed
+		# rules file or relative to the source root.
+		src/compiler/general/bigint/bigint.c
+		src/compiler/general/bigint/integer.c
+		src/compiler/general/debug/debug.c
+		src/compiler/general/dword/dword.c
+		src/compiler/general/format/format.c
+		src/compiler/general/store/store.c
+		src/compiler/general/table/table.c
+		src/compiler/general/timer/timer.c
+		src/compiler/general/util/util.c
+		src/compiler/general/xfloat/xfloat.c
+		src/compiler/general/foam_c/foam_c.c
+		src/compiler/general/foam_c/foam_i.c
+		src/compiler/port/opsys/opsys.c
+		src/compiler/struct/output/output.c
+	}
+
+	cppflags {
+		$(AM_CPPFLAGS)
+		-DFOAM_RTS
+	}
+
+	link {
+		-lm
+	}
+}

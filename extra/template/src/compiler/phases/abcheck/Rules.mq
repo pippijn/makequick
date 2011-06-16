@@ -1,0 +1,18 @@
+library phases_abcheck {
+	sources {
+		abcheck.c
+	}
+
+	link {
+		struct_absyn
+		struct_depdag
+		struct_lists
+		struct_spesym
+		struct
+		general_buffer
+		general_debug
+		general_format
+		general_util
+		port_cport
+	}
+}

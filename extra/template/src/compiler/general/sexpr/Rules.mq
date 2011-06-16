@@ -1,0 +1,20 @@
+library general_sexpr {
+	sources {
+		sexpr.c
+	}
+
+	link {
+		general_bigint
+		general_buffer
+		general_debug
+		general_file
+		general_fluid
+		general_srcpos
+		general_store
+		general_strops
+		general_symbol
+		general_table
+		general_util
+		port_cport
+	}
+}

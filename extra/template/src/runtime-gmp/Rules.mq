@@ -1,0 +1,27 @@
+# The libgmp check in configure generates a condition that can be used to
+# create optional components. A user can specify --without-gmp to explicitly
+# disable these components, even if libgmp exists on the system.
+library runtime if GMP {
+	sources {
+		sources (runtime)
+		# Some sources from the import can be excluded from this source list.
+		# Excluded files can either be specified in full or just with the base
+		# name. It is an error if an excluded file was not imported using a
+		# sources directive.
+		exclude {
+			foam_i.c
+		}
+		src/compiler/general/foam_c/foam_i_gmp.c
+	}
+
+	cppflags {
+		$(AM_CPPFLAGS)
+		-DFOAM_RTS
+	}
+
+	link {
+		# libgmp is checked for in configure
+		-lgmp
+		-lm
+	}
+}

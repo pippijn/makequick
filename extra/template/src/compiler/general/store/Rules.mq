@@ -1,0 +1,12 @@
+library general_store {
+	sources {
+		store.c
+	}
+
+	link {
+		general_util
+		general_timer
+		port_cport
+		port_opsys
+	}
+}

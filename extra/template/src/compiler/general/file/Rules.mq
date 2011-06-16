@@ -1,0 +1,17 @@
+library general_file {
+	sources {
+		file.c
+		fname.c
+	}
+
+	link {
+		general_buffer
+		general_debug
+		general_store
+		general_strops
+		general_util
+		general_xfloat
+		port_cport
+		port_opsys
+	}
+}

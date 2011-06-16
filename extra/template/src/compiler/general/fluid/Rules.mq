@@ -1,0 +1,11 @@
+library general_fluid {
+	sources {
+		fluid.c
+	}
+
+	link {
+		general_util
+		general_store
+		port_cport
+	}
+}

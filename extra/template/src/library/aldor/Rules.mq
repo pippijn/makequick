@@ -1,0 +1,95 @@
+library aldor : aldor-user-library {
+	sources {
+		src/aldor_gloop.as
+		src/arith/sal_arith.as
+		src/arith/sal_binpow.as
+		src/arith/sal_bool.as
+		src/arith/sal_bsearch.as
+		src/arith/sal_complex.as
+		src/arith/sal_dfloat.as
+		src/arith/sal_fltcat.as
+		src/arith/sal_ftools.as
+		src/arith/sal_int.as
+		src/arith/sal_intcat.as
+		src/arith/sal_itools.as
+		src/arith/sal_lincomb.as
+		src/arith/sal_mint.as
+		src/arith/sal_oarith.as
+		src/arith/sal_pointer.as
+		src/arith/sal_random.as
+		src/arith/sal_segment.as
+		src/arith/sal_sfloat.as
+		src/base/ald_pfunc.as
+		src/base/sal_base.as
+		src/base/sal_bstream.as
+		src/base/sal_byte.as
+		src/base/sal_char.as
+		src/base/sal_copy.as
+		src/base/sal_gener.as
+		src/base/sal_htype.as
+		src/base/sal_itype.as
+		src/base/sal_manip.as
+		src/base/sal_order.as
+		src/base/sal_otype.as
+		src/base/sal_partial.as
+		src/base/sal_serial.as
+		src/base/sal_syntax.as
+		src/base/sal_torder.as
+		src/base/sal_tstream.as
+		src/datastruc/ald_flags.as
+		src/datastruc/ald_queue.as
+		src/datastruc/ald_symbol.as
+		src/datastruc/ald_symtab.as
+		src/datastruc/sal_array.as
+		src/datastruc/sal_barray.as
+		src/datastruc/sal_bdata.as
+		src/datastruc/sal_bstruc.as
+		src/datastruc/sal_ckarray.as
+		src/datastruc/sal_cklist.as
+		src/datastruc/sal_ckmembk.as
+		src/datastruc/sal_data.as
+		src/datastruc/sal_ddata.as
+		src/datastruc/sal_fstruc.as
+		src/datastruc/sal_hash.as
+		src/datastruc/sal_kntry.as
+		src/datastruc/sal_list.as
+		src/datastruc/sal_lstruc.as
+		src/datastruc/sal_memblk.as
+		src/datastruc/sal_parray.as
+		src/datastruc/sal_pkarray.as
+		src/datastruc/sal_set.as
+		src/datastruc/sal_slist.as
+		src/datastruc/sal_sortas.as
+		src/datastruc/sal_sset.as
+		src/datastruc/sal_stream.as
+		src/datastruc/sal_string.as
+		src/datastruc/sal_table.as
+		src/lang/sal_lang.as
+		src/util/ald_trace.as
+		src/util/rtexns.as
+		src/util/sal_cmdline.as
+		src/util/sal_file.as
+		src/util/sal_timer.as
+		src/util/sal_version.as
+
+		# This library also includes one C source file.
+		support/sal_util.c
+	}
+
+	link {
+		-lm
+	}
+
+	# Additional files if GMP is available.
+	# This condition makes libaldor independent of GMP, allowing it to be
+	# disabled in configure.
+	sources if GMP {
+		src/gmp/sal_fltgmp.as
+		src/gmp/sal_gmptls.as
+		src/gmp/sal_intgmp.as
+	}
+
+	link if GMP {
+		-lgmp
+	}
+}

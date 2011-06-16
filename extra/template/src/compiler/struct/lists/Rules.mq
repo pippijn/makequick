@@ -1,0 +1,10 @@
+library struct_lists {
+	sources {
+		lists.c
+	}
+
+	link {
+		general_list
+		port_cport
+	}
+}
