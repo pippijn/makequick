@@ -62,9 +62,6 @@ project 'Aldor Compiler' {
 	}
 
 	section {
-		arg_enable gmp = $libgmp_available {
-		}
-
 		arg_enable coverage {
 			'Build with test coverage'
 			cflags COV_CFLAGS { --coverage }
