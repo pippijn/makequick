@@ -19,11 +19,4 @@ namespace nodes
   {
     return mempool.free (ptr, bytes);
   }
-
-
-  token::token (int tok, char const *text, int leng)
-    : tok (tok)
-    , string (text, leng)
-  {
-  }
 }

@@ -1,6 +1,14 @@
 %{
 #include "lexer.h"
 
+static std::string
+move (std::string &s)
+{
+  std::string r = s;
+  s.clear ();
+  return r;
+}
+
 #define SELF static_cast<lexer *> (yyget_extra (yyscanner))
 
 #define YY_USER_ACTION					\
@@ -12,10 +20,16 @@
       yycolumn += yyleng;				\
   }
 
+#define APPEND() SELF->text.append (yytext, yyleng)
+
 #define Return(TOK)					\
   do {							\
-    yylval->token					\
-      = new nodes::token (TOK, yytext, yyleng);		\
+    if (!SELF->text.empty ())				\
+      yylval->token					\
+        = new nodes::token (TOK, move (SELF->text));	\
+    else						\
+      yylval->token					\
+        = new nodes::token (TOK, yytext, yyleng);	\
     return TOK;						\
   } while (0)						\
 
@@ -35,72 +49,97 @@
 
 %x VAR_INIT
 %x VAR_RBODY VAR_SQBODY
-%x RULE
-%x STRING
+%x RULE RULE_INIT RULE_CODE
+%x STRING FILENAME MULTIFILE SOURCES
 
+/* Whitespace */
 WS	[ \t\v\n\r]
+/* Filenames */
+FN	[^ \t\v\n\r{}]
+/* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
+/* Numbers */
 DIGIT	[0-9]
 
 %%
 "#".*					{ }
 {WS}+					{ }
 
-"if"					{ Return (TK_KEYWORD); }
-"alignof"				{ Return (TK_KEYWORD); }
-"arg_enable"				{ Return (TK_KEYWORD); }
-"arg_with"				{ Return (TK_KEYWORD); }
-"c_bigendian"				{ Return (TK_KEYWORD); }
-"c_charset"				{ Return (TK_KEYWORD); }
-"c_enum_fwdecl"				{ Return (TK_KEYWORD); }
-"c_float_format"			{ Return (TK_KEYWORD); }
-"c_late_expansion"			{ Return (TK_KEYWORD); }
-"c_stdint_h"				{ Return (TK_KEYWORD); }
-"c_token_paste"				{ Return (TK_KEYWORD); }
-"c_typeof"				{ Return (TK_KEYWORD); }
-"cflags"				{ Return (TK_KEYWORD); }
-"config_header"				{ Return (TK_KEYWORD); }
-"contact"				{ Return (TK_KEYWORD); }
-"cppflags"				{ Return (TK_KEYWORD); }
-"define"				{ Return (TK_KEYWORD); }
-"exclude"				{ Return (TK_KEYWORD); }
-"extra_dist"				{ Return (TK_KEYWORD); }
-"functions"				{ Return (TK_KEYWORD); }
-"header"				{ Return (TK_KEYWORD); }
-"headers"				{ Return (TK_KEYWORD); }
-"library"				{ Return (TK_KEYWORD); }
-"link"					{ Return (TK_KEYWORD); }
+"if"					{ Return (KW_IF); }
+"alignof"				{ Return (KW_ALIGNOF); }
+"arg_enable"				{ Return (KW_ARG_ENABLE); }
+"arg_with"				{ Return (KW_ARG_WITH); }
+"c_bigendian"				{ Return (KW_C_BIGENDIAN); }
+"c_charset"				{ Return (KW_C_CHARSET); }
+"c_enum_fwdecl"				{ Return (KW_C_ENUM_FWDECL); }
+"c_float_format"			{ Return (KW_C_FLOAT_FORMAT); }
+"c_late_expansion"			{ Return (KW_C_LATE_EXPANSION); }
+"c_stdint_h"				{ Return (KW_C_STDINT_H); }
+"c_token_paste"				{ Return (KW_C_TOKEN_PASTE); }
+"c_typeof"				{ Return (KW_C_TYPEOF); }
+"cflags"				{ Return (KW_CFLAGS); }
+"config_header"				{ Return (KW_CONFIG_HEADER); }
+"contact"				{ Return (KW_CONTACT); }
+"cppflags"				{ Return (KW_CPPFLAGS); }
+"define"				{ Return (KW_DEFINE); }
+"exclude"				{ Return (KW_EXCLUDE); }
+"extra_dist"				{ Return (KW_EXTRA_DIST); }
+"functions"				{ Return (KW_FUNCTIONS); }
+"header"				{ Return (KW_HEADER); }
+"headers"				{ Return (KW_HEADERS); }
+"library"				{ Return (KW_LIBRARY); }
+"link"					{ Return (KW_LINK); }
 "nodist_sources"			{ Return (KW_NODIST_SOURCES); }
-"options"				{ Return (TK_KEYWORD); }
-"program"				{ Return (TK_KEYWORD); }
-"project"				{ Return (TK_KEYWORD); }
-"section"				{ Return (TK_KEYWORD); }
-"sizeof"				{ Return (TK_KEYWORD); }
+"options"				{ Return (KW_OPTIONS); }
+"program"				{ Return (KW_PROGRAM); }
+"project"				{ Return (KW_PROJECT); }
+"section"				{ Return (KW_SECTION); }
+"sizeof"				{ Return (KW_SIZEOF); }
 "sources"				{ Return (KW_SOURCES); }
-"symbol"				{ Return (TK_KEYWORD); }
-"template"				{ Return (TK_KEYWORD); }
-"version"				{ Return (TK_KEYWORD); }
+"symbol"				{ Return (KW_SYMBOL); }
+"template"				{ Return (KW_TEMPLATE); }
+"version"				{ Return (KW_VERSION); }
+
+{FN}+":"				{ PUSH (RULE_INIT); Return (TK_FILENAME); }
+<RULE_INIT>{
+	{WS}+				{ }
+	{FN}+				{ POP (); Return (TK_FILENAME); }
+}
+<RULE_CODE>{
+	[^}]+				{ Return (TK_STRING); }
+	"}"				{ Return (TK_RBRACE); }
+}
 
 <INITIAL,STRING>{
 	"$"				{ PUSH (VAR_INIT); Return (TK_OPERATOR); }
 	"->"				{ Return (TK_OPERATOR); }
 	"=>"				{ Return (TK_OPERATOR); }
 	":"				{ Return (TK_OPERATOR); }
-	"<"				{ Return (TK_OPERATOR); }
-	"@"				{ Return (TK_OPERATOR); }
-	"*"				{ Return (TK_OPERATOR); }
-	"["				{ Return (TK_OPERATOR); }
-	"]"				{ Return (TK_OPERATOR); }
-	"("				{ Return (TK_OPERATOR); }
-	")"				{ Return (TK_OPERATOR); }
-	"{"				{ Return (TK_OPERATOR); }
-	"}"				{ Return (TK_OPERATOR); }
+	"{"				{ Return (TK_LBRACE); }
+	"}"				{ Return (TK_RBRACE); }
 	"="				{ Return (TK_OPERATOR); }
 
 	\'(\\.|[^\\'])*\'		{ Return (TK_STRING); }
 
 	/* rules start */
 	"%"				{ PUSH (RULE); Return (TK_OPERATOR); }
+}
+
+<SOURCES>{
+	{WS}+				{ }
+	{FN}+				{ APPEND (); PUSH (FILENAME); }
+	"{"				{ yyless (0); PUSH (FILENAME); }
+	"}"				{ Return (TK_RBRACE); }
+}
+<FILENAME>{
+	{WS}+				{ POP (); Return (TK_FILENAME); }
+	{FN}+				{ APPEND (); }
+	"{"				{ PUSH (MULTIFILE); APPEND (); }
+}
+<MULTIFILE>{
+	{WS}+				{ SELF->text.append (" ", 1); }
+	{FN}+				{ APPEND (); }
+	"}"				{ APPEND (); POP (); }
 }
 
 <RULE>{
@@ -153,8 +192,20 @@ yywrap (yyscan_t yyscanner)
 }
 
 int
-lexer::cond ()
+lexer::state () const
 {
   yyguts_t *yyg = (yyguts_t *)lex;
   return YY_START;
+}
+
+void
+lexer::push_state (int cond)
+{
+  yy_push_state (cond, lex);
+}
+
+void
+lexer::pop_state ()
+{
+  yy_pop_state (lex);
 }

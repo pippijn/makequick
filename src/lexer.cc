@@ -1,5 +1,5 @@
-#define YY_HEADER_EXPORT_START_CONDITIONS
 #include "lexer.h"
+#include "yystate.h"
 
 #include <cassert>
 #include <climits>
@@ -9,15 +9,18 @@
 #include <vector>
 
 static char const *
-strcond (int cond)
+strstate (int state)
 {
-  switch (cond)
+  switch (state)
     {
-    case INITIAL        : return "in initial state";
-    case VAR_INIT       : return "after $";
-    case VAR_RBODY      : return "in variable body";
-    case VAR_SQBODY     : return "in gvar body";
-    case STRING         : return "in string literal";
+    case yy::INITIAL    : return "in initial state";
+    case yy::VAR_INIT   : return "after $";
+    case yy::VAR_RBODY  : return "in variable body";
+    case yy::VAR_SQBODY : return "in gvar body";
+    case yy::RULE       : return "in rule";
+    case yy::STRING     : return "in string literal";
+    case yy::FILENAME   : return "in filename";
+    case yy::SOURCES    : return "in sources block";
     default             : return "<unknown>";
     }
 }
@@ -59,16 +62,19 @@ lexer::close_file ()
 int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
-  return yylex (yylval, yylloc, lex);
+  int tok = yylex (yylval, yylloc, lex);
+  if (tok)
+    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token->string.c_str ());
+  return tok;
 }
 
 int
 lexer::wrap ()
 {
-  if (cond () != INITIAL)
+  if (state () != yy::INITIAL)
     {
       std::string msg = "end of file ";
-      msg += strcond (cond ());
+      msg += strstate (state ());
       yyerror (loc, 0, msg.c_str ());
     }
 

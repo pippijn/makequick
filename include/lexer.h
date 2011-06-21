@@ -14,14 +14,18 @@ struct lexer
   bool close_file ();
 
   int next (YYSTYPE *yylval, YYLTYPE *yylloc);
-  int cond ();
   int wrap ();
   void lloc (YYLTYPE *yylloc, int lineno, int column, int leng);
+
+  int state () const;
+  void push_state (int state);
+  void pop_state ();
 
   void *lex;
   YYLTYPE *loc;
 
   std::string const base;
+  std::string text;
   std::vector<std::string>::const_iterator it;
   std::vector<std::string>::const_iterator et;
 

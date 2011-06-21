@@ -6,13 +6,19 @@ makepp_SOURCES =	\
 	node.cc		\
 	nopvisitor.cc	\
 	parser.cc	\
-	shstr.cc	\
 	sighandler.cc	\
 	yylex.ll	\
 	yyparse.yy
 
-BUILT_SOURCES += yylex.cc yyparse.cc
+BUILT_SOURCES += yylex.cc yyparse.cc yystate.h
 EXTRA_DIST += yylex.h
 
+yystate.h: yylex.h
+	@echo 'namespace yy { enum state {' > $@
+	$(AM_V_GEN)grep '^#define [A-Z][A-Z_]* [0-9]\+$$' yylex.h | grep -v ' YY_' | awk '{print $$2 ","}' >> $@
+	@echo 'NSTATE' >> $@
+	@echo '}; }' >> $@
+
+yylex.h: yylex.cc
 yylex.cc: $(CURDIR)/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<

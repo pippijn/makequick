@@ -1,5 +1,6 @@
 %{
 #include "parser.h"
+#include "yystate.h"
 #define YYSTYPE YYSTYPE
 
 union YYSTYPE;
@@ -23,15 +24,54 @@ using namespace nodes;
 %debug
 %error-verbose
 %token-table
-%glr-parser
+/*%glr-parser*/
 
 %parse-param { parser *self }
 %lex-param { parser *self }
 
 %token TK_EOF 0			"end of file"
 
+%token KW_IF			"if"
+%token KW_ALIGNOF		"alignof"
+%token KW_ARG_ENABLE		"arg_enable"
+%token KW_ARG_WITH		"arg_with"
+%token KW_C_BIGENDIAN		"c_bigendian"
+%token KW_C_CHARSET		"c_charset"
+%token KW_C_ENUM_FWDECL		"c_enum_fwdecl"
+%token KW_C_FLOAT_FORMAT	"c_float_format"
+%token KW_C_LATE_EXPANSION	"c_late_expansion"
+%token KW_C_STDINT_H		"c_stdint_h"
+%token KW_C_TOKEN_PASTE		"c_token_paste"
+%token KW_C_TYPEOF		"c_typeof"
+%token KW_CFLAGS		"cflags"
+%token KW_CONFIG_HEADER		"config_header"
+%token KW_CONTACT		"contact"
+%token KW_CPPFLAGS		"cppflags"
+%token KW_DEFINE		"define"
+%token KW_EXCLUDE		"exclude"
+%token KW_EXTRA_DIST		"extra_dist"
+%token KW_FUNCTIONS		"functions"
+%token KW_HEADER		"header"
+%token KW_HEADERS		"headers"
+%token KW_LIBRARY		"library"
+%token KW_LINK			"link"
 %token KW_NODIST_SOURCES	"nodist_sources"
+%token KW_OPTIONS		"options"
+%token KW_PROGRAM		"program"
+%token KW_PROJECT		"project"
+%token KW_SECTION		"section"
+%token KW_SIZEOF		"sizeof"
 %token KW_SOURCES		"sources"
+%token KW_SYMBOL		"symbol"
+%token KW_TEMPLATE		"template"
+%token KW_VERSION		"version"
+
+%token TK_LSQBRACK		"["
+%token TK_RSQBRACK		"]"
+%token TK_LBRACK		"("
+%token TK_RBRACK		")"
+%token TK_LBRACE		"{"
+%token TK_RBRACE		"}"
 
 %token TK_LIBRARY_REF		"library reference"
 %token TK_FILENAME		"filename"
@@ -50,20 +90,7 @@ using namespace nodes;
  *
  ****************************************************************************/
 document
-	: definition_list
-	;
-
-definition_list
-	: /* empty */
-	| definition_list definition
-	;
-
-definition
-	: TK_IDENTIFIER
-	| TK_INTEGER
-	| TK_KEYWORD
-	| TK_OPERATOR
-	| TK_STRING
+	: toplevel_declarations
 	;
 
 toplevel_declarations
@@ -71,125 +98,10 @@ toplevel_declarations
 	| toplevel_declarations toplevel_declaration
 	;
 
-
-/****************************************************************************
- *
- *	Project definition with configure checks and arguments
- *
- ****************************************************************************/
-toplevel_declaration: project_block;
-
-project_block
-	: "project" string "{" project_members "}"
-	;
-
-project_members
-	: "version:" string
-	  "contact:" string
-	  "config_header:" filename
-	  project_sections
-	;
-
-project_sections
-	: project_section
-	| project_sections project_section
-	;
-
-project_section
-	: "section" string "{" project_section_members "}"
-	| "section"        "{" project_section_members "}"
-	;
-
-project_section_members
-	: project_section_member
-	| project_section_members project_section_member
-	;
-
-project_section_member
-	: project_library
-	| project_headers
-	| project_functions
-	| project_arg_enable
-	| project_arg_with
-	| project_cflags
-	| project_check
-	;
-
-project_library
-	: "library" identifier "{" project_library_members "}"
-	;
-
-project_library_members
-	: "symbol:" identifier
-	  "header:" filename
-	;
-
-project_headers
-	: "headers" "{" filenames "}"
-	;
-
-project_functions
-	: "functions" "{" identifiers "}"
-	;
-
-project_arg_enable
-	: "arg_enable" identifier "=" identifier "{" project_arg_enable_members "}"
-	| "arg_enable" identifier "=" string     "{" project_arg_enable_members "}"
-	;
-
-project_arg_enable_members
-	: string
-	  project_section_members
-	;
-
-project_arg_with
-	: "arg_with" identifier "=" identifier "{" project_arg_with_members "}"
-	;
-
-project_arg_with_members
-	: string
-	  project_arg_with_options
-	;
-
-project_arg_with_options
-	: "options" "{" project_arg_with_options_members "}"
-	;
-
-project_arg_with_options_members
-	: project_arg_with_options_member
-	| project_arg_with_options_members project_arg_with_options_member
-	;
-
-project_arg_with_options_member
-	: identifier "=>" "{" project_section_members "}"
-	;
-
-project_cflags
-	: cflags
-	| "cflags" identifier cflags_body
-	;
-
-project_check
-	: "c_bigendian"
-	| "c_typeof"
-	| "c_charset"
-	| "c_enum_fwdecl"
-	| "c_stmt_exprs"
-	| "c_late_expansion"
-	| "c_token_paste"
-	| "c_float_format"
-	| "c_stdint_h"
-	| "alignof" "{" strings "}"
-	| "sizeof" "{" strings "}"
-	;
-
-
-cflags
-	: "cflags" cflags_body
-	;
-
-cflags_body
-	: "{" identifiers "}"
+toplevel_declaration
+	: program
+	| library
+	| template
 	;
 
 
@@ -198,8 +110,6 @@ cflags_body
  *	Targets (program/library/template)
  *
  ****************************************************************************/
-toplevel_declaration: program | library | template;
-
 program
 	: "program" target_definition
 	;
@@ -213,11 +123,7 @@ template
 	;
 
 target_definition
-	: identifier condition inheritance target_body
-	;
-
-inheritance
-	: ":" identifiers_comma
+	: identifier target_body
 	;
 
 target_body
@@ -231,13 +137,21 @@ target_members
 
 target_member
 	: sources
-	| link
-	| variable_definition
 	| rule
 	;
 
 sources
-	: "sources" condition "{" sources_members "}"
+	: "sources" sources_begin sources_members sources_end
+	;
+
+sources_begin
+	: "{"
+		{ self->lex.push_state (yy::SOURCES); }
+	;
+
+sources_end
+	: "}"
+		{ self->lex.pop_state (); }
 	;
 
 sources_members
@@ -246,77 +160,25 @@ sources_members
 	;
 
 sources_member
-	: sources_ref
-	| filename
-	;
-
-sources_ref
-	: "sources" "(" identifier ")"
-	;
-
-link
-	: "link" condition "{" library_refs "}"
-	;
-
-condition
-	: "if" identifier
-	;
-
-variable_definition
-	: identifier "=" string
+	: filename
 	;
 
 rule
-	: patterns ":" patterns "{" rule_members "}"
+	: filename filename rule_begin rule_code rule_end
 	;
 
-rule_members
-	: rule_member
-	| rule_members rule_member
+rule_begin
+	: "{"
+		{ self->lex.push_state (yy::RULE_CODE); }
 	;
 
-rule_member
-	: string
+rule_end
+	: "}"
+		{ self->lex.pop_state (); }
 	;
 
-pattern
-	: identifier
-	;
-
-/****************************************************************************
- *
- *	Common rules
- *
- ****************************************************************************/
-patterns
-	: pattern
-	| patterns pattern
-	;
-
-library_refs
-	: library_ref
-	| library_refs library_ref
-	;
-
-filenames
-	: filename
-	| filenames filename
-	;
-
-identifiers
-	: identifier
-	| identifiers identifier
-	;
-
-identifiers_comma
-	: identifier
-	| identifiers_comma "," identifier
-	;
-
-strings
-	: string
-	| strings string
-	;
+rule_code
+	: TK_STRING
 
 
 /****************************************************************************
@@ -324,15 +186,14 @@ strings
  *	Tokens
  *
  ****************************************************************************/
-string: TK_STRING
-identifier: TK_IDENTIFIER
-library_ref: TK_LIBRARY_REF
-filename: TK_FILENAME
-
+/*string: TK_STRING;*/
+identifier: TK_IDENTIFIER;
+/*library_ref: TK_LIBRARY_REF;*/
+filename: TK_FILENAME;
 %%
 
 char const *
-yytokname (yySymbol yytoken)
+tokname (yySymbol yytoken)
 {
-  return yytokenName (yytoken);
+  return yytname[yytoken];
 }

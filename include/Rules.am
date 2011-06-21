@@ -4,7 +4,6 @@ EXTRA_DIST +=		\
 	nopvisitor.h	\
 	object_pool.h	\
 	parser.h	\
-	shstr.h		\
 	sighandler.h	\
 	visitor.h	\
 	y.tab.h		\
