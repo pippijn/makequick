@@ -3,12 +3,19 @@
 #include "lexer.h"
 #include "parser.h"
 #include "nopvisitor.h"
+#include "sighandler.h"
 
 #include <clocale>
 #include <cstdlib>
 
+#if LEXER_TEST
+#include <sys/time.h>
+#endif
+
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
+
+#define ONESHOT 0
 
 namespace fs = boost::filesystem;
 
@@ -27,6 +34,7 @@ collect (fs::path const &path, std::vector<std::string> &files)
 
 int
 main (int argc, char *argv[])
+try
 {
   if (argc < 2)
     return EXIT_FAILURE;
@@ -58,12 +66,42 @@ main (int argc, char *argv[])
 
   std::vector<std::string> files;
   collect (path, files);
+  std::sort (files.begin (), files.end ());
 
 #if 0
   std::copy (files.begin (), files.end (), std::ostream_iterator<std::string> (std::cout, "\n"));
 #endif
 
   lexer lex (path.string (), files);
+
+#if LEXER_TEST
+  int i = 0;
+  int token;
+  timeval start;
+  gettimeofday (&start, 0);
+  double max_per_sec = 0;
+  while ((token = lex.next ()) != EOF)
+    {
+      if (should_terminate)
+        return EXIT_FAILURE;
+      if (++i == 1000000)
+        {
+          timeval now, sub;
+          gettimeofday (&now, 0);
+          timersub (&now, &start, &sub);
+          double per_sec = i / (sub.tv_sec + double (sub.tv_usec) / 1000000);
+          max_per_sec = std::max (per_sec, max_per_sec);
+          printf ("%d tokens in %ld.%06ld seconds (%.0f tokens per second, max=%.0f)\n", i, sub.tv_sec, sub.tv_usec,
+                  per_sec, max_per_sec);
+          i = 0;
+          start = now;
+#if ONESHOT
+          return EXIT_SUCCESS;
+#endif
+        }
+    }
+#endif
+
   parser parse (lex);
 
   if (node_ptr doc = parse ())
@@ -77,4 +115,9 @@ main (int argc, char *argv[])
     }
 
   return EXIT_SUCCESS;
+}
+catch (std::exception const &e)
+{
+  printf ("error: %s\n", e.what ());
+  return EXIT_FAILURE;
 }

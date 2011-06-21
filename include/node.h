@@ -5,6 +5,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 
+#include "shstr.h"
 #include "visitor.h"
 
 struct YYLTYPE
@@ -29,6 +30,9 @@ namespace nodes
     friend void intrusive_ptr_release (node *n);
     friend void intrusive_ptr_add_ref (node *n);
 
+    void *operator new (size_t bytes);
+    void operator delete (void *ptr, size_t bytes);
+
   private:
     int refcnt;
   };
@@ -47,14 +51,14 @@ namespace nodes
     : node
   {
     virtual void accept (visitor &v) { v.visit (*this); }
-    token (int tok, char const *text, int leng)
-      : tok (tok)
-      , string (text, leng)
-    {
-    }
+    token (int tok, char const *text, int leng);
 
     int const tok;
+#if USE_SHSTR
+    shstr const string;
+#else
     std::string const string;
+#endif
   };
 
 

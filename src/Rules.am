@@ -6,6 +6,8 @@ makepp_SOURCES =	\
 	node.cc		\
 	nopvisitor.cc	\
 	parser.cc	\
+	shstr.cc	\
+	sighandler.cc	\
 	yylex.ll	\
 	yyparse.yy
 

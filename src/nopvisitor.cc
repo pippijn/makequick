@@ -24,5 +24,5 @@ nopvisitor::visit (nodes::definition_list &n)
 void
 nopvisitor::visit (nodes::token &n)
 {
-  printf ("%-16s: %s\n", yytokname (n.tok - 255), n.string.c_str ());
+  printf ("%-16s: \"%s\"\n", yytokname (n.tok - 255), n.string.c_str ());
 }

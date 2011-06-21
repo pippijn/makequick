@@ -2,7 +2,11 @@
 
 Make++ is a make-inspired build system that compiles to GNU Autotools.
 
+=cut
+
 L<Git repository|http://xinutec.org/git/devel/makepp.git/>
+
+=pod
 
 This is the future development of L<Autoproj|autoproj>. While Autoproj is a
 working piece of software, C<Make++> is nowhere, yet. At the moment, there are

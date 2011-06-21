@@ -62,12 +62,12 @@ project 'Aldor Compiler' {
 	}
 
 	section {
-		arg_enable coverage {
+		arg_enable coverage = no {
 			'Build with test coverage'
 			cflags COV_CFLAGS { --coverage }
 		}
 
-		arg_enable strict-c {
+		arg_enable strict-c = no {
 			'Use maximum warning levels available in C compiler'
 		}
 
@@ -75,15 +75,15 @@ project 'Aldor Compiler' {
 			'Use the new type hash code algorithm'
 		}
 
-		arg_enable bigint-do-debug {
+		arg_enable bigint-do-debug = no {
 			'Display debug info for the BInt manipulation'
 		}
 
-		arg_enable bigint-short-immed {
+		arg_enable bigint-short-immed = no {
 			'Defines IInt as "short" rather than "int"'
 		}
 
-		arg_enable bigint-test-base {
+		arg_enable bigint-test-base = no {
 			'Use only 6 bits for the bigint base instead of the full machine word for testing'
 		}
 
@@ -91,7 +91,7 @@ project 'Aldor Compiler' {
 			'Newly allocated store contains 0xAAAA...'
 		}
 
-		arg_enable store-zero-new {
+		arg_enable store-zero-new = no {
 			'Newly allocated store contains zeros'
 		}
 
@@ -99,17 +99,17 @@ project 'Aldor Compiler' {
 			'Freed storage contains 0xDDDD...'
 		}
 
-		arg_enable libcstub {
+		arg_enable libcstub = no {
 			'Prevent linking against libc'
 			cflags STRICT_LDFLAGS { -Wc,-nodefaultlibs }
 			cflags { -fno-stack-protector }
 		}
 
-		arg_enable alignment-check {
+		arg_enable alignment-check = no {
 			'Enable alignment checking if available'
 		}
 
-		arg_enable stackchk {
+		arg_enable stackchk = no {
 			'Enable stack protector if available'
 			cflags { -fstack-protector-all }
 		}

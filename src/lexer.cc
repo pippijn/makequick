@@ -1,3 +1,4 @@
+#define YY_HEADER_EXPORT_START_CONDITIONS
 #include "lexer.h"
 
 #include <cassert>
@@ -7,33 +8,81 @@
 #include <stdexcept>
 #include <vector>
 
+static char const *
+strcond (int cond)
+{
+  switch (cond)
+    {
+    case INITIAL        : return "in initial state";
+    case VAR_INIT       : return "after $";
+    case VAR_RBODY      : return "in variable body";
+    case VAR_SQBODY     : return "in gvar body";
+    case STRING         : return "in string literal";
+    default             : return "<unknown>";
+    }
+}
+
 lexer::lexer (std::string const &base, std::vector<std::string> const &files)
-  : it (files.begin ())
+  : loc (0)
+  , it (files.begin ())
   , et (files.end ())
   , base (base)
+#if LEXER_TEST
+  , it0 (it)
+#endif
 {
   yylex_init (&lex);
   yyset_extra (this, lex);
+  yyset_in (NULL, lex);
 
   wrap ();
 }
 
 lexer::~lexer ()
 {
+  close_file ();
   yylex_destroy (lex);
+}
+
+bool
+lexer::close_file ()
+{
+  if (FILE *oldfh = yyget_in (lex))
+    {
+      fclose (oldfh);
+      yyset_in (NULL, lex);
+      return true;
+    }
+  return false;
+}
+
+int
+lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
+{
+  return yylex (yylval, yylloc, lex);
 }
 
 int
 lexer::wrap ()
 {
-  if (FILE *oldfh = yyget_in (lex))
+  if (cond () != INITIAL)
     {
-      fclose (oldfh);
-      yyset_lineno (1, lex);
+      std::string msg = "end of file ";
+      msg += strcond (cond ());
+      yyerror (loc, 0, msg.c_str ());
     }
 
+  if (close_file ())
+    yyset_lineno (1, lex);
+
   if (it == et)
-    return 1;
+    {
+#if !LEXER_TEST
+      return 1;
+#else
+      it = it0;
+#endif
+    }
 
   FILE *fh = fopen (it->c_str (), "r");
   if (!fh)
@@ -61,4 +110,6 @@ lexer::lloc (YYLTYPE *yylloc, int lineno, int column, int leng)
   yylloc->first_column = column;
   yylloc->last_column = column + leng;
   yylloc->last_line = lineno;
+
+  loc = yylloc;
 }
