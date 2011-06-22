@@ -84,6 +84,19 @@ namespace nodes
       add (n2);
       add (n3);
     }
+    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4) : name (name) {
+      add (n1);
+      add (n2);
+      add (n3);
+      add (n4);
+    }
+    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4, node_ptr n5) : name (name) {
+      add (n1);
+      add (n2);
+      add (n3);
+      add (n4);
+      add (n5);
+    }
 
     char const *name;
   };

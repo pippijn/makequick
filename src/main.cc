@@ -17,6 +17,7 @@
 
 #define ONESHOT 0
 #define LEXER_TEST 0
+#define PARSER_BENCH 0
 
 namespace fs = boost::filesystem;
 
@@ -71,6 +72,16 @@ try
 
 #if 0
   std::copy (files.begin (), files.end (), std::ostream_iterator<std::string> (std::cout, "\n"));
+#endif
+
+#if PARSER_BENCH
+  for (int i = 0; i < 10; i++)
+    {
+      lexer lex (path.string (), files);
+      parser parse (lex);
+      parse ();
+    }
+  return EXIT_SUCCESS;
 #endif
 
   lexer lex (path.string (), files);

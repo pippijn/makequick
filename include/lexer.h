@@ -25,6 +25,7 @@ struct lexer
   void push_state (int state);
   void pop_state ();
 
+
   void *yyscanner;
   YYLTYPE *loc;
 

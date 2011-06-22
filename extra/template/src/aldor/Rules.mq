@@ -40,13 +40,13 @@ program aldor {
 	#
 	# XXX: Alternative selector syntax: $(TARGET.link[extends library])
 	src/library/%.{$(ALDOR_OUTPUTS)}: src/library/%.as {
-		$(top_srcdir)/extra/tools/alfront		\
-			--frontend="$(THIS)"			\
-			--basename='src/library/$*'		\
-			--verbose="$(V)"			\
-			--libs="$(TARGET.link : aldor-library)"	\
-			--output="$(ALDOR_OUTPUTS)"		\
-			--library='$(TARGET)'			\
+		$(top_srcdir)/extra/tools/alfront
+			--frontend="$(THIS)"
+			--basename='src/library/$*'
+			--verbose="$(V)"
+			--libs="$(TARGET.link : aldor-library)"
+			--output="$(ALDOR_OUTPUTS)"
+			--library='$(TARGET)'
 			-- $[AFLAGS]
 	}
 
@@ -54,24 +54,24 @@ program aldor {
 	# rule above. It is therefore only matched, if the above rule does not
 	# match.
 	%.{$(ALDOR_OUTPUTS)}: %.as {
-		$(top_srcdir)/extra/tools/alfront		\
-			--frontend="$(THIS)"			\
-			--basename="$*"				\
-			--verbose="$(V)"			\
-			--libs="$(TARGET.link : aldor-library)"	\
-			--output="$(ALDOR_OUTPUTS)"		\
+		$(top_srcdir)/extra/tools/alfront
+			--frontend="$(THIS)"
+			--basename="$*"
+			--verbose="$(V)"
+			--libs="$(TARGET.link : aldor-library)"
+			--output="$(ALDOR_OUTPUTS)"
 			-- $[AFLAGS]
 	}
 
 	# This is a simple pattern rule, which is disjoint with the above two
 	# rules.
 	%-main.c: %.as {
-		$(top_srcdir)/extra/tools/alfront		\
-			--frontend="$(THIS)"			\
-			--basename="$*"				\
-			--verbose="$(V)"			\
-			--libs="$(TARGET.link : aldor-library)"	\
-			--main					\
+		$(top_srcdir)/extra/tools/alfront
+			--frontend="$(THIS)"
+			--basename="$*"
+			--verbose="$(V)"
+			--libs="$(TARGET.link : aldor-library)"
+			--main
 			-- $[AFLAGS]
 	}
 

@@ -11,12 +11,14 @@ namespace nodes
   void *
   node::operator new (size_t bytes)
   {
+    //return ::operator new (bytes);
     return mempool.alloc (bytes);
   }
 
   void
   node::operator delete (void *ptr, size_t bytes)
   {
+    //return ::operator delete (ptr);
     return mempool.free (ptr, bytes);
   }
 }

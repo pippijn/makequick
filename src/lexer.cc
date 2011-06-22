@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <vector>
 
+#define LEXER_VERBOSE 1
+
 char const *
 lexer::STRSTATE (int state)
 {
@@ -24,6 +26,9 @@ lexer::STRSTATE (int state)
     case yy::FILENAME   : return "FILENAME";
     case yy::MULTIFILE  : return "MULTIFILE";
     case yy::SOURCES    : return "SOURCES";
+    case yy::LINK       : return "LINK";
+    case yy::VARDECL    : return "VARDECL";
+    case yy::FLAGS      : return "FLAGS";
     default             : return "<unknown>";
     }
 }
@@ -43,6 +48,9 @@ lexer::strstate (int state)
     case yy::FILENAME   : return "in filename";
     case yy::MULTIFILE  : return "in multi-rule wildcard";
     case yy::SOURCES    : return "in sources block";
+    case yy::LINK       : return "in link section";
+    case yy::VARDECL    : return "in variable declaration";
+    case yy::FLAGS      : return "in tool flags";
     default             : return "<unknown>";
     }
 }
@@ -86,8 +94,10 @@ int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
   int tok = lex (yylval, yylloc);
+#if LEXER_VERBOSE
   if (tok)
-    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token->string.c_str ());
+    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token ? yylval->token->string.c_str () : "(null)");
+#endif
   return tok;
 }
 
