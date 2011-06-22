@@ -17,7 +17,7 @@ using namespace nodes;
 %union {
   nodes::node *node;
   nodes::node_list *list;
-  nodes::token *token;
+  tokens::token *token;
 }
 
 %define api.pure

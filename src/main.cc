@@ -2,7 +2,7 @@
 
 #include "lexer.h"
 #include "parser.h"
-#include "nopvisitor.h"
+#include "phases.h"
 #include "sighandler.h"
 
 #include <clocale>
@@ -127,8 +127,7 @@ try
 
   if (node_ptr doc = parse ())
     {
-      nopvisitor nop;
-      doc->accept (nop);
+      phases::run ("nop", doc);
     }
   else
     {

@@ -229,34 +229,12 @@ lexer::pop_state ()
 }
 
 template<short Tok>
-bool
-lexer::pimpl::is_variable_token ()
-{
-  return Tok == TK_IDENTIFIER
-      || Tok == TK_VAR
-      || Tok == TK_FILENAME
-      || Tok == TK_CODE
-      || Tok == TK_INT_LIB
-      || Tok == TK_EXT_LIB
-      || Tok == TK_FLAG
-      || Tok == KW_CPPFLAGS
-      ;;
-}
-
-template<short Tok>
 int
 lexer::pimpl::make_token (YYSTYPE *lval, char const *text, int leng)
 {
   if (!this->text.empty ())
-    lval->token = new nodes::token (Tok, move (this->text));
+    lval->token = new tokens::token (Tok, move (this->text));
   else
-#if 0
-    if (is_variable_token<Tok> ())
-#endif
-      lval->token = new nodes::token (Tok, text, leng);
-#if 0
-    else
-      lval->token = 0;
-#endif
+    lval->token = new tokens::token (Tok, text, leng);
   return Tok;
 }

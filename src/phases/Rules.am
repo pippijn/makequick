@@ -1,0 +1,2 @@
+makepp_SOURCES +=	\
+	nop.cc

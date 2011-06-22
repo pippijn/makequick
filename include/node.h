@@ -1,7 +1,11 @@
 #pragma once
 
 #include <string>
+#if NODE_USE_LIST
+#include <list>
+#else
 #include <vector>
+#endif
 
 #include <boost/intrusive_ptr.hpp>
 
@@ -36,33 +40,16 @@ namespace nodes
     int refcnt;
   };
 
-  typedef boost::intrusive_ptr<node> node_ptr;
-
   struct node_list
     : node
   {
     void add (node_ptr n) { list.push_back (n); }
 
+#if NODE_USE_LIST
+    std::list<node_ptr> list;
+#else
     std::vector<node_ptr> list;
-  };
-
-  struct token
-    : node
-  {
-    virtual void accept (visitor &v) { v.visit (*this); }
-    token (int tok, char const *text, int leng)
-      : tok (tok)
-      , string (text, leng)
-    {
-    }
-    token (int tok, std::string const &string)
-      : tok (tok)
-      , string (string)
-    {
-    }
-
-    int const tok;
-    std::string const string;
+#endif
   };
 
 
@@ -99,6 +86,31 @@ namespace nodes
     }
 
     char const *name;
+  };
+}
+
+namespace tokens
+{
+  using nodes::node;
+  using nodes::visitor;
+
+  struct token
+    : node
+  {
+    virtual void accept (visitor &v) { v.visit (*this); }
+    token (int tok, char const *text, int leng)
+      : tok (tok)
+      , string (text, leng)
+    {
+    }
+    token (int tok, std::string const &string)
+      : tok (tok)
+      , string (string)
+    {
+    }
+
+    int const tok;
+    std::string const string;
   };
 }
 

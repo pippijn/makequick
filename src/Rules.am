@@ -4,11 +4,13 @@ makepp_SOURCES =	\
 	lexer.cc	\
 	main.cc		\
 	node.cc		\
-	nopvisitor.cc	\
 	parser.cc	\
+	phases.cc	\
 	sighandler.cc	\
 	yylex.ll	\
 	yyparse.yy
+
+include phases/Rules.am
 
 BUILT_SOURCES += yylex.cc yyparse.cc yystate.h
 EXTRA_DIST += yylex.h yystate.h

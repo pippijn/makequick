@@ -1,10 +1,13 @@
 #pragma once
 
+#include "node_ptr.h"
+
 namespace nodes
 {
   struct visitor
   {
-    virtual void visit (struct generic_node &n) { }
-    virtual void visit (struct token &n) { }
+    virtual void visit (tokens::token &n) { }
+
+    virtual void visit (generic_node &n) { }
   };
 }

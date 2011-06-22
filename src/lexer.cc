@@ -96,7 +96,7 @@ lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
   int tok = lex (yylval, yylloc);
 #if LEXER_VERBOSE
   if (tok)
-    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token ? yylval->token->string.c_str () : "(null)");
+    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token->string.c_str ());
 #endif
   return tok;
 }
