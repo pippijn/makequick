@@ -10,34 +10,32 @@ move (std::string &s)
   return r;
 }
 
-#define SELF static_cast<lexer *> (yyget_extra (yyscanner))
-
 #define YY_USER_ACTION					\
   {							\
-    SELF->lloc (yylloc, yylineno, yycolumn, yyleng);	\
+    lloc (yylloc, yylineno, yycolumn, yyleng);		\
     if (*yytext == '\n')				\
       yycolumn = 1;					\
     else						\
       yycolumn += yyleng;				\
   }
 
-#define APPEND() SELF->impl->text.append (yytext, yyleng)
+#define APPEND() impl->text.append (yytext, yyleng)
 
 #define Return(TOK)					\
   do {							\
-    if (!SELF->impl->text.empty ())			\
+    if (!impl->text.empty ())				\
       yylval->token					\
-        = new nodes::token (TOK,			\
-            move (SELF->impl->text));			\
+        = new nodes::token (TOK, move (impl->text));	\
     else						\
       yylval->token					\
         = new nodes::token (TOK, yytext, yyleng);	\
     return TOK;						\
   } while (0)						\
 
-#define PUSH(STATE)	yy_push_state (STATE, yyscanner)
-#define POP()		yy_pop_state (yyscanner)
+#define PUSH(STATE)	push_state (STATE)
+#define POP()		pop_state ()
 
+#define YY_DECL int lexer::lex (YYSTYPE *yylval_param, YYLTYPE *yylloc_param)
 %}
 
 %option prefix="yy"
@@ -55,15 +53,17 @@ move (std::string &s)
 %x FILENAME MULTIFILE SOURCES LINK
 
 /* Whitespace */
+SPACE	[ \t\v]
 WS	[ \t\v\n\r]
+NWS	[^ \t\v\n\r]
 /* Filenames */
 FN	[^ \t\v\n\r{}/%*.:]
+FNSTART	([./*%{]|"**")
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 
 %%
 <*>"#".*				{ }
-{WS}+					{ }
 
 "if"					{ Return (KW_IF); }
 "alignof"				{ Return (KW_ALIGNOF); }
@@ -102,24 +102,21 @@ ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 "version"				{ Return (KW_VERSION); }
 
 <INITIAL>{
+	{SPACE}+			{ }
+	{NWS}+{FNSTART}			{ PUSH (FILENAME); yyless (0); }
+	{NWS}+{FNSTART}{NWS}+":"	{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
+	{FNSTART}{NWS}			{ PUSH (FILENAME); yyless (0); }
+	{FNSTART}{NWS}+":"		{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
 	{ID}				{ Return (TK_IDENTIFIER); }
 	"{"				{ Return (TK_LBRACE); }
 	"}"				{ Return (TK_RBRACE); }
 }
 
-<SOURCES>{
-	/* Expect filenames */
-	{WS}+				{ }
-	{FN}+				{ PUSH (FILENAME); Return (TK_FILENAME); }
-	("."|"/"|"*"|"**"|"%")		{ PUSH (FILENAME); Return (TK_FILENAME); }
-	"{"				{ PUSH (FILENAME); PUSH (MULTIFILE); Return (TK_FILENAME); }
-	"}"				{ Return (TK_RBRACE); }
-}
 <FILENAME>{
 	{WS}+				{ POP (); Return (TK_WHITESPACE); }
 	{FN}+				{ Return (TK_FILENAME); }
-	("."|"/"|"*"|"**"|"%")		{ Return (TK_FILENAME); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FILENAME); }
+	{FNSTART}			{ Return (TK_FILENAME); }
 	":"				{ POP (); yyless (0); }
 }
 <MULTIFILE>{
@@ -128,43 +125,31 @@ ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 	"}"				{ POP (); Return (TK_FILENAME); }
 }
 
-
 <RULE_INIT>{
-	/* Expect filename pattern followed by ":" and then more filename patterns */
 	{WS}+				{ }
-	"%"				{ PUSH (FILENAME); Return (TK_FILENAME); }
-	{FN}+				{ PUSH (FILENAME); Return (TK_FILENAME); }
 	":"				{ Return (TK_COLON); }
-	"{"\n*				{ Return (TK_LBRACE); }
-	"}"				{ Return (TK_RBRACE); }
+	"{"				{ POP (); yyless (0); }
+	{NWS}				{ PUSH (FILENAME); yyless (0); }
 }
 
 <RULE_CODE>{
-	^\t{2}"}"			{ Return (TK_RBRACE); }
-	^\t{3}				{ PUSH (RULE_LINE); Return (TK_WHITESPACE); }
-	^\t{4}				{ PUSH (RULE_LINE); }
-}
-<RULE_LINE>{
-	[^$\n\r]+			{ Return (TK_CODE); }
-	"$"				{ APPEND (); PUSH (VAR_INIT); }
-	\n				{ POP (); }
-}
-
-<LINK>{
-	{WS}+				{ }
-	[a-z][a-z_]*			{ Return (TK_INT_LIB); }
-	-l{FN}+				{ Return (TK_EXT_LIB); }
 	"}"				{ Return (TK_RBRACE); }
+	^\t{2}				{ PUSH (RULE_LINE); }
 }
 
-<VAR_INIT>{
-	"<"				{ APPEND (); POP (); Return (TK_VAR); }
-	"@"				{ APPEND (); POP (); Return (TK_VAR); }
-	"*"				{ APPEND (); POP (); Return (TK_VAR); }
+<RULE_LINE>{
+	\n				{ }
+	[^\n\t]+			{ Return (TK_CODE); }
+	^\t{1}"}"			{ POP (); yyless (1); Return (TK_WHITESPACE); }
+	^\t{2}				{ Return (TK_WHITESPACE); }
+	^\t{3}				{ }
 }
 
-<*>.					{ printf ("in state %d\n", YY_START); yyerror (yylloc, 0, yytext); }
+
+<*>.					{ printf (">>> in state %s\n", STRSTATE (state ())); yyerror (yylloc, 0, yytext); }
 %%
+
+#define SELF static_cast<lexer *> (yyget_extra (yyscanner))
 
 int
 yywrap (yyscan_t yyscanner)
@@ -175,18 +160,20 @@ yywrap (yyscan_t yyscanner)
 int
 lexer::state () const
 {
-  yyguts_t *yyg = (yyguts_t *)lex;
+  yyguts_t *yyg = (yyguts_t *)yyscanner;
   return YY_START;
 }
 
 void
-lexer::push_state (int cond)
+lexer::push_state (int state)
 {
-  yy_push_state (cond, lex);
+  printf ("PUSH (%s)\n", STRSTATE (state));
+  yy_push_state (state, yyscanner);
 }
 
 void
 lexer::pop_state ()
 {
-  yy_pop_state (lex);
+  printf ("POP (%s)\n", STRSTATE (state ()));
+  yy_pop_state (yyscanner);
 }

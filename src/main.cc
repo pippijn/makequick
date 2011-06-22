@@ -8,7 +8,7 @@
 #include <clocale>
 #include <cstdlib>
 
-#if LEXER_TEST
+#if LEXER_BENCH
 #include <sys/time.h>
 #endif
 
@@ -16,6 +16,7 @@
 #include <boost/filesystem.hpp>
 
 #define ONESHOT 0
+#define LEXER_TEST 0
 
 namespace fs = boost::filesystem;
 
@@ -73,14 +74,23 @@ try
 #endif
 
   lexer lex (path.string (), files);
-
 #if LEXER_TEST
+  YYSTYPE yylval;
+  YYLTYPE yylloc;
+  while (int token = lex.next (&yylval, &yylloc))
+    {
+    }
+  return EXIT_SUCCESS;
+#endif
+
+#if LEXER_BENCH
   int i = 0;
-  int token;
   timeval start;
   gettimeofday (&start, 0);
   double max_per_sec = 0;
-  while ((token = lex.next ()) != EOF)
+  YYSTYPE yylval;
+  YYLTYPE yylloc;
+  while (int token = lex.next (&yylval, &yylloc))
     {
       if (should_terminate)
         return EXIT_FAILURE;

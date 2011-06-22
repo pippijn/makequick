@@ -75,6 +75,7 @@ using namespace nodes;
 %token TK_LBRACE		"{"
 %token TK_RBRACE		"}"
 %token TK_COLON			":"
+%token TK_WHITESPACE		"whitespace"
 
 %token<token> TK_INT_LIB	"internal library"
 %token<token> TK_EXT_LIB	"external library"
@@ -82,12 +83,12 @@ using namespace nodes;
 %token<token> TK_FILENAME	"filename"
 %token<token> TK_IDENTIFIER	"identifier"
 %token<token> TK_VAR		"variable"
-%token<token> TK_WHITESPACE	"white space"
 
-%type<list> rule_line rule_code rules rule export sources target_body target_definition
+%type<list> sources target_body target_definition
 %type<list> program library template target_member target_members toplevel_declarations toplevel_declaration
-%type<list> filename sources_member sources_members sources_members.1 extra_dist nodist_sources link link_body
-%type<token> identifier filename_part rule_code_part link_member
+%type<list> filename filenames.0 filenames.1 sources_member sources_members extra_dist nodist_sources
+%type<list> rule rule_lines rule_line
+%type<token> identifier filename_part rule_code_frag
 
 %destructor { delete $$; } <*>
 
@@ -118,8 +119,6 @@ toplevel_declaration
 		{ $$ = new generic_node ("toplevel_declaration", $1); }
 	| extra_dist
 		{ $$ = new generic_node ("toplevel_declaration", $1); }
-	| "export" { self->lex.push_state (yy::RULE_INIT); } rule
-		{ $$ = new generic_node ("toplevel_declaration", $3); self->lex.pop_state (); }
 	;
 
 
@@ -164,128 +163,80 @@ target_member
 	: sources
 	| nodist_sources
 	| extra_dist
-	| export
-	| link
+	| rule
 	;
 
 sources
-	: "sources" sources_begin sources_members sources_end
+	: "sources" "{" sources_members "}"
 		{ $$ = new generic_node ("sources", $3); }
 	;
 
 nodist_sources
-	: "nodist_sources" sources_begin sources_members sources_end
+	: "nodist_sources" "{" sources_members "}"
 		{ $$ = new generic_node ("nodist_sources", $3); }
 	;
 
 extra_dist
-	: "extra_dist" sources_begin sources_members sources_end
+	: "extra_dist" "{" sources_members "}"
 		{ $$ = new generic_node ("extra_dist", $3); }
 	;
 
-sources_begin
-	: "{"	{ self->lex.push_state (yy::SOURCES); }
-	;
-
-sources_end
-	: "}"	{ self->lex.pop_state (); }
-	;
-
 sources_members
-	:
-		{ $$ = new generic_node ("sources_members"); }
-	| sources_members.1 whitespace
-	;
-
-sources_members.1
 	: sources_member
 		{ $$ = new generic_node ("sources_members", $1); }
-	| sources_members.1 whitespace sources_member
-		{ ($$ = $1)->add ($3); }
-	;
-
-sources_member
-	: filename
-		{ $$ = new generic_node ("sources_member", $1); }
-	;
-
-export
-	: "export" export_begin rules export_end
-		{ $$ = new generic_node ("export", $3); }
-	;
-
-export_begin
-	: "{"	{ self->lex.push_state (yy::RULE_INIT); }
-	;
-
-export_end
-	: "}"	{ self->lex.pop_state (); }
-	;
-
-rules
-	: rule
-		{ $$ = new generic_node ("rules", $1); }
-	| rules rule
+	| sources_members sources_member
 		{ ($$ = $1)->add ($2); }
 	;
 
+sources_member
+	: filename TK_WHITESPACE
+	;
+
+
 rule
-	: sources_members.1 ":" sources_members rule_begin rule_code rule_end
+	: filenames.1 ":" filenames.0 rule_begin rule_lines rule_end
 		{ $$ = new generic_node ("rule", $1, $3, $5); }
 	;
 
 rule_begin
-	: "{"	{ self->lex.push_state (yy::RULE_CODE); }
+	: "{" { self->lex.push_state (yy::RULE_CODE); }
 	;
 
 rule_end
-	: "}"	{ self->lex.pop_state (); }
+	: "}" { self->lex.pop_state (); }
 	;
 
-rule_code
-	: whitespace rule_line
-		{ $$ = new generic_node ("rule_code", $2); }
-	| rule_code whitespace rule_line
-		{ ($$ = $1)->add ($3); }
+rule_lines
+	: rule_line TK_WHITESPACE
+		{ $$ = new generic_node ("rule_lines", $1); }
+	| rule_lines rule_line TK_WHITESPACE
+		{ ($$ = $1)->add ($2); }
 	;
 
 rule_line
-	: rule_code_part
+	: rule_code_frag
 		{ $$ = new generic_node ("rule_line", $1); }
-	| rule_line rule_code_part
+	| rule_line rule_code_frag
 		{ ($$ = $1)->add ($2); }
 	;
 
-rule_code_part
+rule_code_frag
 	: TK_CODE
-	| TK_VAR
 	;
 
-link
-	: "link" link_begin link_body link_end
-		{ $$ = new generic_node ("link", $3); }
-	;
-
-link_begin
-	: "{"	{ self->lex.push_state (yy::LINK); }
-	;
-
-link_end
-	: "}"	{ self->lex.pop_state (); }
-	;
-
-link_body
-	: link_member
-		{ $$ = new generic_node ("link_body", $1); }
-	| link_body link_member
+filenames.0
+	:
+		{ $$ = new generic_node ("filenames"); }
+	| filenames.0 filename TK_WHITESPACE
 		{ ($$ = $1)->add ($2); }
 	;
 
-link_member
-	: TK_INT_LIB
-	| TK_EXT_LIB
+filenames.1
+	: filename
+		{ $$ = new generic_node ("filenames", $1); }
+	| filenames.1 TK_WHITESPACE filename
+		{ ($$ = $1)->add ($3); }
 	;
-
 
 
 /****************************************************************************
@@ -306,9 +257,6 @@ filename_part
 	: TK_FILENAME
 	;
 
-whitespace
-	: TK_WHITESPACE
-	;
 %%
 
 char const *

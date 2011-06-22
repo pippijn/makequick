@@ -9,8 +9,27 @@
 #include <stdexcept>
 #include <vector>
 
-static char const *
-strstate (int state)
+char const *
+lexer::STRSTATE (int state)
+{
+  switch (state)
+    {
+    case yy::INITIAL    : return "INITIAL";
+    case yy::VAR_INIT   : return "VAR_INIT";
+    case yy::VAR_RBODY  : return "VAR_RBODY";
+    case yy::VAR_SQBODY : return "VAR_SQBODY";
+    case yy::RULE_INIT  : return "RULE_INIT";
+    case yy::RULE_CODE  : return "RULE_CODE";
+    case yy::RULE_LINE  : return "RULE_LINE";
+    case yy::FILENAME   : return "FILENAME";
+    case yy::MULTIFILE  : return "MULTIFILE";
+    case yy::SOURCES    : return "SOURCES";
+    default             : return "<unknown>";
+    }
+}
+
+char const *
+lexer::strstate (int state)
 {
   switch (state)
     {
@@ -33,14 +52,14 @@ lexer::lexer (std::string const &base, std::vector<std::string> const &files)
   , it (files.begin ())
   , et (files.end ())
   , base (base)
-#if LEXER_TEST
+#if LEXER_BENCH
   , it0 (it)
 #endif
   , impl (new pimpl)
 {
-  yylex_init (&lex);
-  yyset_extra (this, lex);
-  yyset_in (NULL, lex);
+  yylex_init (&yyscanner);
+  yyset_extra (this, yyscanner);
+  yyset_in (NULL, yyscanner);
 
   wrap ();
 }
@@ -48,16 +67,16 @@ lexer::lexer (std::string const &base, std::vector<std::string> const &files)
 lexer::~lexer ()
 {
   close_file ();
-  yylex_destroy (lex);
+  yylex_destroy (yyscanner);
 }
 
 bool
 lexer::close_file ()
 {
-  if (FILE *oldfh = yyget_in (lex))
+  if (FILE *oldfh = yyget_in (yyscanner))
     {
       fclose (oldfh);
-      yyset_in (NULL, lex);
+      yyset_in (NULL, yyscanner);
       return true;
     }
   return false;
@@ -66,7 +85,7 @@ lexer::close_file ()
 int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
-  int tok = yylex (yylval, yylloc, lex);
+  int tok = lex (yylval, yylloc);
   if (tok)
     printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token->string.c_str ());
   return tok;
@@ -83,11 +102,11 @@ lexer::wrap ()
     }
 
   if (close_file ())
-    yyset_lineno (1, lex);
+    yyset_lineno (1, yyscanner);
 
   if (it == et)
     {
-#if !LEXER_TEST
+#if !LEXER_BENCH
       return 1;
 #else
       it = it0;
@@ -99,7 +118,7 @@ lexer::wrap ()
     throw std::runtime_error ("Could not open " + *it + " for reading");
   ++it;
 
-  yyset_in (fh, lex);
+  yyset_in (fh, yyscanner);
   return 0;
 }
 
