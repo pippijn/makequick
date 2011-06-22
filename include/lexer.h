@@ -2,6 +2,7 @@
 
 #include "ylcode.h"
 
+#include <memory>
 #include <vector>
 
 #define LEXER_TEST 0
@@ -25,9 +26,11 @@ struct lexer
   YYLTYPE *loc;
 
   std::string const base;
-  std::string text;
   std::vector<std::string>::const_iterator it;
   std::vector<std::string>::const_iterator et;
+
+  struct pimpl;
+  std::auto_ptr<pimpl> const impl;
 
 #if LEXER_TEST
   std::vector<std::string>::const_iterator it0;

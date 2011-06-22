@@ -1,5 +1,6 @@
 %{
 #include "lexer.h"
+#include "lexer/pimpl.h"
 
 static std::string
 move (std::string &s)
@@ -20,13 +21,14 @@ move (std::string &s)
       yycolumn += yyleng;				\
   }
 
-#define APPEND() SELF->text.append (yytext, yyleng)
+#define APPEND() SELF->impl->text.append (yytext, yyleng)
 
 #define Return(TOK)					\
   do {							\
-    if (!SELF->text.empty ())				\
+    if (!SELF->impl->text.empty ())			\
       yylval->token					\
-        = new nodes::token (TOK, move (SELF->text));	\
+        = new nodes::token (TOK,			\
+            move (SELF->impl->text));			\
     else						\
       yylval->token					\
         = new nodes::token (TOK, yytext, yyleng);	\
@@ -49,20 +51,18 @@ move (std::string &s)
 
 %x VAR_INIT
 %x VAR_RBODY VAR_SQBODY
-%x RULE RULE_INIT RULE_CODE
-%x STRING FILENAME MULTIFILE SOURCES
+%x RULE_INIT RULE_CODE RULE_LINE
+%x FILENAME MULTIFILE SOURCES LINK
 
 /* Whitespace */
 WS	[ \t\v\n\r]
 /* Filenames */
-FN	[^ \t\v\n\r{}]
+FN	[^ \t\v\n\r{}/%*.:]
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
-/* Numbers */
-DIGIT	[0-9]
 
 %%
-"#".*					{ }
+<*>"#".*				{ }
 {WS}+					{ }
 
 "if"					{ Return (KW_IF); }
@@ -83,6 +83,7 @@ DIGIT	[0-9]
 "cppflags"				{ Return (KW_CPPFLAGS); }
 "define"				{ Return (KW_DEFINE); }
 "exclude"				{ Return (KW_EXCLUDE); }
+"export"				{ Return (KW_EXPORT); }
 "extra_dist"				{ Return (KW_EXTRA_DIST); }
 "functions"				{ Return (KW_FUNCTIONS); }
 "header"				{ Return (KW_HEADER); }
@@ -100,89 +101,69 @@ DIGIT	[0-9]
 "template"				{ Return (KW_TEMPLATE); }
 "version"				{ Return (KW_VERSION); }
 
-{FN}+":"				{ PUSH (RULE_INIT); Return (TK_FILENAME); }
-<RULE_INIT>{
-	{WS}+				{ }
-	{FN}+				{ POP (); Return (TK_FILENAME); }
-}
-<RULE_CODE>{
-	[^}]+				{ Return (TK_STRING); }
-	"}"				{ Return (TK_RBRACE); }
-}
-
-<INITIAL,STRING>{
-	"$"				{ PUSH (VAR_INIT); Return (TK_OPERATOR); }
-	"->"				{ Return (TK_OPERATOR); }
-	"=>"				{ Return (TK_OPERATOR); }
-	":"				{ Return (TK_OPERATOR); }
+<INITIAL>{
+	{ID}				{ Return (TK_IDENTIFIER); }
 	"{"				{ Return (TK_LBRACE); }
 	"}"				{ Return (TK_RBRACE); }
-	"="				{ Return (TK_OPERATOR); }
-
-	\'(\\.|[^\\'])*\'		{ Return (TK_STRING); }
-
-	/* rules start */
-	"%"				{ PUSH (RULE); Return (TK_OPERATOR); }
 }
 
 <SOURCES>{
+	/* Expect filenames */
 	{WS}+				{ }
-	{FN}+				{ APPEND (); PUSH (FILENAME); }
-	"{"				{ yyless (0); PUSH (FILENAME); }
+	{FN}+				{ PUSH (FILENAME); Return (TK_FILENAME); }
+	("."|"/"|"*"|"**"|"%")		{ PUSH (FILENAME); Return (TK_FILENAME); }
+	"{"				{ PUSH (FILENAME); PUSH (MULTIFILE); Return (TK_FILENAME); }
 	"}"				{ Return (TK_RBRACE); }
 }
 <FILENAME>{
-	{WS}+				{ POP (); Return (TK_FILENAME); }
-	{FN}+				{ APPEND (); }
-	"{"				{ PUSH (MULTIFILE); APPEND (); }
+	{WS}+				{ POP (); Return (TK_WHITESPACE); }
+	{FN}+				{ Return (TK_FILENAME); }
+	("."|"/"|"*"|"**"|"%")		{ Return (TK_FILENAME); }
+	"{"				{ PUSH (MULTIFILE); Return (TK_FILENAME); }
+	":"				{ POP (); yyless (0); }
 }
 <MULTIFILE>{
-	{WS}+				{ SELF->text.append (" ", 1); }
-	{FN}+				{ APPEND (); }
-	"}"				{ APPEND (); POP (); }
+	{WS}+				{ }
+	{FN}+				{ Return (TK_FILENAME); }
+	"}"				{ POP (); Return (TK_FILENAME); }
 }
 
-<RULE>{
-	"/"				{ Return (TK_OPERATOR); }
-	"."				{ Return (TK_OPERATOR); }
-	"{"				{ Return (TK_OPERATOR); }
-	"}"				{ POP (); Return (TK_OPERATOR); }
+
+<RULE_INIT>{
+	/* Expect filename pattern followed by ":" and then more filename patterns */
+	{WS}+				{ }
+	"%"				{ PUSH (FILENAME); Return (TK_FILENAME); }
+	{FN}+				{ PUSH (FILENAME); Return (TK_FILENAME); }
+	":"				{ Return (TK_COLON); }
+	"{"\n*				{ Return (TK_LBRACE); }
+	"}"				{ Return (TK_RBRACE); }
+}
+
+<RULE_CODE>{
+	^\t{2}"}"			{ Return (TK_RBRACE); }
+	^\t{3}				{ PUSH (RULE_LINE); Return (TK_WHITESPACE); }
+	^\t{4}				{ PUSH (RULE_LINE); }
+}
+<RULE_LINE>{
+	[^$\n\r]+			{ Return (TK_CODE); }
+	"$"				{ APPEND (); PUSH (VAR_INIT); }
+	\n				{ POP (); }
+}
+
+<LINK>{
+	{WS}+				{ }
+	[a-z][a-z_]*			{ Return (TK_INT_LIB); }
+	-l{FN}+				{ Return (TK_EXT_LIB); }
+	"}"				{ Return (TK_RBRACE); }
 }
 
 <VAR_INIT>{
-	{WS}				{ yyerror (yylloc, 0, "whitespace after $"); }
-	"("				{ BEGIN (VAR_RBODY); Return (TK_OPERATOR); }
-	"["				{ BEGIN (VAR_SQBODY); Return (TK_OPERATOR); }
-	"<"				{ POP (); Return (TK_OPERATOR); }
-	"@"				{ POP (); Return (TK_OPERATOR); }
-	"*"				{ POP (); Return (TK_OPERATOR); }
-}
-<VAR_RBODY>{
-	{WS}				{ }
-	"."				{ Return (TK_OPERATOR); }
-	":"				{ Return (TK_OPERATOR); }
-	")"				{ POP (); Return (TK_OPERATOR); }
-	{ID}				{ Return (TK_IDENTIFIER); }
-}
-<VAR_SQBODY>{
-	"]"				{ POP (); Return (TK_OPERATOR); }
-	{ID}				{ Return (TK_IDENTIFIER); }
+	"<"				{ APPEND (); POP (); Return (TK_VAR); }
+	"@"				{ APPEND (); POP (); Return (TK_VAR); }
+	"*"				{ APPEND (); POP (); Return (TK_VAR); }
 }
 
-\"					{ PUSH (STRING); Return (TK_STRING); }
-<STRING>{
-	\\\"				{ Return (TK_STRING); }
-	\"				{ POP (); Return (TK_STRING); }
-	{WS}+				{ Return (TK_STRING); }
-}
-
-
-<INITIAL,STRING>{
-	{ID}				{ Return (TK_IDENTIFIER); }
-	{DIGIT}+			{ Return (TK_INTEGER); }
-}
-
-<*>.					{ yyerror (yylloc, 0, yytext); }
+<*>.					{ printf ("in state %d\n", YY_START); yyerror (yylloc, 0, yytext); }
 %%
 
 int

@@ -1,3 +1,5 @@
+include lexer/Rules.am
+
 EXTRA_DIST +=		\
 	lexer.h		\
 	node.h		\

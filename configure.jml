@@ -1,7 +1,7 @@
 project {
-	name: "Parser"
+	name: "MakePP"
 	version: "0.1"
-	contact: "parser@xinutec.org"
+	contact: "makepp@xinutec.org"
 
 	lang: "C++"
 

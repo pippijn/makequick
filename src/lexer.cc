@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "lexer/pimpl.h"
 #include "yystate.h"
 
 #include <cassert>
@@ -17,9 +18,11 @@ strstate (int state)
     case yy::VAR_INIT   : return "after $";
     case yy::VAR_RBODY  : return "in variable body";
     case yy::VAR_SQBODY : return "in gvar body";
-    case yy::RULE       : return "in rule";
-    case yy::STRING     : return "in string literal";
+    case yy::RULE_INIT  : return "in rule declaration";
+    case yy::RULE_CODE  : return "in rule code";
+    case yy::RULE_LINE  : return "in rule line";
     case yy::FILENAME   : return "in filename";
+    case yy::MULTIFILE  : return "in multi-rule wildcard";
     case yy::SOURCES    : return "in sources block";
     default             : return "<unknown>";
     }
@@ -33,6 +36,7 @@ lexer::lexer (std::string const &base, std::vector<std::string> const &files)
 #if LEXER_TEST
   , it0 (it)
 #endif
+  , impl (new pimpl)
 {
   yylex_init (&lex);
   yyset_extra (this, lex);

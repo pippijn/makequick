@@ -1,0 +1,22 @@
+program datagen {
+	export {
+		# simple direct rule
+		include/bar.c: src/bar.data {
+			./datagen -bar -c $< $@
+				continued
+				stuff
+				here
+			and now it is back
+		}
+
+		# Rule without dependency
+		include/bar.c: {
+			./datagen $@
+		}
+
+		# Rule with many dependencies
+		include/bar.c: a b c %d {
+			./datagen $@
+		}
+	}
+}

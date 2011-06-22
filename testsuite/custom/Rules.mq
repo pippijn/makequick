@@ -1,25 +1,27 @@
 program datagen {
-	# simple direct rule
-	include/bar.c: src/bar.data {
-		./datagen -bar -c $< $@
-	}
+	export {
+		# simple direct rule
+		include/bar.c: src/bar.data {
+			./datagen -bar -c $< $@
+		}
 
-	# multi-rule:
-	include/foo.{c h}: src/foo.data {
-		./datagen -foo $< $*
-	}
+		# multi-rule:
+		include/foo.{c h}: src/foo.data {
+			./datagen -foo $< $*
+		}
 
-	# additional dependencies:
-	include/cow.{c h}: src/cow.data src/foo.data {
-		./datagen -foo $< $*
-	}
+		# additional dependencies:
+		include/cow.{c h}: src/cow.data src/foo.data {
+			./datagen -foo $< $*
+		}
 
-	# 2 alternatives for pattern rules with equal semantics:
-	include/%.c
-	include/%.h: src/%.data {
-		./datagen $< $*
-	}
-	include/%.{c h}: src/%.data {
-		./datagen $< $*
+		# 2 alternatives for pattern rules with equal semantics:
+		include/%.c
+		include/%.h: src/%.data {
+			./datagen $< $*
+		}
+		include/%.{c h}: src/%.data {
+			./datagen $< $*
+		}
 	}
 }

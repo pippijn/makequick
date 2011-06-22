@@ -41,7 +41,7 @@ namespace nodes
   struct node_list
     : node
   {
-    void add (node *n) { list.push_back (n); }
+    void add (node_ptr n) { list.push_back (n); }
 
     std::vector<node_ptr> list;
   };
@@ -66,20 +66,26 @@ namespace nodes
   };
 
 
-  struct document
-    : node
-  {
-    virtual void accept (visitor &v) { v.visit (*this); }
-    document (node *defs) : defs (defs) { }
-
-    node_ptr defs;
-  };
-
-
-  struct definition_list
+  struct generic_node
     : node_list
   {
     virtual void accept (visitor &v) { v.visit (*this); }
+
+    generic_node (char const *name) : name (name) { }
+    generic_node (char const *name, node_ptr n1) : name (name) {
+      add (n1);
+    }
+    generic_node (char const *name, node_ptr n1, node_ptr n2) : name (name) {
+      add (n1);
+      add (n2);
+    }
+    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3) : name (name) {
+      add (n1);
+      add (n2);
+      add (n3);
+    }
+
+    char const *name;
   };
 }
 

@@ -11,7 +11,7 @@ makepp_SOURCES =	\
 	yyparse.yy
 
 BUILT_SOURCES += yylex.cc yyparse.cc yystate.h
-EXTRA_DIST += yylex.h
+EXTRA_DIST += yylex.h yystate.h
 
 yystate.h: yylex.h
 	@echo 'namespace yy { enum state {' > $@

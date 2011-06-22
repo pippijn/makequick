@@ -16,6 +16,7 @@ using namespace nodes;
 
 %union {
   nodes::node *node;
+  nodes::node_list *list;
   nodes::token *token;
 }
 
@@ -24,7 +25,7 @@ using namespace nodes;
 %debug
 %error-verbose
 %token-table
-/*%glr-parser*/
+%glr-parser
 
 %parse-param { parser *self }
 %lex-param { parser *self }
@@ -49,6 +50,7 @@ using namespace nodes;
 %token KW_CPPFLAGS		"cppflags"
 %token KW_DEFINE		"define"
 %token KW_EXCLUDE		"exclude"
+%token KW_EXPORT		"export"
 %token KW_EXTRA_DIST		"extra_dist"
 %token KW_FUNCTIONS		"functions"
 %token KW_HEADER		"header"
@@ -72,14 +74,20 @@ using namespace nodes;
 %token TK_RBRACK		")"
 %token TK_LBRACE		"{"
 %token TK_RBRACE		"}"
+%token TK_COLON			":"
 
-%token TK_LIBRARY_REF		"library reference"
-%token TK_FILENAME		"filename"
-%token TK_IDENTIFIER		"identifier"
-%token TK_INTEGER		"integer"
-%token TK_KEYWORD		"keyword"
-%token TK_OPERATOR		"operator"
-%token TK_STRING		"string literal"
+%token<token> TK_INT_LIB	"internal library"
+%token<token> TK_EXT_LIB	"external library"
+%token<token> TK_CODE		"shell code"
+%token<token> TK_FILENAME	"filename"
+%token<token> TK_IDENTIFIER	"identifier"
+%token<token> TK_VAR		"variable"
+%token<token> TK_WHITESPACE	"white space"
+
+%type<list> rule_line rule_code rules rule export sources target_body target_definition
+%type<list> program library template target_member target_members toplevel_declarations toplevel_declaration
+%type<list> filename sources_member sources_members sources_members.1 extra_dist nodist_sources link link_body
+%type<token> identifier filename_part rule_code_part link_member
 
 %destructor { delete $$; } <*>
 
@@ -91,17 +99,27 @@ using namespace nodes;
  ****************************************************************************/
 document
 	: toplevel_declarations
+		{ self->doc = new generic_node ("document", $1); }
 	;
 
 toplevel_declarations
 	: toplevel_declaration
+		{ $$ = new generic_node ("toplevel_declarations", $1); }
 	| toplevel_declarations toplevel_declaration
+		{ ($$ = $1)->add ($2); }
 	;
 
 toplevel_declaration
 	: program
+		{ $$ = new generic_node ("toplevel_declaration", $1); }
 	| library
+		{ $$ = new generic_node ("toplevel_declaration", $1); }
 	| template
+		{ $$ = new generic_node ("toplevel_declaration", $1); }
+	| extra_dist
+		{ $$ = new generic_node ("toplevel_declaration", $1); }
+	| "export" { self->lex.push_state (yy::RULE_INIT); } rule
+		{ $$ = new generic_node ("toplevel_declaration", $3); self->lex.pop_state (); }
 	;
 
 
@@ -112,73 +130,162 @@ toplevel_declaration
  ****************************************************************************/
 program
 	: "program" target_definition
+		{ $$ = new generic_node ("program", $2); }
 	;
 
 library
 	: "library" target_definition
+		{ $$ = new generic_node ("library", $2); }
 	;
 
 template
 	: "template" target_definition
+		{ $$ = new generic_node ("template", $2); }
 	;
 
 target_definition
 	: identifier target_body
+		{ $$ = new generic_node ("target_definition", $1, $2); }
 	;
 
 target_body
 	: "{" target_members "}"
+		{ $$ = new generic_node ("target_body", $2); }
 	;
 
 target_members
 	: target_member
+		{ $$ = new generic_node ("target_members", $1); }
 	| target_members target_member
+		{ ($$ = $1)->add ($2); }
 	;
 
 target_member
 	: sources
-	| rule
+	| nodist_sources
+	| extra_dist
+	| export
+	| link
 	;
 
 sources
 	: "sources" sources_begin sources_members sources_end
+		{ $$ = new generic_node ("sources", $3); }
+	;
+
+nodist_sources
+	: "nodist_sources" sources_begin sources_members sources_end
+		{ $$ = new generic_node ("nodist_sources", $3); }
+	;
+
+extra_dist
+	: "extra_dist" sources_begin sources_members sources_end
+		{ $$ = new generic_node ("extra_dist", $3); }
 	;
 
 sources_begin
-	: "{"
-		{ self->lex.push_state (yy::SOURCES); }
+	: "{"	{ self->lex.push_state (yy::SOURCES); }
 	;
 
 sources_end
-	: "}"
-		{ self->lex.pop_state (); }
+	: "}"	{ self->lex.pop_state (); }
 	;
 
 sources_members
+	:
+		{ $$ = new generic_node ("sources_members"); }
+	| sources_members.1 whitespace
+	;
+
+sources_members.1
 	: sources_member
-	| sources_members sources_member
+		{ $$ = new generic_node ("sources_members", $1); }
+	| sources_members.1 whitespace sources_member
+		{ ($$ = $1)->add ($3); }
 	;
 
 sources_member
 	: filename
+		{ $$ = new generic_node ("sources_member", $1); }
+	;
+
+export
+	: "export" export_begin rules export_end
+		{ $$ = new generic_node ("export", $3); }
+	;
+
+export_begin
+	: "{"	{ self->lex.push_state (yy::RULE_INIT); }
+	;
+
+export_end
+	: "}"	{ self->lex.pop_state (); }
+	;
+
+rules
+	: rule
+		{ $$ = new generic_node ("rules", $1); }
+	| rules rule
+		{ ($$ = $1)->add ($2); }
 	;
 
 rule
-	: filename filename rule_begin rule_code rule_end
+	: sources_members.1 ":" sources_members rule_begin rule_code rule_end
+		{ $$ = new generic_node ("rule", $1, $3, $5); }
 	;
 
 rule_begin
-	: "{"
-		{ self->lex.push_state (yy::RULE_CODE); }
+	: "{"	{ self->lex.push_state (yy::RULE_CODE); }
 	;
 
 rule_end
-	: "}"
-		{ self->lex.pop_state (); }
+	: "}"	{ self->lex.pop_state (); }
 	;
 
 rule_code
-	: TK_STRING
+	: whitespace rule_line
+		{ $$ = new generic_node ("rule_code", $2); }
+	| rule_code whitespace rule_line
+		{ ($$ = $1)->add ($3); }
+	;
+
+rule_line
+	: rule_code_part
+		{ $$ = new generic_node ("rule_line", $1); }
+	| rule_line rule_code_part
+		{ ($$ = $1)->add ($2); }
+	;
+
+rule_code_part
+	: TK_CODE
+	| TK_VAR
+	;
+
+link
+	: "link" link_begin link_body link_end
+		{ $$ = new generic_node ("link", $3); }
+	;
+
+link_begin
+	: "{"	{ self->lex.push_state (yy::LINK); }
+	;
+
+link_end
+	: "}"	{ self->lex.pop_state (); }
+	;
+
+link_body
+	: link_member
+		{ $$ = new generic_node ("link_body", $1); }
+	| link_body link_member
+		{ ($$ = $1)->add ($2); }
+	;
+
+link_member
+	: TK_INT_LIB
+	| TK_EXT_LIB
+	;
+
 
 
 /****************************************************************************
@@ -186,10 +293,22 @@ rule_code
  *	Tokens
  *
  ****************************************************************************/
-/*string: TK_STRING;*/
 identifier: TK_IDENTIFIER;
-/*library_ref: TK_LIBRARY_REF;*/
-filename: TK_FILENAME;
+
+filename
+	: filename_part
+		{ $$ = new generic_node ("filename", $1); }
+	| filename filename_part
+		{ ($$ = $1)->add ($2); }
+	;
+
+filename_part
+	: TK_FILENAME
+	;
+
+whitespace
+	: TK_WHITESPACE
+	;
 %%
 
 char const *

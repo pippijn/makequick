@@ -6,23 +6,22 @@
 
 #include <boost/foreach.hpp>
 
-void 
-nopvisitor::visit (nodes::document &n)
-{
-  n.defs->accept (*this);
-}
+static int indent;
 
 void 
-nopvisitor::visit (nodes::definition_list &n)
+nopvisitor::visit (nodes::generic_node &n)
 {
+  printf ("%*s<%s>\n", indent, "", n.name);
+  indent += 2;
   BOOST_FOREACH (node_ptr const &p, n.list)
-    {
+    if (p)
       p->accept (*this);
-    }
+  indent -= 2;
+  printf ("%*s</%s>\n", indent, "", n.name);
 }
 
 void
 nopvisitor::visit (nodes::token &n)
 {
-  printf ("%-16s: \"%s\"\n", tokname (n.tok - 255), n.string.c_str ());
+  printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok - 255), n.string.c_str ());
 }
