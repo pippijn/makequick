@@ -61,6 +61,9 @@ FN	[^ \t\v\n\r{}/%*.:]
 FNSTART	([./*%{]|"**")
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
+/* Rule start */
+MULTI	"{"[^}\n\r]+"}"
+RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 
 %%
 <*>"#".*				{ }
@@ -104,9 +107,9 @@ ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 <INITIAL>{
 	{SPACE}+			{ }
 	{NWS}+{FNSTART}			{ PUSH (FILENAME); yyless (0); }
-	{NWS}+{FNSTART}{NWS}+":"	{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
+	{NWS}+{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
 	{FNSTART}{NWS}			{ PUSH (FILENAME); yyless (0); }
-	{FNSTART}{NWS}+":"		{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
+	{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
 	{ID}				{ Return (TK_IDENTIFIER); }
 	"{"				{ Return (TK_LBRACE); }
 	"}"				{ Return (TK_RBRACE); }
@@ -139,10 +142,20 @@ ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 
 <RULE_LINE>{
 	\n				{ }
-	[^\n\t]+			{ Return (TK_CODE); }
 	^\t{1}"}"			{ POP (); yyless (1); Return (TK_WHITESPACE); }
 	^\t{2}				{ Return (TK_WHITESPACE); }
 	^\t{3}				{ }
+	[^\n$]+				{ Return (TK_CODE); }
+	"$"				{ APPEND (); PUSH (VAR_INIT); }
+}
+
+<VAR_INIT>{
+	[@*<]				{ APPEND (); POP (); Return (TK_VAR); }
+	"("				{ APPEND (); BEGIN (VAR_RBODY); }
+}
+<VAR_RBODY>{
+	{ID}				{ APPEND (); }
+	")"				{ APPEND (); POP (); Return (TK_VAR); }
 }
 
 

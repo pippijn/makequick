@@ -222,6 +222,7 @@ rule_line
 
 rule_code_frag
 	: TK_CODE
+	| TK_VAR
 	;
 
 filenames.0
