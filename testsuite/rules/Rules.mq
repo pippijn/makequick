@@ -13,8 +13,13 @@ program datagen {
 		./datagen $@
 	}
 
-	# Rule with many dependencies
+	# Simple pattern rule
 	%.o: %.c {
+		$(CC) $< -o $@
+	}
+
+	# Rule with many dependencies
+	%.o: %.c a b c d e {
 		$(CC) $< -o $@
 	}
 }
