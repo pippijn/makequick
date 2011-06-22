@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <vector>
 
-#define LEXER_VERBOSE 1
+#define LEXER_VERBOSE 0
 
 char const *
 lexer::STRSTATE (int state)
