@@ -1,2 +1,3 @@
 makepp_SOURCES +=	\
-	nop.cc
+	audit.cc	\
+	xml.cc

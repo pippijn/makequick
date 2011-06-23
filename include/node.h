@@ -11,7 +11,7 @@
 
 #include "visitor.h"
 
-struct YYLTYPE
+struct location
 {
   std::string const *file;
   int first_line;
@@ -19,15 +19,13 @@ struct YYLTYPE
   int last_line;
   int last_column;
 };
-#define YYLTYPE_IS_DECLARED 1
-#define YYLTYPE_IS_TRIVIAL 1
 
 namespace nodes
 {
   struct node
   {
     virtual void accept (visitor &v) = 0;
-    node () : refcnt (0) { }
+    node (location const &loc) : loc (loc), refcnt (0) { }
     virtual ~node () { }
 
     friend void intrusive_ptr_release (node *n);
@@ -35,6 +33,8 @@ namespace nodes
 
     void *operator new (size_t bytes);
     void operator delete (void *ptr, size_t bytes);
+
+    location loc;
 
   private:
     int refcnt;
@@ -44,6 +44,10 @@ namespace nodes
     : node
   {
     void add (node_ptr n) { list.push_back (n); }
+    size_t size () const { return list.size (); }
+    node_ptr &operator [] (size_t index) { return list.at (index); }
+
+    node_list (location const &loc) : node (loc) { }
 
 #if NODE_USE_LIST
     std::list<node_ptr> list;
@@ -58,26 +62,26 @@ namespace nodes
   {
     virtual void accept (visitor &v) { v.visit (*this); }
 
-    generic_node (char const *name) : name (name) { }
-    generic_node (char const *name, node_ptr n1) : name (name) {
+    generic_node (int type, location const &loc) : node_list (loc), type (type) { }
+    generic_node (int type, location const &loc, node_ptr n1) : node_list (loc), type (type) {
       add (n1);
     }
-    generic_node (char const *name, node_ptr n1, node_ptr n2) : name (name) {
+    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2) : node_list (loc), type (type) {
       add (n1);
       add (n2);
     }
-    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3) : name (name) {
+    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3) : node_list (loc), type (type) {
       add (n1);
       add (n2);
       add (n3);
     }
-    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4) : name (name) {
+    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4) : node_list (loc), type (type) {
       add (n1);
       add (n2);
       add (n3);
       add (n4);
     }
-    generic_node (char const *name, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4, node_ptr n5) : name (name) {
+    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4, node_ptr n5) : node_list (loc), type (type) {
       add (n1);
       add (n2);
       add (n3);
@@ -85,7 +89,7 @@ namespace nodes
       add (n5);
     }
 
-    char const *name;
+    int const type;
   };
 }
 
@@ -98,13 +102,15 @@ namespace tokens
     : node
   {
     virtual void accept (visitor &v) { v.visit (*this); }
-    token (int tok, char const *text, int leng)
-      : tok (tok)
+    token (location const &loc, int tok, char const *text, int leng)
+      : node (loc)
+      , tok (tok)
       , string (text, leng)
     {
     }
-    token (int tok, std::string const &string)
-      : tok (tok)
+    token (location const &loc, int tok, std::string const &string)
+      : node (loc)
+      , tok (tok)
       , string (string)
     {
     }

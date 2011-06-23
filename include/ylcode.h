@@ -10,6 +10,14 @@
 #include <inttypes.h>
 
 #include "node.h"
+
+struct YYLTYPE
+  : location
+{
+};
+#define YYLTYPE_IS_DECLARED 1
+#define YYLTYPE_IS_TRIVIAL 1
+
 #include "yyparse.h"
 #ifndef FLEX_SCANNER
 #include "yylex.h"

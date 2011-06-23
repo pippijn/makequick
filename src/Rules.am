@@ -1,6 +1,7 @@
 bin_PROGRAMS = makepp
 
 makepp_SOURCES =	\
+	exception.cc	\
 	lexer.cc	\
 	main.cc		\
 	node.cc		\
@@ -10,17 +11,67 @@ makepp_SOURCES =	\
 	yylex.ll	\
 	yyparse.yy
 
+nodist_makepp_SOURCES =	\
+	node_type.cc
+
 include phases/Rules.am
 
-BUILT_SOURCES += yylex.cc yyparse.cc yystate.h
-EXTRA_DIST += yylex.h yystate.h
+GENFILES = yystate.h node_type.h node_switch.h node_visit.h
+BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
+EXTRA_DIST += yylex.h
+CLEANFILES += $(GENFILES)
 
 yystate.h: yylex.h
 	@echo 'namespace yy { enum state {' > $@
-	$(AM_V_GEN)grep '^#define [A-Z][A-Z_]* [0-9]\+$$' yylex.h | grep -v ' YY_' | awk '{print $$2 ","}' >> $@
+	$(AM_V_GEN)grep '^#define [A-Z][A-Z_]* [0-9]\+$$' $< | grep -v ' YY_' | awk '{print $$2 ","}' >> $@
 	@echo 'NSTATE' >> $@
 	@echo '}; }' >> $@
 
 yylex.h: yylex.cc
 yylex.cc: $(CURDIR)/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<
+
+node_type.h: $(CURDIR)/yyparse.yy Makefile
+	@echo 'namespace nodes { enum node_type {' > $@
+	$(AM_V_GEN)\
+	L=`grep -o 'new generic_node (n_\w*' $<	\
+		| sed -e 's/.*(n_//'		\
+		| sort -u`;			\
+	for i in $$L; do			\
+		echo "  n_$$i,"			\
+			>> $@;			\
+	done
+	@echo '  NODE_TYPES' >> $@
+	@echo '};' >> $@
+	@echo 'extern char const *const node_type_name[];' >> $@
+	@echo '}' >> $@
+
+node_switch.h: node_type.h
+	@echo 'switch (n.type) {' > $@
+	$(AM_V_GEN)\
+	L=`grep -o '  n_\w*,$$' $<				\
+	    | sed -r -e 's/n_(\w+),/\1/'`;			\
+	for i in $$L; do					\
+	    echo "  case n_$$i: visit_$$i (n); break;" >> $@;	\
+	done
+	@echo '}' >> $@
+
+node_visit.h: node_type.h
+	@$(RM) $@
+	$(AM_V_GEN)\
+	L=`grep -o '  n_\w*,$$' $<				\
+	    | sed -r -e 's/n_(\w+),/\1/'`;			\
+	for i in $$L; do					\
+	    echo "  void visit_$$i (generic_node &n);" >> $@;	\
+	done
+
+node_type.cc: node_type.h
+	@echo '#include "node_type.h"' > $@
+	@echo 'char const *const nodes::node_type_name[] = {' >> $@
+	$(AM_V_GEN)\
+	L=`grep -o '  n_\w*,$$' $<		\
+	    | sed -r -e 's/n_(\w+),/\1/'`;	\
+	for i in $$L; do			\
+	    echo "  \"$$i\"," >> $@;		\
+	done
+	@echo '};' >> $@

@@ -8,18 +8,44 @@ program datagen {
 		and now it is back
 	}
 
-	# Rule without dependency
+	# Rule without dependency (except $(THIS))
 	include/bar.c: {
 		./datagen $@
+	}
+	# Equivalent
+	include/bar.c: {
+		$(THIS) $@
+	}
+	# Also equivalent
+	include/bar.c: {
+		$0 $@
 	}
 
 	# Simple pattern rule
 	%.o: %.c {
 		$(CC) $< -o $@
 	}
+	# Equivalent
+	%.o: %.c {
+		$(CC) $1 -o $*.o
+	}
 
 	# Rule with many dependencies
 	%.o: %.c a b c d e {
 		$(CC) $< -o $@
 	}
+
+	# Identifiers as filenames
+	foo: bar {
+		make_foo
+	}
+
+	# Extra dependencies
+	foo: cow ;
+
+	# Many extra dependencies
+	foo: cow bar moo ;
+
+	# No extra dependencies, just $(THIS)
+	foo:;
 }

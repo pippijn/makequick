@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <sys/time.h>
+
 #define LEXER_VERBOSE 0
 
 char const *
@@ -96,7 +98,7 @@ lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
   int tok = lex (yylval, yylloc);
 #if LEXER_VERBOSE
   if (tok)
-    printf ("%-16s: \"%s\"\n", tokname (tok - 255), yylval->token->string.c_str ());
+    printf ("%-16s: \"%s\"\n", tokname (tok), yylval->token->string.c_str ());
 #endif
   return tok;
 }
@@ -141,14 +143,13 @@ lexer::lloc (YYLTYPE *yylloc, int lineno, int column, int leng)
   assert (leng >= 1);
   assert (UINT_MAX - column - leng > INT_MAX);
 
-  if (column == 0)
-    column = 1;
+  column++;
 
   yylloc->file = &it[-1];
   yylloc->first_line = lineno;
   yylloc->first_column = column;
-  yylloc->last_column = column + leng;
   yylloc->last_line = lineno;
+  yylloc->last_column = column + leng;
 
   loc = yylloc;
 }

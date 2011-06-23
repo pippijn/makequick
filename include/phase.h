@@ -3,8 +3,10 @@
 #include "exception.h"
 #include "local.h"
 #include "node.h"
+#include "node_type.h"
 #include "phase.h"
 #include "phases.h"
+#include "sighandler.h"
 #include "visitor.h"
 #include "ylcode.h"
 
@@ -13,9 +15,9 @@
 #define resume(member)          n.member = n.member->accept (*this)
 #define resume_if(member)       if (n.member) resume (member)
 #if NODE_USE_LIST
-#define resume_list()           for (std::list<node_ptr>::iterator it = n.list.begin (), et = n.list.end (); it != et; ++it) *it = (*it)->accept (*this)
+#define resume_list()           for (std::list<node_ptr>::iterator it = n.list.begin (), et = n.list.end (); it != et; ++it) if (*it) (*it)->accept (*this)
 #else
-#define resume_list()           for (std::vector<node_ptr>::iterator it = n.list.begin (), et = n.list.end (); it != et; ++it) *it = (*it)->accept (*this)
+#define resume_list()           for (std::vector<node_ptr>::iterator it = n.list.begin (), et = n.list.end (); it != et; ++it) if (*it) (*it)->accept (*this)
 #endif
 
 using namespace nodes;

@@ -5,18 +5,18 @@
 
 #include <boost/foreach.hpp>
 
-#define VALID_XML 1
+#define VALID_XML 0
 
 namespace
 {
-  struct nopvisitor
+  struct xml
     : visitor
   {
     virtual void visit (token &n);
     virtual void visit (generic_node &n);
   };
 
-  static phase<nopvisitor> thisphase ("nop");
+  static phase<xml> thisphase ("xml");
 }
 
 static int indent;
@@ -38,23 +38,23 @@ xmlname (char const *p)
 }
 
 void
-nopvisitor::visit (token &n)
+xml::visit (token &n)
 {
 #if VALID_XML
-  std::string const name = xmlname (tokname (n.tok - 255));
+  std::string const name = xmlname (tokname (n.tok));
   printf ("%*s<t:%s><![CDATA[%s]]></t:%s>\n", indent, "", name.c_str (), n.string.c_str (), name.c_str ());
 #else
-  printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok - 255), n.string.c_str ());
+  printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok), n.string.c_str ());
 #endif
 }
 
 void 
-nopvisitor::visit (generic_node &n)
+xml::visit (generic_node &n)
 {
 #if VALID_XML
-  printf ("%*s<n:%s>\n", indent, "", n.name);
+  printf ("%*s<n:%s>\n", indent, "", node_type_name[n.type]);
 #else
-  printf ("%*s<%s>\n", indent, "", n.name);
+  printf ("%*s<%s>\n", indent, "", node_type_name[n.type]);
 #endif
   indent += 2;
   BOOST_FOREACH (node_ptr const &p, n.list)
@@ -62,8 +62,8 @@ nopvisitor::visit (generic_node &n)
       p->accept (*this);
   indent -= 2;
 #if VALID_XML
-  printf ("%*s</n:%s>\n", indent, "", n.name);
+  printf ("%*s</n:%s>\n", indent, "", node_type_name[n.type]);
 #else
-  printf ("%*s</%s>\n", indent, "", n.name);
+  printf ("%*s</%s>\n", indent, "", node_type_name[n.type]);
 #endif
 }

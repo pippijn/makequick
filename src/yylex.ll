@@ -13,21 +13,24 @@ move (std::string &s)
 #define YY_USER_ACTION					\
   {							\
     lloc (yylloc, yylineno, yycolumn, yyleng);		\
-    if (*yytext == '\n')				\
-      yycolumn = 1;					\
+    if (strchr (yytext, '\n'))				\
+      yycolumn = 0;					\
     else						\
       yycolumn += yyleng;				\
   }
 
-#define APPEND() impl->text.append (yytext, yyleng)
-
 #define Return(TOK)					\
-  return impl->make_token<TOK> (yylval, yytext, yyleng)
+  return impl->make_token<TOK> (yylval, yylloc, yytext, yyleng)
 
 #define PUSH(STATE)	push_state (STATE)
 #define POP()		pop_state ()
 
 #define YY_DECL int lexer::lex (YYSTYPE *yylval_param, YYLTYPE *yylloc_param)
+
+#define BACKTRACK(N) do {		\
+  yyless (N);				\
+  yycolumn -= yyleng - N;		\
+} while (0)
 %}
 
 %option prefix="yy"
@@ -40,8 +43,7 @@ move (std::string &s)
 %option nodefault
 %option never-interactive
 
-%x VAR_INIT
-%x VAR_RBODY VAR_SQBODY
+%x VAR_INIT VAR_RBODY VAR_SQBODY
 %x RULE_INIT RULE_CODE RULE_LINE
 %x FILENAME MULTIFILE SOURCES LINK VARDECL FLAGS
 
@@ -57,7 +59,10 @@ FNSTART	([./*%{]|"**")
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 /* Rule start */
 MULTI	"{"[^}\n\r]+"}"
-RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
+RLSTART	((({FNSTART}|{MULTI})({NWS}|{MULTI}))+|{ID})":"
+/* Numbers */
+DIGIT	[0-9]
+INTEGER	{DIGIT}+
 
 %%
 "if"					{ Return (KW_IF); }
@@ -100,10 +105,10 @@ RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 
 <INITIAL>{
 	{WS}+				{ }
-	{NWS}+{FNSTART}			{ PUSH (FILENAME); yyless (0); }
-	{NWS}+{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
-	{FNSTART}{NWS}			{ PUSH (FILENAME); yyless (0); }
-	{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); yyless (0); }
+	{NWS}+{FNSTART}			{ PUSH (FILENAME); BACKTRACK (0); }
+	{NWS}+{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
+	{FNSTART}{NWS}			{ PUSH (FILENAME); BACKTRACK (0); }
+	{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
 	{ID}				{ Return (TK_IDENTIFIER); }
 	"("				{ Return (TK_LBRACK); }
 	")"				{ Return (TK_RBRACK); }
@@ -121,7 +126,7 @@ RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 	{FN}+				{ Return (TK_FILENAME); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FILENAME); }
 	{FNSTART}			{ Return (TK_FILENAME); }
-	":"				{ POP (); yyless (0); }
+	":"				{ POP (); BACKTRACK (0); }
 }
 <MULTIFILE>{
 	{WS}+				{ }
@@ -132,8 +137,9 @@ RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 <RULE_INIT>{
 	{WS}+				{ }
 	":"				{ Return (TK_COLON); }
-	"{"				{ POP (); yyless (0); }
-	{NWS}				{ PUSH (FILENAME); yyless (0); }
+	";"				{ POP (); Return (TK_SEMICOLON); }
+	"{"				{ POP (); BACKTRACK (0); }
+	{NWS}				{ PUSH (FILENAME); BACKTRACK (0); }
 }
 
 <RULE_CODE>{
@@ -146,26 +152,27 @@ RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 	\n				{ }
 	^\t{3}				{ }
 	^\t{2}				{ Return (TK_WHITESPACE); }
-	^\t{1}"}"			{ POP (); yyless (1); Return (TK_WHITESPACE); }
+	^\t{1}"}"			{ POP (); BACKTRACK (1); Return (TK_WHITESPACE); }
 	[^\n\t$]+			{ Return (TK_CODE); }
-	"$"				{ APPEND (); PUSH (VAR_INIT); }
+	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 
 <VAR_INIT>{
-	[@*<]				{ APPEND (); POP (); Return (TK_VAR); }
-	"("				{ APPEND (); BEGIN (VAR_RBODY); }
-	"["				{ APPEND (); BEGIN (VAR_SQBODY); }
+	[@*<]				{ POP (); Return (TK_SHORTVAR); }
+	{INTEGER}			{ POP (); Return (TK_INTEGER); }
+	"("				{ BEGIN (VAR_RBODY); Return (TK_LBRACK); }
+	"["				{ BEGIN (VAR_SQBODY); Return (TK_LSQBRACK); }
 }
 <VAR_RBODY>{
 	{WS}+				{ }
-	{ID}				{ APPEND (); }
-	"."				{ APPEND (); }
-	":"				{ APPEND (); }
-	")"				{ APPEND (); POP (); Return (TK_VAR); }
+	{ID}				{ Return (TK_IDENTIFIER); }
+	"."				{ Return (TK_DOT); }
+	":"				{ Return (TK_COLON); }
+	")"				{ POP (); Return (TK_RBRACK); }
 }
 <VAR_SQBODY>{
-	{ID}				{ APPEND (); }
-	"]"				{ APPEND (); POP (); Return (TK_VAR); }
+	{ID}				{ Return (TK_IDENTIFIER); }
+	"]"				{ POP (); Return (TK_RSQBRACK); }
 }
 
 <LINK>{
@@ -180,7 +187,7 @@ RLSTART	({FNSTART}|{MULTI})({NWS}|{MULTI})+":"
 	^\t{2}				{ }
 	^\t{1}				{ Return (TK_WHITESPACE); }
 	[^\n\t$]+			{ Return (TK_CODE); }
-	"$"				{ APPEND (); PUSH (VAR_INIT); }
+	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 
 <FLAGS>{
@@ -230,11 +237,11 @@ lexer::pop_state ()
 
 template<short Tok>
 int
-lexer::pimpl::make_token (YYSTYPE *lval, char const *text, int leng)
+lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
 {
   if (!this->text.empty ())
-    lval->token = new tokens::token (Tok, move (this->text));
+    lval->token = new tokens::token (*lloc, Tok, move (this->text));
   else
-    lval->token = new tokens::token (Tok, text, leng);
+    lval->token = new tokens::token (*lloc, Tok, text, leng);
   return Tok;
 }
