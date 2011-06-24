@@ -1,0 +1,273 @@
+=head1 Rules
+
+Make++ defines a few rules itself and has knowledge about automake-defined
+rules, so that e.g. rules for compiling C sources are not emitted again. The
+rules feature in Make++ is the reason this project was actually started. The
+syntax is basically the same as GNU Make pattern rules with some extensions, but
+the way they are expanded makes them much more useful.
+
+=begin code MakePP
+
+   %.o: %.c {
+      $(CC) $< -o $@
+   }
+
+=end code MakePP
+
+The above example is a simple rule to build object files from C sources. The
+rule is instantiated for each match, so that the resulting Makefile has only
+explicit rules.
+
+Rules are matched on the graph, rather than on the filesystem. When a rule
+matches a file in the graph, an edge from that file to the new file is created.
+Other rules can then match this new file.
+
+Rules defined in a program block implicitly depend on that program and
+C<$(THIS)> expands to the program location with C<$(EXEEXT)> appended. Thus, in
+this case, C<$(THIS)> is expanded to C<$(builddir)/msgcat$(EXEEXT)>
+
+=begin code MakePP
+
+   program msgcat {
+      %.c: %.msg {
+         $(THIS) -c $< $@
+      }
+   }
+
+=end code MakePP
+
+Rules inside programs are always considered for match, but are disabled in the
+resulting Makefile, if the program was conditional and disabled at configure
+time.
+
+=head2 Pattern matching
+
+The introductory example is already a pattern rule. Patterns in Make++ are
+slightly more advanced than in GNU Make. There is a set of rules defining which
+pattern is matched. Simply speaking, the most special pattern is matched.
+
+=begin code MakePP
+
+   %.c: %.y {
+      ...
+   }
+   src/%.c: src/%.y {
+      ...
+   }
+
+=end code MakePP
+
+In the above example, the second rule is matched for all C<.y> files under
+C<src/>. All other C<.y> files are matched by the first rule.
+
+
+=head2 Line continuations
+
+Rules can span multiple lines, just like L<variables>.
+
+=begin code MakePP
+
+   %.c: %.y {
+      echo This is the first line
+      bison
+         -y
+         -o $@
+         $<
+      echo This is
+         the third line
+   }
+
+=end code MakePP
+
+
+=head2 Special variables in rules
+
+=over
+
+=item $<
+
+This variable expands to the first dependency. It does not exist, if the target
+does not have any dependencies or the only dependency is C<$(THIS)>.
+
+=item $@
+
+This variable expands to the target. It does not exist, if the rule has multiple
+targets.
+
+=item $*
+
+The string matched by C<%> in a pattern rule. It only exists in pattern rules.
+
+=item $1 ... $n
+
+The C<n>th dependency. Only dependencies listed on the rule itself are
+considered. Dependencies in external dependency declarations are not considered.
+
+=item $-1 ... $-n
+
+The C<n>th dependency, counting from the last. Thus, C<$-1> is the last
+dependency.
+
+=item $0
+
+An alias for C<$(THIS)>. Neither C<$0> nor C<$(THIS)> exist in global rules.
+
+=back
+
+
+=head2 Target-specific variables
+
+For a generic rule, it is often useful to let targets define an additional set
+of flags for the tool. The variable syntax C<$[VAR]> roughly expands to
+C<$(AM_VAR) $(VAR) $($(target)_VAR)>, where C<$(target)> is the C<program> or
+C<library> the target file is being built for.
+
+=begin code MakePP
+
+   %.c: %.y {
+      $(YACC) $[YFLAGS] -o $@ $<
+   }
+
+   program myparser {
+      sources {
+         src/parser.y
+      }
+   }
+
+=end code MakePP
+
+The pattern rule in the above example might be expanded to roughly the following
+make code:
+
+=begin code MakePP
+
+   src/parser.c: src/parser.y
+      $(MKDIR_P) src/
+      $(YACC) $(AM_YFLAGS) $(YFLAGS) $(myparser_YFLAGS) -o src/parser.c \
+         `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y
+
+=end code MakePP
+
+The C<test> makes sure that vpath builds work correctly. The first line will
+make the target directory, if it does not yet exist.
+
+=head3 $(TARGET)
+
+The special variable C<$(TARGET)> will expand to the library or program name.
+Not only that, but you can also access its declarations using the syntax
+described in L<variables>.
+
+=begin code MakePP
+
+   %.c: %.cx {
+      $(CPP)
+         -DTARGET='"$(TARGET)"'
+         -DLIBRARIES='"$(TARGET.link : library)"'
+         $< -o $@
+   }
+
+   program myprog {
+      sources {
+         main.cx
+      }
+      link {
+         mylib1
+         -lm
+      }
+   }
+
+=end code MakePP
+
+In the above example, C<$(TARGET.link : library)> will be expanded to C<mylib1>.
+
+
+=head2 Output in $(builddir)
+
+You may want to output the resulting files directly into the C<$(builddir)>,
+instead of a subdir. For this use case, the C<%%> pattern may be used.
+
+=begin code MakePP
+
+   %%.c: %%.y {
+      $(YACC) $[YFLAGS] -o $@ $<
+   }
+
+=end code MakePP
+
+The C<%%> pattern on the left will match exactly one path segment, i.e. without
+any path separators (C</>). A C<%%> on the right matches any number of path
+segments before matching the final path segment, i.e. the file, which was
+matched by the C<%%> on the left. The above example might be expanded to:
+
+=begin code MakePP
+
+   parser.c: src/parser.y
+      $(YACC) $(AM_YFLAGS) $(YFLAGS) $(myparser_YFLAGS) -o parser.c \
+         `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y
+
+=end code MakePP
+
+As you can see, a C<mkdir> is no longer necessary and the output is now in the
+current directory.
+
+
+=head2 Silencing rules
+
+Similar to C<make>, lines of a recipe may be silenced by prepending them with
+C<@>. Make++ extends this to automake C<silent-rules>.
+
+=begin code MakePP
+
+   %.c: %.y {
+      @echo Calling bison
+      @(YACC)bison $< -o $@
+   }
+
+=end code MakePP
+
+The C<@(NAME)> syntax emits an C<$(AM_V_GEN)>-like variable that prints C<YACC>
+and the target (C<$@>) in the C<silent-rules> style. Calling C<make V=1> will
+print the actual command instead of the single-line message.
+
+
+=head2 External rules
+
+If Make++ is not flexible enough for the use case, external rules may be
+imported using the C<extern> keyword. You may optionally add rule stubs
+declaring patterns or explicit graph edges that may be assumed as being
+implemented. Note that these rules are not special and more exact rules can
+still be matched.
+
+=begin code MakePP
+
+   extern 'lex-rules.am' %.c: %.l
+   extern 'yacc-rules.am' {
+      %.c: %.y ;
+      %.h: %.y ;
+   }
+   extern 'more-rules.am'
+
+=end code MakePP
+
+
+=head2 Replacing automake rules
+
+The power gained with the introduction of these pattern rules can be used to
+replace large parts of automake. E.g. a simplified automake rule for building
+object files from C sources can be written as follows:
+
+=begin code MakePP
+
+   %%.o: %%.c {
+      @(CC)$(CC) $[CPPFLAGS] $[CFLAGS] -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+   }
+
+=end code MakePP
+
+Automake still provides many useful tools, such as its C<distcheck> and
+C<parallel-tests> facilities. These tools are the reason Make++ targets automake
+and not make, directly.
+
+Also note that it's not useful to actually rewrite the automake rules, as the
+resulting Makefile will not be any shorter. Automake may do optimisations at a
+lower level than Make++, so it is not advisable to override many of its rules.

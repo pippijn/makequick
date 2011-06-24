@@ -2,174 +2,94 @@
 
 Make++ is a make-inspired build system that compiles to GNU Autotools.
 
-=cut
-
 L<Git repository|http://xinutec.org/git/devel/makepp.git/>
-
-=pod
 
 This is the future development of L<Autoproj|autoproj>. While Autoproj is a
 working piece of software, C<Make++> is nowhere, yet. At the moment, there are
-only ideas, but no code. The ideas are also very much in flux, so don't expect
-much stability.
+only ideas, but not much code. The ideas are also very much in flux, so don't
+expect much stability.
 
-Here are some examples. Those marked with C<[#]> have comments, so you can
-understand a bit of what is going on.
+=head2 Introduction
 
-C<[#]> L<configure.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/configure.mq>
+Make++ compiles a purely declarative build definition to POSIX-compliant and
+thus fairly portable L<automake|http://www.gnu.org/software/automake/> input. It
+solves a few problems with automake, such as the fact that libraries must appear
+in topological order with respect to internal dependencies. This is still a
+problem with automake. It basically means that the following automake code fails
+during installation:
 
-C<[#]> L<include/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/include/Rules.mq>
+   lib_LTLIBRARIES = liba.la libb.la
+   liba_la_LIBADD = libb.la
 
-C<[#]> L<src/aldor/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/aldor/Rules.mq>
+C<lib_LTLIBRARIES> must list the libraries in topological order, so that a
+definition as C<libb.la liba.la> would work. Make++ solves this problem by
+topologically sorting the libraries and emitting a properly sorted
+C<lib_LTLIBRARIES>.
 
-L<src/compiler/general/bigint/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/bigint/Rules.mq>
+Another issue with automake is poor extensibility. Inference rules can be used
+to extend automake with new source formats. By adding the new source extensions
+to C<SUFFIXES>, automake knows about them and generates the proper C<.c> to
+C<.o> rules. However, if you have a program, which is used to build other
+sources, you will want to add this to the dependency list for the resulting
+sources. With inference rules, this is not possible, so you need to write one
+rule per source file. With many source files, this is a very tedious task and
+there are two solutions: use GNU Make with pattern rules or generate the rules
+with a script. Pattern rules can get very L<complex|http://xinutec.org/git/aldor/compiler.git/tree/src/aldor/Rules.am?id=5f356e51ca7d642d8ef157404004b42e36ea9012>
+if you want to support target-specific flags for your tool. Generating rules is
+always ad-hoc and each type of rules needs its own script.
 
-L<src/compiler/general/bitv/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/bitv/Rules.mq>
+Yet another issue is the lack of wildcards. While wildcards have several
+disadvantages, they also have many advantages and it is the author's opinion
+that a good programmer should not suffer, because bad programmers might abuse a
+feature. The same holds for build systems. Advanced features should not be
+withheld from advanced users. Make++ supports but discourages the use of
+wildcards.
 
-L<src/compiler/general/buffer/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/buffer/Rules.mq>
+=head3 Autotools integration
 
-L<src/compiler/general/ccode/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/ccode/Rules.mq>
+Make++ input is translated to one or more C<Makefile.am>s and a single
+C<configure.ac>. The unification of automake and autoconf was done, because a
+lot of knowledge from automake input has to be duplicated in the autoconf input.
+Things such as which libraries to check for at configure time so that they may
+be linked against in the Makefile or submodule dependencies are present in both
+formats. Make++ attempts to unify these formats in a new format based on QML and
+GNU Make.
 
-L<src/compiler/general/cfgfile/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/cfgfile/Rules.mq>
+=head3 Flexibility
 
-L<src/compiler/general/debug/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/debug/Rules.mq>
+Make++ is, by design, much less flexible than automake and autoconf. It is also
+much more strict. It gives the user some additional tools the author has been
+missing in the GNU build system.
 
-L<src/compiler/general/dnf/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/dnf/Rules.mq>
+Source files are looked for in the entire source tree. Files are not explicitly
+included by other files. Autoconf scripts may be included in the C<project>
+block. Additional automake rules may be included in rule files. This gives you
+all the flexibility back at the expense of the included files being essentially
+a black box to Make++, thus defeating its static analysis features. Make++
+guarantees that pure projects, i.e. without external autotools input, do not
+cause errors at a lower level. This can no longer be guaranteed in the presence
+of such black boxes.
 
-L<src/compiler/general/dword/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/dword/Rules.mq>
+=head3 Unsupported features
 
-L<src/compiler/general/file/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/file/Rules.mq>
+Make++ does not plan on supporting percentages, because the author does not
+believe in those. C<cmake> is a build system that supports such comfort.
 
-L<src/compiler/general/fluid/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/fluid/Rules.mq>
+=head2 Documentation
 
-L<src/compiler/general/foam_c/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/foam_c/Rules.mq>
+The documentation is too large, so that it had to be distributed over multiple
+pages.
 
-L<src/compiler/general/format/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/format/Rules.mq>
+=over
 
-L<src/compiler/general/ftype/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/ftype/Rules.mq>
+=item L<project|makepp/project>
 
-L<src/compiler/general/list/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/list/Rules.mq>
+=item L<variables|makepp/variables>
 
-L<src/compiler/general/logging/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/logging/Rules.mq>
+=item L<targets|makepp/target>
 
-L<src/compiler/general/msg/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/msg/Rules.mq>
+=item L<template|makepp/template>
 
-L<src/compiler/general/path/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/path/Rules.mq>
+=item L<rules|makepp/rules>
 
-L<src/compiler/general/priq/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/priq/Rules.mq>
-
-L<src/compiler/general/sexpr/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/sexpr/Rules.mq>
-
-L<src/compiler/general/srcpos/io/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/srcpos/io/Rules.mq>
-
-L<src/compiler/general/srcpos/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/srcpos/Rules.mq>
-
-L<src/compiler/general/store/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/store/Rules.mq>
-
-L<src/compiler/general/strops/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/strops/Rules.mq>
-
-L<src/compiler/general/symbol/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/symbol/Rules.mq>
-
-L<src/compiler/general/table/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/table/Rules.mq>
-
-L<src/compiler/general/termtype/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/termtype/Rules.mq>
-
-L<src/compiler/general/textansi/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/textansi/Rules.mq>
-
-L<src/compiler/general/textcolour/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/textcolour/Rules.mq>
-
-L<src/compiler/general/texthp/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/texthp/Rules.mq>
-
-L<src/compiler/general/timer/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/timer/Rules.mq>
-
-L<src/compiler/general/util/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/util/Rules.mq>
-
-L<src/compiler/general/xfloat/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/general/xfloat/Rules.mq>
-
-L<src/compiler/phases/abcheck/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/abcheck/Rules.mq>
-
-L<src/compiler/phases/abuse/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/abuse/Rules.mq>
-
-L<src/compiler/phases/bloop/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/bloop/Rules.mq>
-
-L<src/compiler/phases/flatten/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/flatten/Rules.mq>
-
-L<src/compiler/phases/linear/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/linear/Rules.mq>
-
-L<src/compiler/phases/parse/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/parse/Rules.mq>
-
-L<src/compiler/phases/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/Rules.mq>
-
-L<src/compiler/phases/scan/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/scan/Rules.mq>
-
-L<src/compiler/phases/scobind/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/phases/scobind/Rules.mq>
-
-L<src/compiler/port/cport/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/port/cport/Rules.mq>
-
-L<src/compiler/port/opsys/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/port/opsys/Rules.mq>
-
-L<src/compiler/struct/absyn/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/absyn/Rules.mq>
-
-L<src/compiler/struct/axlobs/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/axlobs/Rules.mq>
-
-L<src/compiler/struct/depdag/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/depdag/Rules.mq>
-
-L<src/compiler/struct/doc/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/doc/Rules.mq>
-
-C<[#]> L<src/compiler/struct/fint/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/fint/Rules.mq>
-
-L<src/compiler/struct/foam/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/foam/Rules.mq>
-
-L<src/compiler/struct/lists/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/lists/Rules.mq>
-
-L<src/compiler/struct/output/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/output/Rules.mq>
-
-L<src/compiler/struct/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/Rules.mq>
-
-L<src/compiler/struct/spesym/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/spesym/Rules.mq>
-
-L<src/compiler/struct/srcline/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/srcline/Rules.mq>
-
-L<src/compiler/struct/syme/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/syme/Rules.mq>
-
-L<src/compiler/struct/token/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/struct/token/Rules.mq>
-
-L<src/compiler/toplevel/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/compiler/toplevel/Rules.mq>
-
-C<[#]> L<src/library/aldor/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/aldor/Rules.mq>
-
-L<src/library/aldorunit/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/aldorunit/Rules.mq>
-
-L<src/library/algebra/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/algebra/Rules.mq>
-
-L<src/library/axldem/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/axldem/Rules.mq>
-
-L<src/library/axllib/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/axllib/Rules.mq>
-
-L<src/library/charset/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/charset/Rules.mq>
-
-L<src/library/extio/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/extio/Rules.mq>
-
-C<[#]> L<src/library/foamlib/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/foamlib/Rules.mq>
-
-C<[#]> L<src/library/foam/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/foam/Rules.mq>
-
-L<src/library/model/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/model/Rules.mq>
-
-L<src/library/openmath/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/openmath/Rules.mq>
-
-C<[#]> L<src/library/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/Rules.mq>
-
-L<src/library/xmllib/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/library/xmllib/Rules.mq>
-
-C<[#]> L<src/runtime-gmp/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/runtime-gmp/Rules.mq>
-
-C<[#]> L<src/runtime/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/runtime/Rules.mq>
-
-C<[#]> L<src/tools/datagen/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/tools/datagen/Rules.mq>
-
-C<[#]> L<src/tools/msgcat/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/tools/msgcat/Rules.mq>
-
-C<[#]> L<src/tools/unicl/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/tools/unicl/Rules.mq>
-
-C<[#]> L<src/tools/zacc/Rules.mq|http://xinutec.org/git/devel/makepp.git/tree/extra/template/src/tools/zacc/Rules.mq>
+=back

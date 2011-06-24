@@ -1,0 +1,82 @@
+=head1 Variables
+
+Variables are actually wrongly named "variable", as they are really constants,
+but everybody always calls them variables, so here they shall be called
+variables, as well.
+
+=begin code MakePP
+
+   SRCEXTS = c h
+   OBJEXTS = o obj
+   EXTS = $(SRCEXTS) $(OBJEXTS)
+
+=end code MakePP
+
+
+=head2 Scopes
+
+Variable definitions may be scoped. These are not visible outside the scope of
+the enclosing target, project or template.
+
+=begin code MakePP
+
+   program prog {
+      VARIABLE = a b c d
+   }
+
+=end code MakePP
+
+=head2 Line continuations
+
+Variable definitions may span multiple lines. The line continues as long as the
+indentation level is higher than the variable definition.
+
+=begin code MakePP
+
+   VARIABLE = some values
+      the values
+         continue
+      until here
+      OTHERVAR = this line is still part of
+      the variable definition
+   OTHERVAR = this is a new variable definition
+
+=end code MakePP
+
+=head2 Expansion
+
+Variables are not expanded unless they really have to be. Eager contexts include
+C<sources> and C<link> sections and rules. Variables are not expanded in other
+variable definitions, but are recursively expanded if the defined variable is
+expanded in an eager context. Variables are not expanded in rule bodies.
+
+=head2 Pseudo-variables
+
+Pseudo-variables can be used to query declarations or to call functions on data.
+
+=begin code MakePP
+
+   program prog {
+      sources {
+         ...
+      }
+      link {
+         mylib1
+         mylib2
+         -lm
+      }
+   }
+
+   PROGLINK = $(prog.link)
+   # filter by locally built libraries
+   PROGLIBS = $(prog.link:library)
+
+=end code MakePP
+
+The above filter syntax can be used to filter out system libraries such as, in
+this example, C<-lm>. Thus, the C<PROGLIBS> variable would be expanded to
+C<mylib1 mylib2>, C<$(PROGLINK)> would also include C<-lm>. This may be useful
+in L<rules>.
+
+This filter syntax cannot be used to filter arbitrary text. It only works on
+pseudo-variables such as C<$(mytarget.link)>.

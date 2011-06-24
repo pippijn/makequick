@@ -1,0 +1,146 @@
+=head1 Target templates
+
+Templates define common flags and sources for targets. They do not define
+targets, by themselves. Templates offer a better structured way to inheriting
+sources and libraries.
+
+=begin code MakePP
+
+   # Build a program that does some math
+   program prog {
+      sources {
+         main.c
+         math.c
+      }
+      link {
+         -lm
+      }
+   }
+   # Build a program that does the same math but with GMP
+   program gmpprog {
+      sources {
+         # Import prog's sources
+         sources (prog)
+         # except math.c
+         exclude { math.c }
+         # because we reimplement it using GMP
+         gmpmath.c
+      }
+      link {
+         # Import prog's link section
+         link (prog)
+         # And link against GMP
+         -lgmp
+      }
+   }
+
+=end code MakePP
+
+The above example can be better written as follows:
+
+=begin code MakePP
+
+   template math-program {
+      sources {
+         main.c
+      }
+      link {
+         -lm
+      }
+   }
+   # Inherit from the "math-program" template.
+   program prog : math-program {
+      sources {
+         math.c
+      }
+   }
+   program gmpprog : math-program {
+      sources {
+         gmpmath.c
+      }
+      link {
+         -lgmp
+      }
+   }
+
+=end code MakePP
+
+Both programs inherit the sources and link blocks from C<math-program> and add
+their own sources to it. This method is better structured but less flexible.
+Templates can inherit from other templates. It is still possible to import
+sources from other templates and even targets.
+
+Note that templates also have their own namespace, so that it is possible to
+declare a template with the same name as a target.
+
+It is not possible to exclude inherited C<sources>, C<link>, etc. Template
+inheritance forms an I<is-a> relationship.
+
+=head2 Multiple inheritance
+
+Multiple templates can be inherited. Order of inheritance does not matter and
+conflicts are flagged as an error. Two templates linking against the same
+library or listing the exact same source file is not a conflict. Targets can not
+serve as a base, so a target or template cannot inherit from another target,
+only from templates. Inheriting from a template more than once, even implicitly
+through another base, is an error.
+
+=begin code MakePP
+
+   template math-program {
+      sources {
+         math-support.c
+      }
+      link {
+         -lm
+      }
+   }
+   template system-program {
+      sources {
+         system-support.c
+      }
+      link {
+         -lutil
+      }
+   }
+   program sysprog : math-program, system-program {
+      sources {
+         main.c
+      }
+   }
+
+=end code MakePP
+
+
+=head2 Filtering
+
+As we learned in L<variables>, one may filter the C<$(prog.link)> variable by
+locally built libraries. Templates take this one step further by allowing you to
+filter by template.
+
+=begin code MakePP
+
+   template math-library {
+      ...
+   }
+   library mathsupport : math-library {
+      ...
+   }
+   program mathprog {
+      sources { ... }
+      link {
+         # Link against two support libraries
+         mathsupport
+         support
+         # Also link against libm
+         -lm
+      }
+   }
+
+=end code MakePP
+
+In the above example, the C<$(mathprog.link)> variable would expand to
+"C<mathsupport support -lm>". The expansion of C<$(mathprog.link : library)>
+would be "C<mathsupport support>", and expanding the pseudo-variable
+C<$(mathprog.link : math-library)> results in just "C<mathsupport>". This is
+especially useful in L<pattern rules>.

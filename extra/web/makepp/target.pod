@@ -1,0 +1,223 @@
+=head1 Targets (programs/libraries)
+
+Target descriptions are declaratively defined in rule files. They share the
+syntax with project descriptions, but the order of these files is irrelevant.
+The order of declarations within a file is also irrelevant. Moreover, the
+translator sorts the input files lexically before starting to parse them. This
+is to guarantee the same parse order on every system, so that errors appear in
+the same order and comparisons are easier.
+
+Currently supported targets are programs and libraries. The simplest possible
+target is a program with a single source file.
+
+=begin code MakePP
+
+   program make {
+      sources {
+         make.c
+      }
+   }
+
+=end code MakePP
+
+If you wanted to build a library called C<libmake.la>, instead, you would
+substitute C<library> for C<program>. Programs and libraries are exactly the
+same, except that libraries may be linked against by other programs and
+libraries and programs may not.
+
+=head2 Sections
+
+A target contains at least one section and optionally a description string. You
+can add a description to a target. This is used in the configure summary and, in
+case of libraries, generated pkg-config files.
+
+=head3 sources
+
+The C<sources> directive is used to list the sources for a target. This
+directive supports wildcards and group matches.
+
+The semantics of C<*> and C<?> are equal to their semantics in POSIX shell. An
+additional C<**> wildcard matches recursively. Furthermore, C<{a b c}> group
+matches may be used in wildcards.
+
+Unlike pattern rules, these wildcards only match on the actual file system, more
+specifically the source directory. It does not match built files. If you want to
+distribute built sources, you need to list them, explicitly.
+
+=begin code MakePP
+
+   sources {
+      # All .c files in the current directory and descendants
+      **.c
+      # Match ac.cc ad.cc bc.cc bd.cc
+      {a b}{c d}.cc
+      # Explicit source
+      main.cpp
+   }
+
+=end code MakePP
+
+Explicitly listed sources must either exist in the file system or be buildable
+via an explicit or pattern rule. Filenames can either be specified relative to
+the currently processed rules file or relative to the source root.
+
+We recommend I<not> to use wildcards too much for several
+L<reasons|http://www.gnu.org/s/hello/manual/automake/Wildcards.html>. You may
+freely mix wildcard matches and explicit sources. The C<-Wwildcard-match> flag
+warns for every file matched by a wildcard that was not explicitly listed. This
+way, you can be notified if you create a new file without adding it to the
+sources list.
+
+Sources from other targets can be imported via a C<sources> directive within the
+sources list. Optionally, an C<exclude> directive can prevent one or more
+sources from being imported. Excluded files can either be specified in full or
+just with the base name.
+
+=begin code MakePP
+
+   # sources for the math lib with emulated SSE
+   sources {
+      sources (mathlib)
+      exclude {
+         # do not import the SSE implementation
+         math_sse.c
+      }
+      # we have an emulation
+      math_see_emu.c
+   }
+
+=end code MakePP
+
+A warning is issued if the imported set is empty after exclusions. It is an
+error to list the same file twice or to list a file that was already imported.
+It is, in fact, even an error to list two different files that ultimately target
+the same object file.
+
+=head3 nodist_sources
+
+All files listed in C<sources> are shipped with the distribution. That includes
+sources built from other sources or by rules. The C<nodist_sources> section lets
+you build sources without shipping them.
+
+=head3 extra_dist
+
+These files are added to the distribution produced by C<make dist>. They are not
+scoped and the files are also added, if the target containing them is not built.
+This directive may also appear outside a target description.
+
+=begin code MakePP
+
+   # include/Rules
+   extra_dist {
+      # Distribute all header files (recursively matched)
+      **.h
+   }
+
+=end code MakePP
+
+=head3 link
+
+In the C<link> section of a target, you may refer to libraries built within this
+project. The installation order of libraries is calculated using the dependency
+information (libraries are topologically sorted and installed in inverse sort
+order). It is an error to refer to a non-existent internal library.
+
+In order to link against external libraries, you must add the C<"-l"> prefix.
+Libraries linked like this are automatically checked in configure. If you also
+want to check whether certain symbols are defined in the library, you need to
+add those checks, manually.
+
+=begin code MakePP
+
+   link {
+      # Link against the locally built libmylib.la
+      mylib
+
+      # Also link against GMP
+      -lgmp
+   }
+
+=end code MakePP
+
+You may import C<link> sections the same way as sources can be imported. Global
+C<link> sections apply to all targets without a C<link> section. They are not
+imported by default, if a C<link> section is present. In order to import the
+global link section, the C<link ()> directive must be present in the target's
+link section.
+
+=begin code MakePP
+
+   link {
+      # Import global libraries
+      link ()
+      # But don't link against GMP
+      exclude {
+         -lgmp
+      }
+   }
+
+=end code MakePP
+
+If the global link section links against a locally built library, that library
+excludes itself, automatically. Care must be taken with locally built libraries
+in the global link section. It is very easy to introduce dependency cycles, this
+way.
+
+=head3 cppflags
+
+If inside a target, these are target-specific C<CPPFLAGS>. If you define
+target-specific C<cppflags>, the global C<cppflags> are overridden. you may
+import global C<cppflags> as with link and sources.
+
+=begin code MakePP
+
+   cppflags {
+      # Import global CPPFLAGS
+      cppflags ()
+      # Add target-specific CPPFLAGS
+      -D_GNU_SOURCE
+   }
+
+=end code MakePP
+
+=head2 Conditions
+
+All sections in a target description may be conditionalised. The condition must
+be explicitly (via C<arg_enable>) or implicitly (e.g. via C<library>) defined by
+the C<project> section.
+
+=begin code MakePP
+
+   # Add these sources iff GMP is available and enabled
+   sources if GMP {
+      gmp_math.c
+   }
+
+=end code MakePP
+
+You may even conditionalise the entire target. Then all sections inside the
+target, except C<extra_dist>, are implicitly conditionalised.
+
+=begin code MakePP
+
+   program pcregrep if PCRE {
+      ...
+   }
+
+=end code MakePP
+
+=head2 Install targets
+
+By default, programs are installed into C<$bindir> and libraries are installed
+into C<$libdir>. You can change this by using the arrow operator.
+
+=begin code MakePP
+
+   # install to $pkglibexecdir
+   program cc1plus -> pkglibexec {
+      ...
+   }
+
+=end code MakePP
+
+TODO: There is no way to define custom install dirs, for now.

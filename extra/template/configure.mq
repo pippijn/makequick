@@ -87,16 +87,36 @@ project 'Aldor Compiler' {
 			'Use only 6 bits for the bigint base instead of the full machine word for testing'
 		}
 
-		arg_enable store-wipe-new = yes {
-			'Newly allocated store contains 0xAAAA...'
+		arg_enable store-new = wipe {
+			'Fill newly allocated storage with...'
+			options {
+				wipe => {
+					define STO_NEW_AAAA {
+						'Fill newly allocated storage with 0xAAAA...'
+					}
+				}
+				zero => {
+					define STO_NEW_ZERO {
+						'Fill newly allocated storage with zeros'
+					}
+				}
+			}
 		}
 
-		arg_enable store-zero-new = no {
-			'Newly allocated store contains zeros'
-		}
-
-		arg_enable store-zero-old = yes {
-			'Freed storage contains 0xDDDD...'
+		arg_enable store-old = wipe {
+			'Fill freed storage with...'
+			options {
+				wipe => {
+					define STO_OLD_DDDD {
+						'Fill freed storage with 0xDDDD...'
+					}
+				}
+				zero => {
+					define STO_OLD_ZERO {
+						'Fill freed storage with zeros'
+					}
+				}
+			}
 		}
 
 		arg_enable libcstub = no {
@@ -114,11 +134,11 @@ project 'Aldor Compiler' {
 			cflags { -fstack-protector-all }
 		}
 
-		arg_enable zacc = '`test ! -f $srcdir/src/compiler/phases/parse/axl.c`' {
+		arg_enable zacc = `test ! -f $srcdir/src/compiler/phases/parse/axl.c && echo yes` {
 			'Build YACC preprocessor'
 		}
 
-		arg_with mem-manager = malloc {
+		arg_enable mem-manager = malloc {
 			'Choose the memory management algorithm'
 			options {
 				once => {
