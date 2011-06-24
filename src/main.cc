@@ -128,7 +128,7 @@ try
   if (node_ptr doc = parse ())
     {
       phases::run ("audit", doc);
-      //phases::run ("xml", doc);
+      phases::run ("xml", doc);
     }
   else
     {

@@ -64,7 +64,6 @@ using namespace nodes;
 %token<token> KW_IF			"if"
 %token<token> KW_ALIGNOF		"alignof"
 %token<token> KW_ARG_ENABLE		"arg_enable"
-%token<token> KW_ARG_WITH		"arg_with"
 %token<token> KW_C_BIGENDIAN		"c_bigendian"
 %token<token> KW_C_CHARSET		"c_charset"
 %token<token> KW_C_ENUM_FWDECL		"c_enum_fwdecl"
@@ -133,11 +132,11 @@ using namespace nodes;
 %type<list> description inheritance.opt inheritance if.opt if destination.opt destination
 %type<list> tool_flags flags identifiers
 %type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
-%type<list> check_library_notfound.opt define arg_enable arg_with arg_with_options arg_with_choices
-%type<list> arg_with_choice project project_members project_member section section_members section_member
-%type<list> code_frag variable variable_content
+%type<list> define arg_enable arg_enable_options arg_enable_choices
+%type<list> arg_enable_choice arg_enable_content project project_members project_member
+%type<list> code_frag variable variable_content section section_members section_member
 %type<token> identifier filename_part link_item flag_keyword string.opt identifier.opt ac_checks
-%type<token> arg_default
+%type<token> arg_default check_library_notfound.opt
 
 %destructor { delete $$; } <*>
 
@@ -218,7 +217,6 @@ section_member
 	: ac_checks
 		{ $$ = new generic_node (n_ac_check, @$, $1); }
 	| arg_enable
-	| arg_with
 	| check_alignof
 	| check_cflags
 	| check_functions
@@ -246,9 +244,10 @@ ac_checks
 
 arg_enable
 	: "arg_enable" identifier "=" arg_default "{"
-	    section_members
+	    TK_STRING
+	    arg_enable_content
 	  "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $4, $6); delete $1; delete $3; delete $5; delete $7; }
+		{ $$ = new generic_node (n_arg_enable, @$, $2, $4, $6, $7); delete $1; delete $3; delete $5; delete $8; }
 	;
 
 arg_default
@@ -256,49 +255,47 @@ arg_default
 	| TK_STRING
 	;
 
-arg_with
-	: "arg_with" identifier "=" identifier "{"
-	    TK_STRING
-	    arg_with_options
-	  "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $4, $6, $7); delete $1; delete $3; delete $5; delete $8; }
+arg_enable_content
+	: { $$ = NULL; }
+	| section_members
+	| arg_enable_options
 	;
 
-arg_with_options
-	: "options" "{" arg_with_choices "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $3); delete $1; delete $2; delete $4; }
+arg_enable_options
+	: "options" "{" arg_enable_choices "}"
+		{ $$ = $3; delete $1; delete $2; delete $4; }
 	;
 
-arg_with_choices
-	: arg_with_choice
-		{ $$ = new generic_node (n_arg_enable, @$, $1); }
-	| arg_with_choices arg_with_choice
+arg_enable_choices
+	: arg_enable_choice
+		{ $$ = new generic_node (n_arg_enable_choices, @$, $1); }
+	| arg_enable_choices arg_enable_choice
 		{ ($$ = $1)->add ($2); }
 	;
 
-arg_with_choice
+arg_enable_choice
 	: identifier "=>" "{" section_members "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $1, $4); delete $2; delete $3; delete $5; }
+		{ $$ = new generic_node (n_arg_enable_choice, @$, $1, $4); delete $2; delete $3; delete $5; }
 	;
 
 check_alignof
 	: "alignof" "{" TK_STRING "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = new generic_node (n_check_alignof, @$, $3); delete $1; delete $2; delete $4; }
 	;
 
 check_cflags
 	: "cflags" identifier.opt flags_begin flags flags_end
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $4); delete $1; }
+		{ $$ = new generic_node (n_check_cflags, @$, $2, $4); delete $1; }
 	;
 
 check_functions
 	: "functions" "{" identifiers "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = new generic_node (n_check_functions, @$, $3); delete $1; delete $2; delete $4; }
 	;
 
 check_headers
 	: "headers" "{" filenames.1 TK_WHITESPACE "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $3); delete $1; delete $2; delete $4; delete $5; }
+		{ $$ = new generic_node (n_check_headers, @$, $3); delete $1; delete $2; delete $4; delete $5; }
 	;
 
 check_library
@@ -308,23 +305,23 @@ check_library
 	    check_library_notfound.opt
 	    string.opt
 	  "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $5, $7, $9, $10); delete $1; delete $3; delete $4; delete $6; delete $8; delete $11; }
+		{ $$ = new generic_node (n_check_library, @$, $2, $5, $7, $9, $10); delete $1; delete $3; delete $4; delete $6; delete $8; delete $11; }
 	;
 
 check_library_notfound.opt
 	: { $$ = NULL; }
 	| "notfound:" TK_STRING
-		{ $$ = new generic_node (n_arg_enable, @$, $2); delete $1; }
+		{ $$ = $2; delete $1; }
 	;
 
 check_sizeof
 	: "sizeof" "{" TK_STRING "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = new generic_node (n_check_sizeof, @$, $3); delete $1; delete $2; delete $4; }
 	;
 
 define
 	: "define" identifier "{" TK_STRING "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = new generic_node (n_define, @$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 

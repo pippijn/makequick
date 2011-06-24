@@ -68,7 +68,6 @@ INTEGER	{DIGIT}+
 "if"					{ Return (KW_IF); }
 "alignof"				{ Return (KW_ALIGNOF); }
 "arg_enable"				{ Return (KW_ARG_ENABLE); }
-"arg_with"				{ Return (KW_ARG_WITH); }
 "c_bigendian"				{ Return (KW_C_BIGENDIAN); }
 "c_charset"				{ Return (KW_C_CHARSET); }
 "c_enum_fwdecl"				{ Return (KW_C_ENUM_FWDECL); }
@@ -119,6 +118,7 @@ INTEGER	{DIGIT}+
 	"->"				{ Return (TK_ARROW); }
 	"=>"				{ Return (TK_DARROW); }
 	'(\\.|[^'])*'			{ Return (TK_STRING); }
+	`(\\.|[^`])*`			{ Return (TK_STRING); }
 }
 
 <FILENAME>{

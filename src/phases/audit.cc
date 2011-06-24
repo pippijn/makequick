@@ -26,7 +26,7 @@ audit::visit (generic_node &n)
 {
   if (should_terminate)
     return;
-  puts (semantic_error (&n, node_type_name[n.type]).what ());
+  //puts (semantic_error (&n, node_type_name[n.type]).what ());
   if (s.find (&n) != s.end ())
     throw semantic_error (&n, "cycle in abstract syntax tree");
   s.insert (&n);
