@@ -196,7 +196,7 @@ struct regex_match
     boost::cmatch results;
     bool matched = boost::regex_match (p.c_str (), results, re);
     if (matched)
-      errors.add<warning> (node, "wildcard matched file: `" + p.native () + "'");
+      errors.add<warning> (node, "wildcard matched file: " + C::filename (p.native ()));
     return matched;
   }
 
@@ -227,13 +227,15 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
                                                      concat_token);
 
       fs::path path;
-      if (filename[0] == '/')
+      // relative path
+      if (filename[0] != '.')
         {
           path = files.base / filename;
           if (!is_regular_file (path))
             path.clear ();
         }
-      else
+      // absolute (source-root relative) path
+      if (path.empty () && filename[0] != '/')
         {
           path = n.loc.file->parent_path () / filename;
           if (!is_regular_file (path))
@@ -241,14 +243,14 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
         }
       if (path.empty ())
         {
-          errors.add<semantic_error> (f, "could not find file `" + filename + "'");
+          errors.add<semantic_error> (f, "could not find file " + C::filename (filename));
           continue;
         }
 
       if (!std::equal (files.base.begin (),
                        files.base.end (),
                        path.begin ()))
-        throw std::runtime_error ("source file found outside source root: `" + path.native () + "'");
+        throw std::runtime_error ("source file found outside source root: " + C::filename (path.native ()));
 
       source_files.push_back (std::accumulate (path.begin (), path.end (), fs::path (), concat_path));
     }

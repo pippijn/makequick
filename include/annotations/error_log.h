@@ -17,5 +17,13 @@ namespace annotations
     {
       log.push_back (new Exception (node, message));
     }
+
+    bool has_errors () const
+    {
+      foreach (semantic_error const &e, log)
+        if (e.error)
+          return true;
+      return false;
+    }
   };
 }

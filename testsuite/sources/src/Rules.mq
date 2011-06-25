@@ -9,6 +9,6 @@ program datagen {
 		/**.c
 
 
-		main.c /foo.c
+		main.c foo.c
 	}
 }

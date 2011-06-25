@@ -84,11 +84,22 @@ try
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
       error_log &errors = annots.put ("errors", new error_log);
       phases::run (doc, annots);
-      if (errors.log.empty ())
+      {
+        int count = 0;
+        foreach (semantic_error const &e, errors.log)
+          {
+            if (count++ > 10)
+              {
+                puts ("too many diagnostics; exiting");
+                break;
+              }
+            puts (e.what ());
+          }
+      }
+      if (!errors.has_errors ())
         phases::run ("xml", doc, annots);
       else
-        foreach (semantic_error const &e, errors.log)
-          puts (e.what ());
+        return EXIT_FAILURE;
     }
   else
     return EXIT_FAILURE;
@@ -97,6 +108,6 @@ try
 }
 catch (std::exception const &e)
 {
-  printf ("error: %s\n", e.what ());
+  printf ("\e[1;31m%%%% runtime error\e[0m: %s\n", e.what ());
   return EXIT_FAILURE;
 }

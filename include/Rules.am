@@ -1,12 +1,27 @@
+include algorithm/Rules.am
+include annotations/Rules.am
 include lexer/Rules.am
+include stdafx/Rules.am
 
 EXTRA_DIST +=		\
+	annotation.h	\
+	colours.h	\
+	exception.h	\
 	lexer.h		\
+	local.h		\
 	node.h		\
+	node_ptr.h	\
 	nopvisitor.h	\
 	object_pool.h	\
 	parser.h	\
+	phase.h		\
+	phases.h	\
 	sighandler.h	\
+	stdafx.h	\
+	timing.h	\
 	visitor.h	\
 	y.tab.h		\
 	ylcode.h
+
+stdafx.h: include/stdafx/stdafx.h
+	@cp $< $@

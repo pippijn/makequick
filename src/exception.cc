@@ -1,12 +1,13 @@
+#include "colours.h"
 #include "exception.h"
 #include "node.h"
 
-static char const *
+static std::string
 severity (bool error)
 {
   return error
-       ? "\e[1;31merror\e[0m: "
-       : "\e[1;33mwarning\e[0m: "
+       ? C::red ("error: ")
+       : C::yellow ("warning: ")
        ;
 }
 

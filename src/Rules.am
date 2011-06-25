@@ -19,7 +19,7 @@ include phases/Rules.am
 GENFILES = yystate.h node_type.h node_switch.h node_visit.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
 EXTRA_DIST += yylex.h
-CLEANFILES += $(GENFILES)
+CLEANFILES += $(GENFILES) $(nodist_makepp_SOURCES)
 
 yystate.h: yylex.h
 	@echo 'namespace yy { enum state {' > $@

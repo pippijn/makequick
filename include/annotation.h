@@ -1,9 +1,6 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-
-#include <boost/ptr_container/ptr_map.hpp>
+#include "colours.h"
 
 struct annotation
 {
@@ -31,7 +28,7 @@ struct annotation_map
   {
     map_type::iterator found = annots.find (name);
     if (found == annots.end ())
-      throw std::invalid_argument ("annotation `" + name + "' not found");
+      throw std::invalid_argument ("annotation " + C::filename (name) + " not found");
     return dynamic_caster (*found->second);
   }
 
@@ -44,7 +41,7 @@ struct annotation_map
   T &put (std::string const &name, T *annot)
   {
     if (has (name))
-      throw std::invalid_argument ("annotation `" + name + "' already present");
+      throw std::invalid_argument ("annotation " + C::filename (name) + " already present");
     annots.insert (name, std::auto_ptr<annotation> (annot));
     return *annot;
   }

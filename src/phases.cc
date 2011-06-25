@@ -11,7 +11,7 @@ phases::phases (std::string const &name, bool autorun)
 {
   phases *&phase = map[name];
   if (phase)
-    throw std::invalid_argument ("phase `" + name + "' already registered");
+    throw std::invalid_argument ("phase " + C::filename (name) + " already registered");
   phase = this;
 }
 
@@ -20,7 +20,7 @@ phases::run (std::string const &name, node_ptr doc, annotation_map &annots)
 {
   phases *phase = map[name];
   if (!phase)
-    throw std::invalid_argument ("phase `" + name + "' does not exist");
+    throw std::invalid_argument ("phase " + C::filename (name) + " does not exist");
   phase->run1 (doc, annots);
 }
 
