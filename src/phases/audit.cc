@@ -11,9 +11,11 @@ namespace
     virtual void visit (generic_node &n);
 
     std::set<void *> s;
+
+    audit (annotation_map &annots) { }
   };
 
-  static phase<audit> thisphase ("audit");
+  static phase<audit> thisphase ("audit", 0);
 }
 
 void
@@ -24,8 +26,6 @@ audit::visit (token &n)
 void 
 audit::visit (generic_node &n)
 {
-  if (should_terminate)
-    return;
   //puts (semantic_error (&n, node_type_name[n.type]).what ());
   if (s.find (&n) != s.end ())
     throw semantic_error (&n, "cycle in abstract syntax tree");

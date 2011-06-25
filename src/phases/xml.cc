@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cstdio>
 
-#include <boost/foreach.hpp>
-
 #define VALID_XML 0
 
 namespace
@@ -14,9 +12,13 @@ namespace
   {
     virtual void visit (token &n);
     virtual void visit (generic_node &n);
+
+    int in_multifile;
+
+    xml (annotation_map &annots) : in_multifile (0) { }
   };
 
-  static phase<xml> thisphase ("xml");
+  static phase<xml> thisphase ("xml", noauto);
 }
 
 static int indent;
@@ -44,7 +46,29 @@ xml::visit (token &n)
   std::string const name = xmlname (tokname (n.tok));
   printf ("%*s<t:%s><![CDATA[%s]]></t:%s>\n", indent, "", name.c_str (), n.string.c_str (), name.c_str ());
 #else
-  printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok), n.string.c_str ());
+  switch (n.tok)
+    {
+    case TK_FILENAME:
+    case TK_FN_DOT:
+    case TK_FN_LBRACE:
+    case TK_FN_PERCENT:
+    case TK_FN_QMARK:
+    case TK_FN_RBRACE:
+    case TK_FN_SLASH:
+    case TK_FN_STARSTAR:
+    case TK_FN_STAR:
+      {
+        if (in_multifile == 2)
+          printf (" ");
+        in_multifile = !!in_multifile * 2;
+        in_multifile += n.tok == TK_FN_LBRACE;
+        in_multifile *= n.tok != TK_FN_RBRACE;
+        printf ("%s", n.string.c_str ());
+        break;
+      }
+    default:
+      printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok), n.string.c_str ());
+    }
 #endif
 }
 
@@ -57,9 +81,13 @@ xml::visit (generic_node &n)
   printf ("%*s<%s>\n", indent, "", node_type_name[n.type]);
 #endif
   indent += 2;
-  BOOST_FOREACH (node_ptr const &p, n.list)
+  if (n.type == n_filename)
+    printf ("%*s", indent, "");
+  foreach (node_ptr const &p, n.list)
     if (p)
       p->accept (*this);
+  if (n.type == n_filename)
+    printf ("\n");
   indent -= 2;
 #if VALID_XML
   printf ("%*s</n:%s>\n", indent, "", node_type_name[n.type]);

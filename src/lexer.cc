@@ -11,8 +11,6 @@
 
 #include <sys/time.h>
 
-#define LEXER_VERBOSE 0
-
 char const *
 lexer::STRSTATE (int state)
 {
@@ -57,21 +55,16 @@ lexer::strstate (int state)
     }
 }
 
-lexer::lexer (std::string const &base, std::vector<std::string> const &files)
+lexer::lexer (std::vector<fs::path> const &files)
   : loc (0)
-  , it (files.begin ())
-  , et (files.end ())
-  , base (base)
-#if LEXER_BENCH
-  , it0 (it)
-#endif
-  , impl (new pimpl)
+  , impl (new pimpl (files))
 {
   yylex_init (&yyscanner);
   yyset_extra (this, yyscanner);
   yyset_in (NULL, yyscanner);
 
-  wrap ();
+  if (wrap ())
+    throw std::invalid_argument ("no source files found");
 }
 
 lexer::~lexer ()
@@ -92,6 +85,10 @@ lexer::close_file ()
   return false;
 }
 
+#include "timing.h"
+
+static timer T;
+
 int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
@@ -100,6 +97,9 @@ lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
   if (tok)
     printf ("%-16s: \"%s\"\n", tokname (tok), yylval->token->string.c_str ());
 #endif
+
+  T.next ();
+
   return tok;
 }
 
@@ -116,19 +116,16 @@ lexer::wrap ()
   if (close_file ())
     yyset_lineno (1, yyscanner);
 
-  if (it == et)
-    {
-#if !LEXER_BENCH
-      return 1;
-#else
-      it = it0;
-#endif
-    }
+  while (impl->it != impl->et && impl->it->extension () != ".mq")
+    ++impl->it;
 
-  FILE *fh = fopen (it->c_str (), "r");
+  if (impl->it == impl->et)
+    return 1;
+
+  FILE *fh = fopen (impl->it->c_str (), "r");
   if (!fh)
-    throw std::runtime_error ("Could not open " + *it + " for reading");
-  ++it;
+    throw std::runtime_error ("Could not open " + impl->it->string () + " for reading");
+  ++impl->it;
 
   yyset_in (fh, yyscanner);
   return 0;
@@ -145,7 +142,7 @@ lexer::lloc (YYLTYPE *yylloc, int lineno, int column, int leng)
 
   column++;
 
-  yylloc->file = &it[-1];
+  yylloc->file = &impl->it[-1];
   yylloc->first_line = lineno;
   yylloc->first_column = column;
   yylloc->last_line = lineno;

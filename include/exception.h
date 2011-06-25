@@ -21,3 +21,12 @@ struct semantic_error
 
   std::string message;
 };
+
+struct warning
+  : semantic_error
+{
+  warning (nodes::node_ptr node, std::string const &message)
+    : semantic_error (node, message)
+  {
+  }
+};

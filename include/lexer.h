@@ -5,11 +5,16 @@
 #include <memory>
 #include <vector>
 
-#define LEXER_BENCH 0
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
+
+#define LEXER_VERBOSE 0
+#define PARSER_BENCH 0
 
 struct lexer
 {
-  lexer (std::string const &base, std::vector<std::string> const &files);
+  lexer (std::vector<fs::path> const &files);
   ~lexer ();
 
   bool close_file ();
@@ -29,14 +34,6 @@ struct lexer
   void *yyscanner;
   YYLTYPE *loc;
 
-  std::string const base;
-  std::vector<std::string>::const_iterator it;
-  std::vector<std::string>::const_iterator et;
-
   struct pimpl;
   std::auto_ptr<pimpl> const impl;
-
-#if LEXER_BENCH
-  std::vector<std::string>::const_iterator it0;
-#endif
 };

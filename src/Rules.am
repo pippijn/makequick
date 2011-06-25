@@ -49,10 +49,10 @@ node_type.h: $(CURDIR)/yyparse.yy Makefile
 node_switch.h: node_type.h
 	@echo 'switch (n.type) {' > $@
 	$(AM_V_GEN)\
-	L=`grep -o '  n_\w*,$$' $<				\
-	    | sed -r -e 's/n_(\w+),/\1/'`;			\
-	for i in $$L; do					\
-	    echo "  case n_$$i: visit_$$i (n); break;" >> $@;	\
+	L=`grep -o '  n_\w*,$$' $<					\
+	    | sed -r -e 's/n_(\w+),/\1/'`;				\
+	for i in $$L; do						\
+	    echo "  case n_$$i: resume = visit_$$i (n); break;" >> $@;	\
 	done
 	@echo '}' >> $@
 
@@ -62,7 +62,7 @@ node_visit.h: node_type.h
 	L=`grep -o '  n_\w*,$$' $<				\
 	    | sed -r -e 's/n_(\w+),/\1/'`;			\
 	for i in $$L; do					\
-	    echo "  void visit_$$i (generic_node &n);" >> $@;	\
+	    echo "  bool visit_$$i (generic_node &n);" >> $@;	\
 	done
 
 node_type.cc: node_type.h

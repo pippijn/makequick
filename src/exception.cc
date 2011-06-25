@@ -1,17 +1,14 @@
 #include "exception.h"
 #include "node.h"
 
-#include <boost/foreach.hpp>
-#include <sstream>
-
 semantic_error::semantic_error (node_vec const &nodes, std::string const &message)
 {
   std::ostringstream s;
-  BOOST_FOREACH (node_ptr const &n, nodes)
+  foreach (node_ptr const &n, nodes)
     {
       if (&n != &nodes.back ())
         s << "from ";
-      s << *n->loc.file << ":"
+      s << n->loc.file->native () << ":"
         << n->loc.first_line << ":"
         << n->loc.first_column;
       if (&n == &nodes.back ())
@@ -25,7 +22,7 @@ semantic_error::semantic_error (node_vec const &nodes, std::string const &messag
 semantic_error::semantic_error (nodes::node_ptr node, std::string const &message)
 {
   std::ostringstream s;
-  s << *node->loc.file << ":"
+  s << node->loc.file->native ()<< ":"
     << node->loc.first_line << ":"
     << node->loc.first_column << ": "
     << message;

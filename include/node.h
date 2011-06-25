@@ -7,13 +7,16 @@
 #include <vector>
 #endif
 
+#include <boost/filesystem.hpp>
 #include <boost/intrusive_ptr.hpp>
 
 #include "visitor.h"
 
+namespace fs = boost::filesystem;
+
 struct location
 {
-  std::string const *file;
+  fs::path const *file;
   int first_line;
   int first_column;
   int last_line;
@@ -35,6 +38,9 @@ namespace nodes
     void operator delete (void *ptr, size_t bytes);
 
     location loc;
+
+    template<typename T>
+    T &as () { return dynamic_cast<T &> (*this); }
 
   private:
     int refcnt;

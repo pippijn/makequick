@@ -6,9 +6,9 @@ program datagen {
 		aöa/{b c}/d
 		*.c
 
-		**.c
+		/**.c
 
 
-		main.c foo.c
+		main.c /foo.c
 	}
 }

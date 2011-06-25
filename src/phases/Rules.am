@@ -1,3 +1,4 @@
-makepp_SOURCES +=	\
-	audit.cc	\
+makepp_SOURCES +=		\
+	audit.cc		\
+	wildcard_sources.cc	\
 	xml.cc

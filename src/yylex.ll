@@ -124,14 +124,18 @@ INTEGER	{DIGIT}+
 <FILENAME>{
 	{WS}+				{ POP (); Return (TK_WHITESPACE); }
 	{FN}+				{ Return (TK_FILENAME); }
-	"{"				{ PUSH (MULTIFILE); Return (TK_FILENAME); }
-	{FNSTART}			{ Return (TK_FILENAME); }
+	"."				{ Return (TK_FN_DOT); }
+	"/"				{ Return (TK_FN_SLASH); }
+	"*"				{ Return (TK_FN_STAR); }
+	"**"				{ Return (TK_FN_STARSTAR); }
+	"%"				{ Return (TK_FN_PERCENT); }
+	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
 }
 <MULTIFILE>{
 	{WS}+				{ }
 	{FN}+				{ Return (TK_FILENAME); }
-	"}"				{ POP (); Return (TK_FILENAME); }
+	"}"				{ POP (); Return (TK_FN_RBRACE); }
 }
 
 <RULE_INIT>{
