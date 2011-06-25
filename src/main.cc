@@ -10,13 +10,10 @@
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)
 {
-  using boost::ref;
   if (is_directory (path))
-    {
-      std::for_each (fs::directory_iterator (path),
-		     fs::directory_iterator (),
-                     boost::bind (collect, _1, ref (files)));
-    }
+    std::for_each (fs::directory_iterator (path),
+                   fs::directory_iterator (),
+                   boost::bind (collect, _1, boost::ref (files)));
   else if (is_regular_file (path))
     files.push_back (path);
 }
@@ -25,18 +22,15 @@ int
 main (int argc, char *argv[])
 try
 {
-  if (argc < 2)
-    return EXIT_FAILURE;
+  if (!argv[1] || !strcmp (argv[1], "--help"))
+    {
+      puts ("usage: "PACKAGE_TARNAME" <srcdir>");
+      return argv[1] ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
 
   if (!strcmp (argv[1], "--version"))
     {
-      puts (PACKAGE_NAME " v" PACKAGE_VERSION);
-      return EXIT_SUCCESS;
-    }
-
-  if (!strcmp (argv[1], "--help"))
-    {
-      puts ("usage: jmlc <jmlfile>");
+      puts (PACKAGE_STRING);
       return EXIT_SUCCESS;
     }
 
