@@ -196,7 +196,7 @@ struct regex_match
     boost::cmatch results;
     bool matched = boost::regex_match (p.c_str (), results, re);
     if (matched)
-      errors.add<warning> (node, "wildcard matched file: " + p.native ());
+      errors.add<warning> (node, "wildcard matched file: `" + p.native () + "'");
     return matched;
   }
 

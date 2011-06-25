@@ -87,12 +87,8 @@ try
       if (errors.log.empty ())
         phases::run ("xml", doc, annots);
       else
-        {
-          foreach (semantic_error const &e, errors.log)
-            {
-              puts (e.what ());
-            }
-        }
+        foreach (semantic_error const &e, errors.log)
+          puts (e.what ());
     }
   else
     return EXIT_FAILURE;

@@ -10,8 +10,8 @@ struct semantic_error
 {
   typedef std::vector<nodes::node_ptr> node_vec;
 
-  semantic_error (node_vec const &nodes, std::string const &message);
-  semantic_error (nodes::node_ptr node, std::string const &message);
+  semantic_error (node_vec const &nodes, std::string const &message, bool error = true);
+  semantic_error (nodes::node_ptr node, std::string const &message, bool error = true);
 
   ~semantic_error () throw ()
   {
@@ -20,13 +20,14 @@ struct semantic_error
   char const *what () const throw ();
 
   std::string message;
+  bool const error;
 };
 
 struct warning
   : semantic_error
 {
   warning (nodes::node_ptr node, std::string const &message)
-    : semantic_error (node, message)
+    : semantic_error (node, message, false)
   {
   }
 };

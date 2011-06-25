@@ -13,7 +13,6 @@
 /INSTALL
 /m4
 /configure.ac
-*.gch
 rules.am
 Makefile.am
 Makefile.in
