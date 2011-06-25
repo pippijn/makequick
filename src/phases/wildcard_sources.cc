@@ -196,7 +196,7 @@ struct regex_match
     boost::cmatch results;
     bool matched = boost::regex_match (p.c_str (), results, re);
     if (matched)
-      errors.add<warning> (node, "wildcard matched file: " + C::filename (p.native ()));
+      errors.add<warning> (node, "wildcard matched file: " + C::filename (p));
     return matched;
   }
 
@@ -221,21 +221,21 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
   std::vector<fs::path> source_files;
   foreach (generic_node_ptr const &f, plainfiles)
     {
-      std::string const &filename = std::accumulate (f->list.begin (),
-                                                     f->list.end (),
-                                                     std::string (),
-                                                     concat_token);
+      fs::path filename = std::accumulate (f->list.begin (),
+                                           f->list.end (),
+                                           std::string (),
+                                           concat_token);
 
       fs::path path;
       // relative path
-      if (filename[0] != '.')
+      if (filename.native ()[0] != '.')
         {
           path = files.base / filename;
           if (!is_regular_file (path))
             path.clear ();
         }
       // absolute (source-root relative) path
-      if (path.empty () && filename[0] != '/')
+      if (path.empty () && !filename.is_absolute ())
         {
           path = n.loc.file->parent_path () / filename;
           if (!is_regular_file (path))
@@ -250,7 +250,7 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
       if (!std::equal (files.base.begin (),
                        files.base.end (),
                        path.begin ()))
-        throw std::runtime_error ("source file found outside source root: " + C::filename (path.native ()));
+        throw std::runtime_error ("source file found outside source root: " + C::filename (path));
 
       source_files.push_back (std::accumulate (path.begin (), path.end (), fs::path (), concat_path));
     }

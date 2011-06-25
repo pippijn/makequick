@@ -11,6 +11,12 @@ namespace C
   }
 
   static inline std::string
+  filename (fs::path const &fn)
+  {
+    return "\e[0;33m`" + fn.native () + "'\e[0m";
+  }
+
+  static inline std::string
   red (std::string const &fn)
   {
     return "\e[1;31m" + fn + "\e[0m";
