@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include "algorithm/grep.h"
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
 #include "lexer.h"
@@ -16,6 +17,12 @@ collect (fs::path const &path, std::vector<fs::path> &files)
                    boost::bind (collect, _1, boost::ref (files)));
   else if (is_regular_file (path))
     files.push_back (path);
+}
+
+static bool
+is_rule_file (fs::path const &file)
+{
+  return file.extension () == ".mq";
 }
 
 int
@@ -67,7 +74,9 @@ try
   return EXIT_SUCCESS;
 #endif
 
-  lexer lex (files);
+  std::vector<fs::path> rule_files;
+  grep (files.begin (), files.end (), std::back_inserter (rule_files), is_rule_file);
+  lexer lex (rule_files);
   parser parse (lex);
 
   if (node_ptr doc = parse ())
@@ -84,7 +93,7 @@ try
           {
             if (count++ > 10)
               {
-                puts ("too many diagnostics; exiting");
+                puts ("%% too many diagnostics; exiting");
                 break;
               }
             puts (e.what ());

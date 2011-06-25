@@ -116,9 +116,6 @@ lexer::wrap ()
   if (close_file ())
     yyset_lineno (1, yyscanner);
 
-  while (impl->it != impl->et && impl->it->extension () != ".mq")
-    ++impl->it;
-
   if (impl->it == impl->et)
     return 1;
 
