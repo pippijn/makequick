@@ -129,6 +129,7 @@ INTEGER	{DIGIT}+
 	"*"				{ Return (TK_FN_STAR); }
 	"**"				{ Return (TK_FN_STARSTAR); }
 	"%"				{ Return (TK_FN_PERCENT); }
+	"%%"				{ Return (TK_FN_PERPERCENT); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
 }

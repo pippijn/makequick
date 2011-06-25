@@ -114,14 +114,15 @@ using namespace nodes;
 %token<token> TK_DARROW			"=>"
 %token<token> TK_WHITESPACE		"whitespace"
 
-%token<token> TK_FN_DOT			"wildcard ."
-%token<token> TK_FN_LBRACE		"wildcard {"
-%token<token> TK_FN_PERCENT		"wildcard %"
-%token<token> TK_FN_QMARK		"wildcard ?"
-%token<token> TK_FN_RBRACE		"wildcard }"
-%token<token> TK_FN_SLASH		"wildcard /"
-%token<token> TK_FN_STARSTAR		"wildcard **"
-%token<token> TK_FN_STAR		"wildcard *"
+%token<token> TK_FN_QMARK		"?"
+%token<token> TK_FN_SLASH		"/"
+%token<token> TK_FN_DOT			"'.'"
+%token<token> TK_FN_LBRACE		"'{'"
+%token<token> TK_FN_RBRACE		"'}'"
+%token<token> TK_FN_STAR		"*"
+%token<token> TK_FN_STARSTAR		"**"
+%token<token> TK_FN_PERCENT		"%"
+%token<token> TK_FN_PERPERCENT		"%%"
 
 %token<token> TK_EXT_LIB		"external library"
 %token<token> TK_INT_LIB		"internal library"
@@ -619,14 +620,15 @@ filename
 filename_part
 	: TK_FILENAME
 	| TK_IDENTIFIER
-	| "wildcard ?"
-	| "wildcard /"
-	| "wildcard ."
-	| "wildcard {"
-	| "wildcard }"
-	| "wildcard *"
-	| "wildcard **"
-	| "wildcard %"
+	| "?"
+	| "/"
+	| "'.'"
+	| "'{'"
+	| "'}'"
+	| "*"
+	| "**"
+	| "%"
+	| "%%"
 	;
 
 code_frag

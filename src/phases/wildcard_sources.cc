@@ -120,30 +120,23 @@ concat_token (std::string &p1, node_ptr const &p2)
   return p1 += p2->as<token> ().string;
 }
 
-static fs::path &
-concat_path (fs::path &p1, fs::path const &p2)
-{
-  return p1 /= p2;
-}
-
-static void
-escape_wildcard (std::string &regex, std::string const &wc)
-{
-  foreach (char c, wc)
-    switch (c)
-      {
-      case '(':
-      case ')':
-      case '.':
-        regex += '\\';
-      default:
-        regex += c;
-        break;
-      }
-}
-
 struct translate_wildcard
 {
+  static void escape (std::string &regex, std::string const &wc)
+  {
+    foreach (char c, wc)
+      switch (c)
+        {
+        case '(':
+        case ')':
+        case '.':
+          regex += '\\';
+        default:
+          regex += c;
+          break;
+        }
+  }
+
   std::string &operator () (std::string &regex, node_ptr const &n)
   {
     token const &t = n->as<token> ();
@@ -170,7 +163,7 @@ struct translate_wildcard
         if (in_alt == 2)
           regex += '|';
         in_alt = !!in_alt * 2;
-        escape_wildcard (regex, t.string);
+        escape (regex, t.string);
         break;
       }
     return regex;
@@ -252,7 +245,7 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
                        path.begin ()))
         throw std::runtime_error ("source file found outside source root: " + C::filename (path));
 
-      source_files.push_back (std::accumulate (path.begin (), path.end (), fs::path (), concat_path));
+      source_files.push_back (path);
     }
 
   if (!wildcards.empty ())
@@ -261,16 +254,20 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
       foreach (generic_node_ptr const &wc, wildcards)
         {
           if (wc->list.front ()->as<token> ().tok == TK_FN_SLASH)
-            escape_wildcard (regex, files.base.native ());
+            translate_wildcard::escape (regex, files.base.native ());
           else
-            escape_wildcard (regex, wc->loc.file->parent_path ().native () + "/");
-          regex += std::accumulate (wc->list.begin (), wc->list.end (), std::string (), translate_wildcard ());
+            translate_wildcard::escape (regex, wc->loc.file->parent_path ().native () + "/");
+          regex += std::accumulate (wc->list.begin (),
+                                    wc->list.end (),
+                                    std::string (),
+                                    translate_wildcard ());
           if (wc != wildcards.back ())
             regex += '|';
         }
       regex += ")";
 
-      grep (files.begin, files.end, std::back_inserter (source_files),
+      grep (files.begin, files.end,
+            std::back_inserter (source_files),
             regex_match (boost::regex (regex), source_files, &n, errors));
     }
 
