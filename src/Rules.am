@@ -30,6 +30,8 @@ yystate.h: yylex.h
 yylex.h: yylex.cc
 yylex.cc: $(CURDIR)/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<
+	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h}`"	\
+		|| (echo "Updating ${@:.cc=.h}" && mv /tmp/${@:.cc=.h} ${@:.cc=.h})
 
 node_type.h: $(CURDIR)/yyparse.yy Makefile
 	@echo 'namespace nodes { enum node_type {' > $@

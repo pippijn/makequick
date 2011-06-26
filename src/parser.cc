@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#include <iostream>
-
 parser::parser (lexer &lex)
   : lex (lex)
   , doc (0)

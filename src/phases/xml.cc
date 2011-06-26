@@ -1,8 +1,5 @@
 #include "phase.h"
 
-#include <algorithm>
-#include <cstdio>
-
 #define VALID_XML 0
 
 namespace

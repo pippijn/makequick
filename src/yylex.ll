@@ -28,13 +28,13 @@ move (std::string &s)
 #define YY_DECL int lexer::lex (YYSTYPE *yylval_param, YYLTYPE *yylloc_param)
 
 #define BACKTRACK(N) do {		\
-  yyless (N);				\
   yycolumn -= yyleng - N;		\
+  yyless (N);				\
 } while (0)
 %}
 
 %option prefix="yy"
-%option header-file="yylex.h"
+%option header-file="/tmp/yylex.h"
 %option bison-locations
 %option reentrant
 /*%option ecs full 8bit*/
@@ -248,5 +248,13 @@ lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, 
     lval->token = new tokens::token (*lloc, Tok, move (this->text));
   else
     lval->token = new tokens::token (*lloc, Tok, text, leng);
+#if LEXER_VERBOSE
+  printf ("[%d:%d-%d:%d]: %s\n",
+          lloc->first_line,
+          lloc->first_column,
+          lloc->last_line,
+          lloc->last_column,
+          text);
+#endif
   return Tok;
 }

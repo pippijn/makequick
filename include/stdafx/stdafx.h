@@ -1,10 +1,14 @@
 #include <algorithm>
 #include <cassert>
 #include <climits>
+#include <csignal>
 #include <cstdio>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <numeric>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <tr1/unordered_map>

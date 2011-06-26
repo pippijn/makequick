@@ -1,7 +1,5 @@
 #include "phase.h"
 
-#include <set>
-
 namespace
 {
   struct audit

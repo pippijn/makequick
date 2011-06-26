@@ -114,12 +114,6 @@ wildcard_sources::visit_filename (nodes::generic_node &n)
 
 
 
-static std::string &
-concat_token (std::string &p1, node_ptr const &p2)
-{
-  return p1 += p2->as<token> ().string;
-}
-
 struct translate_wildcard
 {
   static void escape (std::string &regex, std::string const &wc)
@@ -199,11 +193,19 @@ struct regex_match
   annotations::error_log &errors;
 };
 
+static std::string &
+concat_token (std::string &p1, node_ptr const &p2)
+{
+  return p1 += p2->as<token> ().string;
+}
+
 bool
 wildcard_sources::visit_sources (nodes::generic_node &n)
 {
-  plainfiles.clear ();
-  wildcards.clear ();
+  if (!wildcards.empty ())
+    throw std::runtime_error ("found wildcards somewhere outside sources");
+  if (!plainfiles.empty ())
+    throw std::runtime_error ("found source files somewhere outside sources");
 
   in_sources = true;
   resume_list ();
@@ -247,6 +249,7 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
 
       source_files.push_back (path);
     }
+  plainfiles.clear ();
 
   if (!wildcards.empty ())
     {
@@ -264,6 +267,7 @@ wildcard_sources::visit_sources (nodes::generic_node &n)
           if (wc != wildcards.back ())
             regex += '|';
         }
+      wildcards.clear ();
       regex += ")";
 
       grep (files.begin, files.end,

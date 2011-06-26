@@ -1,10 +1,5 @@
 #include "sighandler.h"
 
-#include <csignal>
-#include <cstdio>
-#include <cstdlib>
-#include <stdexcept>
-
 bool should_terminate = false;
 
 static void
