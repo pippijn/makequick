@@ -2,6 +2,9 @@
 
 #include "annotation.h"
 #include "exception.h"
+#include "foreach.h"
+
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace annotations
 {

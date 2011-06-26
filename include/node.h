@@ -28,8 +28,8 @@ namespace nodes
   struct node
   {
     virtual void accept (visitor &v) = 0;
-    node (location const &loc) : loc (loc), refcnt (0) { }
-    virtual ~node () { }
+    node (location const &loc);
+    virtual ~node ();
 
     friend void intrusive_ptr_release (node *n);
     friend void intrusive_ptr_add_ref (node *n);
@@ -42,8 +42,12 @@ namespace nodes
     template<typename T>
     T &as () { return dynamic_cast<T &> (*this); }
 
-  private:
     int refcnt;
+    int index;
+
+    static void compress_hash ();
+    static bool audit_hash ();
+    static size_t node_count ();
   };
 
   struct node_list

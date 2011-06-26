@@ -2,6 +2,8 @@
 
 #include "colours.h"
 
+#include <boost/ptr_container/ptr_map.hpp>
+
 struct annotation
 {
   virtual ~annotation () { }

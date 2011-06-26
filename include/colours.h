@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "fs/path.h"
+
 namespace C
 {
   static inline std::string

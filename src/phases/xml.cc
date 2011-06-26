@@ -1,5 +1,7 @@
 #include "phase.h"
 
+#include "foreach.h"
+
 #define VALID_XML 0
 
 namespace

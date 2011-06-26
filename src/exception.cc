@@ -1,6 +1,9 @@
 #include "colours.h"
 #include "exception.h"
+#include "foreach.h"
 #include "node.h"
+
+#include <sstream>
 
 static std::string
 severity (bool error)

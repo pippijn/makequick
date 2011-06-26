@@ -4,12 +4,8 @@
 
 #include <cassert>
 #include <climits>
-#include <iomanip>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
-
-#include <sys/time.h>
 
 char const *
 lexer::STRSTATE (int state)

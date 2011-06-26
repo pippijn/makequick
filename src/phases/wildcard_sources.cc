@@ -4,6 +4,11 @@
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
 
+#include <numeric>
+
+#include <boost/regex.hpp>
+#include <boost/spirit/home/phoenix.hpp>
+
 namespace
 {
   struct wildcard_sources
@@ -180,8 +185,7 @@ struct regex_match
   {
     if (std::find (source_files.begin (), source_files.end (), p) != source_files.end ())
       return false;
-    boost::cmatch results;
-    bool matched = boost::regex_match (p.c_str (), results, re);
+    bool matched = boost::regex_match (p.c_str (), re);
     if (matched)
       errors.add<warning> (node, "wildcard matched file: " + C::filename (p));
     return matched;

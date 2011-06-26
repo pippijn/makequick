@@ -3,10 +3,13 @@
 #include "algorithm/grep.h"
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
+#include "foreach.h"
 #include "lexer.h"
 #include "parser.h"
 #include "phases.h"
 #include "sighandler.h"
+
+#include <boost/bind.hpp>
 
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)

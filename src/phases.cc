@@ -2,6 +2,11 @@
 #include "annotations/error_log.h"
 #include "sighandler.h"
 
+#include <cstdio>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
+
 typedef std::tr1::unordered_map<std::string, phases *> phase_map;
 
 static phase_map map;

@@ -8,9 +8,12 @@ namespace
     virtual void visit (token &n);
     virtual void visit (generic_node &n);
 
-    std::set<void *> s;
+    std::vector<bool> s;
 
-    audit (annotation_map &annots) { }
+    audit (annotation_map &annots)
+      : s (node::node_count ())
+    {
+    }
   };
 
   static phase<audit> thisphase ("audit", 0);
@@ -25,9 +28,9 @@ void
 audit::visit (generic_node &n)
 {
   //puts (semantic_error (&n, node_type_name[n.type]).what ());
-  if (s.find (&n) != s.end ())
+  if (s[n.index])
     throw semantic_error (&n, "cycle in abstract syntax tree");
-  s.insert (&n);
+  s[n.index] = true;
   resume_list ();
-  s.erase (&n);
+  s[n.index] = false;
 }
