@@ -5,7 +5,8 @@
 #include <cassert>
 #include <climits>
 #include <stdexcept>
-#include <vector>
+
+#include <boost/filesystem/path.hpp>
 
 char const *
 lexer::STRSTATE (int state)

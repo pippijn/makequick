@@ -1,4 +1,5 @@
 #include "node.h"
+
 #include "object_pool.h"
 
 namespace nodes

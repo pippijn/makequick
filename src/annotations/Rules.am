@@ -1,0 +1,2 @@
+makepp_SOURCES +=		\
+	error_log.cc

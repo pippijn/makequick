@@ -1,6 +1,8 @@
 bin_PROGRAMS = makepp
 
 makepp_SOURCES =	\
+	annotation.cc	\
+	colours.cc	\
 	exception.cc	\
 	lexer.cc	\
 	main.cc		\
@@ -14,6 +16,7 @@ makepp_SOURCES =	\
 nodist_makepp_SOURCES =	\
 	node_type.cc
 
+include annotations/Rules.am
 include phases/Rules.am
 
 GENFILES = yystate.h node_type.h node_switch.h node_visit.h
@@ -30,10 +33,10 @@ yystate.h: yylex.h
 yylex.h: yylex.cc
 yylex.cc: $(CURDIR)/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<
-	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h}`"	\
+	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h} 2>&1`"	\
 		|| (echo "Updating ${@:.cc=.h}" && mv /tmp/${@:.cc=.h} ${@:.cc=.h})
 
-node_type.h: $(CURDIR)/yyparse.yy Makefile
+node_type.h: $(CURDIR)/yyparse.yy
 	@echo 'namespace nodes { enum node_type {' > $@
 	$(AM_V_GEN)\
 	L=`grep -o 'new generic_node (n_\w*' $<	\

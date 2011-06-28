@@ -4,6 +4,11 @@
 
 #define NODE(T) struct T; typedef boost::intrusive_ptr<T> T##_ptr
 
+#if EXTERN_TEMPLATE
+#include <vector>
+extern template class std::vector<node_ptr>;
+#endif
+
 namespace nodes
 {
   NODE (node);
@@ -40,3 +45,6 @@ move (boost::intrusive_ptr<T> &p)
   swap (r, p);
   return r;
 }
+
+using nodes::node;
+using nodes::node_ptr;

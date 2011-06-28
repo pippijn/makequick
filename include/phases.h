@@ -1,11 +1,11 @@
 #pragma once
 
 #include "node.h"
-#include "annotation.h"
 
 #include <cstdarg>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <memory>
+
+struct annotation_map;
 
 struct phases
 {
@@ -19,8 +19,12 @@ private:
 
 protected:
   phases (std::string const &name, bool autorun);
+  ~phases ();
 
-  std::tr1::unordered_set<std::string> dependencies;
+  void add_dependency (char const *dependency);
+
+  struct pimpl;
+  std::auto_ptr<pimpl> const self;
 };
 
 struct noauto_tag { };
@@ -43,7 +47,7 @@ struct phase
     va_list ap;
     va_start (ap, name);
     while (char const *dependency = va_arg (ap, char const *))
-      dependencies.insert (dependency);
+      add_dependency (dependency);
     va_end (ap);
   }
 

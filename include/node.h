@@ -1,18 +1,10 @@
 #pragma once
 
 #include <string>
-#if NODE_USE_LIST
-#include <list>
-#else
 #include <vector>
-#endif
 
-#include <boost/filesystem.hpp>
-#include <boost/intrusive_ptr.hpp>
-
+#include "fs/fwd.h"
 #include "visitor.h"
-
-namespace fs = boost::filesystem;
 
 struct location
 {
@@ -23,6 +15,10 @@ struct location
   int last_column;
 };
 
+#if EXTERN_TEMPLATE
+extern template class std::vector<node_ptr>;
+#endif
+
 namespace nodes
 {
   struct node
@@ -31,16 +27,13 @@ namespace nodes
     node (location const &loc);
     virtual ~node ();
 
-    friend void intrusive_ptr_release (node *n);
-    friend void intrusive_ptr_add_ref (node *n);
-
     void *operator new (size_t bytes);
     void operator delete (void *ptr, size_t bytes);
 
     location loc;
 
-    template<typename T>
-    T &as () { return dynamic_cast<T &> (*this); }
+    template<typename T> T   &as () { return dynamic_cast<T &> (*this); }
+    template<typename T> bool is () { return dynamic_cast<T *> ( this); }
 
     int refcnt;
     int index;
@@ -59,11 +52,7 @@ namespace nodes
 
     node_list (location const &loc) : node (loc) { }
 
-#if NODE_USE_LIST
-    std::list<node_ptr> list;
-#else
     std::vector<node_ptr> list;
-#endif
   };
 
 
@@ -129,6 +118,3 @@ namespace tokens
     std::string const string;
   };
 }
-
-using nodes::node;
-using nodes::node_ptr;

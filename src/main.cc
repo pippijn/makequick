@@ -10,6 +10,8 @@
 #include "sighandler.h"
 
 #include <boost/bind.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)
@@ -88,24 +90,16 @@ try
 
       annotation_map annots;
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
-      error_log &errors = annots.put ("errors", new error_log);
+      annots.put ("errors", new error_log);
+
       phases::run (doc, annots);
-      {
-        int count = 0;
-        foreach (semantic_error const &e, errors.log)
-          {
-            if (count++ > 10)
-              {
-                puts ("%% too many diagnostics; exiting");
-                break;
-              }
-            puts (e.what ());
-          }
-      }
-      if (!errors.has_errors ())
-        phases::run ("xml", doc, annots);
-      else
+
+      error_log &errors = annots.get ("errors");
+      errors.print ();
+      if (errors.has_errors ())
         return EXIT_FAILURE;
+
+      phases::run ("xml", doc, annots);
     }
   else
     return EXIT_FAILURE;

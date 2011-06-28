@@ -4,11 +4,8 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
-#include <iomanip>
 #include <iostream>
-#include <map>
 #include <numeric>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <tr1/unordered_map>
@@ -25,5 +22,5 @@
 #include <boost/regex.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = boost::filesystem3;
 #define foreach BOOST_FOREACH

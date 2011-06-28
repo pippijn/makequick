@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include <boost/filesystem/path.hpp>
+
 parser::parser (lexer &lex)
   : lex (lex)
   , doc (0)

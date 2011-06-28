@@ -1,9 +1,12 @@
-#include "colours.h"
 #include "exception.h"
+
+#include "colours.h"
 #include "foreach.h"
 #include "node.h"
 
 #include <sstream>
+
+#include <boost/filesystem/path.hpp>
 
 static std::string
 severity (bool error)
@@ -14,8 +17,8 @@ severity (bool error)
        ;
 }
 
-semantic_error::semantic_error (node_vec const &nodes, std::string const &message, bool error)
-  : error (error)
+static std::string const
+make_message (semantic_error::node_vec const &nodes, std::string const &message, bool error)
 {
   std::ostringstream s;
   foreach (node_ptr const &n, nodes)
@@ -30,11 +33,17 @@ semantic_error::semantic_error (node_vec const &nodes, std::string const &messag
       else
         s << "\n";
     }
-  this->message = s.str ();
+  return s.str ();
 }
 
-semantic_error::semantic_error (nodes::node_ptr node, std::string const &message, bool error)
-  : error (error)
+semantic_error::semantic_error (node_vec const &nodes, std::string const &message, bool error)
+  : message (make_message (nodes, message, error))
+  , error (error)
+{
+}
+
+static std::string const
+make_message (node_ptr node, std::string const &message, bool error)
 {
   std::ostringstream s;
   s << node->loc.file->native ()<< ":"
@@ -42,7 +51,13 @@ semantic_error::semantic_error (nodes::node_ptr node, std::string const &message
     << node->loc.first_column << ": "
     << severity (error)
     << message;
-  this->message = s.str ();
+  return s.str ();
+}
+
+semantic_error::semantic_error (node_ptr node, std::string const &message, bool error)
+  : message (make_message (node, message, error))
+  , error (error)
+{
 }
 
 char const *

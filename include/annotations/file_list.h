@@ -1,10 +1,9 @@
 #pragma once
 
 #include "annotation.h"
+#include "fs/fwd.h"
 
-#include <boost/intrusive_ptr.hpp>
-
-namespace fs = boost::filesystem;
+#include <vector>
 
 namespace annotations
 {

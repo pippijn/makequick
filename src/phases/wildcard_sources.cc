@@ -3,10 +3,14 @@
 #include "algorithm/grep.h"
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
+#include "colours.h"
+#include "foreach.h"
 
 #include <numeric>
 
 #include <boost/regex.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
 namespace

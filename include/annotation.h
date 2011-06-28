@@ -1,8 +1,7 @@
 #pragma once
 
-#include "colours.h"
-
-#include <boost/ptr_container/ptr_map.hpp>
+#include <iosfwd>
+#include <memory>
 
 struct annotation
 {
@@ -11,7 +10,11 @@ struct annotation
 
 struct annotation_map
 {
-  typedef boost::ptr_map<std::string, annotation> map_type;
+  struct pimpl;
+  std::auto_ptr<pimpl> self;
+
+  annotation_map ();
+  ~annotation_map ();
 
   struct dynamic_caster
   {
@@ -26,27 +29,16 @@ struct annotation_map
     operator T & () { return dynamic_cast<T &> (annot); }
   };
 
-  dynamic_caster get (std::string const &name)
-  {
-    map_type::iterator found = annots.find (name);
-    if (found == annots.end ())
-      throw std::invalid_argument ("annotation " + C::filename (name) + " not found");
-    return dynamic_caster (*found->second);
-  }
+  dynamic_caster get (std::string const &name);
 
-  bool has (std::string const &name)
-  {
-    return annots.find (name) != annots.end ();
-  }
+  bool has (std::string const &name);
+
+  void store (std::string const &name, annotation *annot);
 
   template<typename T>
   T &put (std::string const &name, T *annot)
   {
-    if (has (name))
-      throw std::invalid_argument ("annotation " + C::filename (name) + " already present");
-    annots.insert (name, std::auto_ptr<annotation> (annot));
+    store (name, annot);
     return *annot;
   }
-
-  map_type annots;
 };

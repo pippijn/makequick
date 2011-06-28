@@ -2,6 +2,8 @@
 
 #include "foreach.h"
 
+#include <algorithm>
+
 #define VALID_XML 0
 
 namespace
