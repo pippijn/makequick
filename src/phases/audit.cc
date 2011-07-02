@@ -5,7 +5,6 @@ namespace
   struct audit
     : visitor
   {
-    virtual void visit (token &n);
     virtual void visit (generic_node &n);
 
     std::vector<bool> s;
@@ -17,11 +16,6 @@ namespace
   };
 
   static phase<audit> thisphase ("audit", 0);
-}
-
-void
-audit::visit (token &n)
-{
 }
 
 void 

@@ -13,6 +13,39 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+fs::path
+resolve (fs::path const &p)
+{
+  fs::path result;
+
+  for (fs::path::iterator it = p.begin ();
+       it != p.end ();
+       ++it)
+    {
+      if (*it == "..")
+        {
+          // /a/b/.. is not necessarily /a if b is a symbolic link
+          if (is_symlink (result))
+            result /= *it;
+          // /a/b/../.. is not /a/b/.. under most circumstances
+          // We can end up with ..s in our result because of symbolic links
+          else if (result.filename () == "..")
+            result /= *it;
+          // Otherwise it should be safe to resolve the parent
+          else
+            result = result.parent_path ();
+        }
+      else if (*it == ".")
+        {
+          // Ignore
+        }
+      else
+        // Just cat other path entries
+        result /= *it;
+    }
+  return result;
+}
+
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)
 {
@@ -46,7 +79,7 @@ try
       return EXIT_SUCCESS;
     }
 
-  fs::path const path (argv[1]);
+  fs::path const path (resolve (absolute (fs::path (argv[1]))));
   if (!exists (path))
     {
       puts ("path does not exist");
@@ -65,6 +98,7 @@ try
 
 #if 0
   std::copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));
+  return EXIT_SUCCESS;
 #endif
 
 #if PARSER_BENCH
@@ -95,7 +129,7 @@ try
       phases::run (doc, annots);
 
       error_log &errors = annots.get ("errors");
-      errors.print ();
+      errors.print (path, argv[1]);
       if (errors.has_errors ())
         return EXIT_FAILURE;
 

@@ -26,6 +26,6 @@ namespace annotations
 
     bool has_errors () const;
     bool has_diagnostics () const;
-    void print () const;
+    void print (fs::path const &path, char const *base) const;
   };
 }

@@ -53,8 +53,8 @@ WS	[ \t\v\n\r]
 NWS	[^ \t\v\n\r]
 FLAG	[^ \t\v\n\r{}]
 /* Filenames */
-FN	[^ \t\v\n\r{}/%*.:]
-FNSTART	([./*%{]|"**")
+FN	[^ \t\v\n\r{}/%*.:?]
+FNSTART	([./*%{?]|"**")
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 /* Rule start */
@@ -125,11 +125,12 @@ INTEGER	{DIGIT}+
 	{WS}+				{ POP (); Return (TK_WHITESPACE); }
 	{FN}+				{ Return (TK_FILENAME); }
 	"."				{ Return (TK_FN_DOT); }
+	"%"				{ Return (TK_FN_PERCENT); }
+	"%%"				{ Return (TK_FN_PERPERCENT); }
+	"?"				{ Return (TK_FN_QMARK); }
 	"/"				{ Return (TK_FN_SLASH); }
 	"*"				{ Return (TK_FN_STAR); }
 	"**"				{ Return (TK_FN_STARSTAR); }
-	"%"				{ Return (TK_FN_PERCENT); }
-	"%%"				{ Return (TK_FN_PERPERCENT); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
 }

@@ -1,4 +1,5 @@
 makepp_SOURCES +=		\
 	audit.cc		\
-	wildcard_sources.cc	\
+	resolve_sources.cc	\
+	resolve_wildcards.cc	\
 	xml.cc

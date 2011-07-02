@@ -18,6 +18,7 @@ nodist_makepp_SOURCES =	\
 
 include annotations/Rules.am
 include phases/Rules.am
+include util/Rules.am
 
 GENFILES = yystate.h node_type.h node_switch.h node_visit.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)

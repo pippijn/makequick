@@ -8,6 +8,7 @@ program datagen {
 
 		/**.c
 
+		main.?
 
 		main.c foo.c
 	}
