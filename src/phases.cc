@@ -1,6 +1,7 @@
 #include "phases.h"
 
 #include "annotations/error_log.h"
+#include "annotation_map.h"
 #include "colours.h"
 #include "foreach.h"
 #include "sighandler.h"
@@ -66,8 +67,8 @@ phases::run (node_ptr doc, annotation_map &annots)
 
   typedef std::vector<std::pair<std::string, phases *> > phase_vec;
   phase_vec phases (map.size ());
-  std::copy (map.begin (), map.end (),
-             phases.begin ());
+  copy (map.begin (), map.end (),
+        phases.begin ());
 
   typedef adjacency_list<vecS, vecS, directedS> Graph;
   Graph G (phases.size () + 1);
@@ -75,12 +76,12 @@ phases::run (node_ptr doc, annotation_map &annots)
     {
       add_edge (et - it, 0, G);
       foreach (std::string const &dep, it->second->self->dependencies)
-        add_edge (et - it, et - std::find_if (phases.rbegin (), phases.rend (), pair_equals (dep)), G);
+        add_edge (et - it, et - find_if (phases.rbegin (), phases.rend (), pair_equals (dep)), G);
     }
 
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   std::vector<Vertex> sorted;
-  topological_sort (G, std::back_inserter (sorted));
+  topological_sort (G, back_inserter (sorted));
 
   annotations::error_log const &errors = annots.get ("errors");
   foreach (Vertex const &v, sorted)

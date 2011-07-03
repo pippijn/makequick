@@ -1,9 +1,10 @@
 #pragma once
 
 #include "annotation.h"
-#include "fs/fwd.h"
 
 #include <vector>
+
+#include <boost/filesystem_fwd.hpp>
 
 namespace annotations
 {

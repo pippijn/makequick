@@ -36,7 +36,7 @@ namespace
     }
   };
 
-  static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources", 0);
+  static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 }
 
 bool resolve_wildcards::visit_ac_check (nodes::generic_node &n) { return true; }
@@ -160,9 +160,9 @@ struct translate_wildcard
   int in_alt;
 };
 
-struct regex_match
+struct regex_matcher
 {
-  explicit regex_match (boost::regex const &re, std::vector<fs::path> const &source_files, node_ptr const &node, annotations::error_log &errors)
+  explicit regex_matcher (boost::regex const &re, std::vector<fs::path> const &source_files, node_ptr const &node, annotations::error_log &errors)
     : re (re)
     , source_files (source_files)
     , node (node)
@@ -172,9 +172,9 @@ struct regex_match
 
   bool operator () (fs::path const &p) const
   {
-    if (std::find (source_files.begin (), source_files.end (), p) != source_files.end ())
+    if (find (source_files.begin (), source_files.end (), p) != source_files.end ())
       return false;
-    bool matched = boost::regex_match (p.c_str (), re);
+    bool matched = regex_match (p.c_str (), re);
     if (matched)
       errors.add<warning> (node, "wildcard matched file: " + C::filename (p));
     return matched;
@@ -207,10 +207,10 @@ resolve_wildcards::visit_sources (nodes::generic_node &n)
             translate_wildcard::escape (regex, files.base.native ());
           else
             translate_wildcard::escape (regex, wc->loc.file->parent_path ().native () + "/");
-          regex += std::accumulate (wc->list.begin (),
-                                    wc->list.end (),
-                                    std::string (),
-                                    translate_wildcard ());
+          regex += accumulate (wc->list.begin (),
+                               wc->list.end (),
+                               std::string (),
+                               translate_wildcard ());
           if (wc != wildcards.back ())
             regex += '|';
         }
@@ -218,8 +218,8 @@ resolve_wildcards::visit_sources (nodes::generic_node &n)
       regex += ")";
 
       grep (files.begin, files.end,
-            std::back_inserter (source_files),
-            regex_match (boost::regex (regex), source_files, &n, errors));
+            back_inserter (source_files),
+            regex_matcher (boost::regex (regex), source_files, &n, errors));
     }
 
   n.list.clear ();

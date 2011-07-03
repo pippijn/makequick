@@ -1,2 +1,3 @@
 makepp_SOURCES +=		\
+	build_dag.cc		\
 	error_log.cc

@@ -3,6 +3,7 @@
 #include "algorithm/grep.h"
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
+#include "annotation_map.h"
 #include "foreach.h"
 #include "lexer.h"
 #include "parser.h"
@@ -50,9 +51,9 @@ static void
 collect (fs::path const &path, std::vector<fs::path> &files)
 {
   if (is_directory (path))
-    std::for_each (fs::directory_iterator (path),
-                   fs::directory_iterator (),
-                   boost::bind (collect, _1, boost::ref (files)));
+    for_each (fs::directory_iterator (path),
+              fs::directory_iterator (),
+              boost::bind (collect, _1, boost::ref (files)));
   else if (is_regular_file (path))
     files.push_back (path);
 }
@@ -94,10 +95,10 @@ try
 
   std::vector<fs::path> files;
   collect (path, files);
-  std::sort (files.begin (), files.end ());
+  sort (files.begin (), files.end ());
 
 #if 0
-  std::copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));
+  copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));
   return EXIT_SUCCESS;
 #endif
 
@@ -114,7 +115,7 @@ try
 #endif
 
   std::vector<fs::path> rule_files;
-  grep (files.begin (), files.end (), std::back_inserter (rule_files), is_rule_file);
+  grep (files.begin (), files.end (), back_inserter (rule_files), is_rule_file);
   lexer lex (rule_files);
   parser parse (lex);
 

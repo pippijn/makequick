@@ -1,10 +1,11 @@
 #pragma once
 
 #include "ylcode.h"
-#include "fs/fwd.h"
 
 #include <memory>
 #include <vector>
+
+#include <boost/filesystem_fwd.hpp>
 
 #define LEXER_VERBOSE 0
 #define PARSER_BENCH 0

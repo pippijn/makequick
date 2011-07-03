@@ -1,6 +1,6 @@
 #pragma once
 
-#include "node.h"
+#include "node_ptr.h"
 
 #include <vector>
 

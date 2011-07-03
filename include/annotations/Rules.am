@@ -1,3 +1,4 @@
 EXTRA_DIST +=		\
+	build_dag.h	\
 	error_log.h	\
 	file_list.h

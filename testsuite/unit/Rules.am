@@ -1,0 +1,5 @@
+check_PROGRAMS += build_dag_t
+
+build_dag_t_SOURCES =			\
+	src/annotations/build_dag.cc	\
+	build_dag_t.cc

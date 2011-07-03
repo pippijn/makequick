@@ -7,7 +7,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-using namespace annotations;
+using annotations::error_log;
 
 struct error_log::pimpl
 {

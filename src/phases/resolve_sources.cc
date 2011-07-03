@@ -36,7 +36,7 @@ namespace
     }
   };
 
-  static phase<resolve_sources> thisphase ("resolve_sources", "audit", 0);
+  static phase<resolve_sources> thisphase ("resolve_sources", "audit");
 }
 
 bool resolve_sources::visit_ac_check (nodes::generic_node &n) { return true; }
@@ -111,8 +111,8 @@ resolve_sources::visit_filename (nodes::generic_node &n)
 {
   if (in_sources)
     {
-      if (std::find_if (n.list.begin (), n.list.end (),
-                        is_wildcard) != n.list.end ())
+      if (find_if (n.list.begin (), n.list.end (),
+                   is_wildcard) != n.list.end ())
         wildcards.push_back (&n);
       else
         plainfiles.push_back (&n);
@@ -143,10 +143,10 @@ resolve_sources::visit_sources (nodes::generic_node &n)
   std::vector<fs::path> source_files;
   foreach (generic_node_ptr const &f, plainfiles)
     {
-      fs::path filename = std::accumulate (f->list.begin (),
-                                           f->list.end (),
-                                           std::string (),
-                                           concat_token);
+      fs::path filename = accumulate (f->list.begin (),
+                                      f->list.end (),
+                                      std::string (),
+                                      concat_token);
 
       fs::path path;
       // relative path

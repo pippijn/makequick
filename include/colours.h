@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "fs/fwd.h"
+#include <boost/filesystem_fwd.hpp>
 
 namespace C
 {

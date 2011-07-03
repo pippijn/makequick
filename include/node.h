@@ -1,10 +1,11 @@
 #pragma once
 
+#include "visitor.h"
+
 #include <string>
 #include <vector>
 
-#include "fs/fwd.h"
-#include "visitor.h"
+#include <boost/filesystem_fwd.hpp>
 
 struct location
 {

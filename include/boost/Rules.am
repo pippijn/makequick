@@ -1,0 +1,2 @@
+EXTRA_DIST +=		\
+	filesystem_fwd.h

@@ -36,7 +36,7 @@ static std::string
 xmlname (char const *p)
 {
   std::string s (p + 1, strlen (p) - 2);
-  std::transform (s.begin (), s.end (), s.begin (), xmltranslate);
+  transform (s.begin (), s.end (), s.begin (), xmltranslate);
   return s;
 }
 

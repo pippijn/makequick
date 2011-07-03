@@ -1,5 +1,6 @@
 #pragma once
 
+#include "annotation_map.h"
 #include "exception.h"
 #include "local.h"
 #include "node.h"

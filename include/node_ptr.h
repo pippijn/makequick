@@ -9,6 +9,8 @@
 extern template class std::vector<node_ptr>;
 #endif
 
+struct location;
+
 namespace nodes
 {
   NODE (node);

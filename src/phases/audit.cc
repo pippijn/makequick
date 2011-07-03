@@ -15,7 +15,7 @@ namespace
     }
   };
 
-  static phase<audit> thisphase ("audit", 0);
+  static phase<audit> thisphase ("audit");
 }
 
 void 

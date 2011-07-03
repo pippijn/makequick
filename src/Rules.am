@@ -1,19 +1,19 @@
 bin_PROGRAMS = makepp
 
-makepp_SOURCES =	\
-	annotation.cc	\
-	colours.cc	\
-	exception.cc	\
-	lexer.cc	\
-	main.cc		\
-	node.cc		\
-	parser.cc	\
-	phases.cc	\
-	sighandler.cc	\
-	yylex.ll	\
+makepp_SOURCES =		\
+	annotation_map.cc	\
+	colours.cc		\
+	exception.cc		\
+	lexer.cc		\
+	main.cc			\
+	node.cc			\
+	parser.cc		\
+	phases.cc		\
+	sighandler.cc		\
+	yylex.ll		\
 	yyparse.yy
 
-nodist_makepp_SOURCES =	\
+nodist_makepp_SOURCES =		\
 	node_type.cc
 
 include annotations/Rules.am

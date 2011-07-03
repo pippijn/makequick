@@ -1,4 +1,4 @@
-#include "annotation.h"
+#include "annotation_map.h"
 #include "colours.h"
 
 #include <stdexcept>

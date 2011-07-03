@@ -12,15 +12,15 @@ create_file_list (std::vector<fs::path> const &source_files,
   using namespace tokens;
   using namespace boost::phoenix;
   using namespace boost::phoenix::arg_names;
-  std::transform (source_files.begin (),
-                  source_files.end (),
-                  std::back_inserter (list),
-                  new_<generic_node>
-                  ( n_filename,
-                    loc,
-                    new_<token>
-                    ( loc,
-                      TK_FILENAME,
-                      bind (&fs::path::native, arg1))));
+  transform (source_files.begin (),
+             source_files.end (),
+             back_inserter (list),
+             new_<generic_node>
+             ( n_filename,
+               loc,
+               new_<token>
+               ( loc,
+                 TK_FILENAME,
+                 bind (&fs::path::native, arg1))));
 }
 

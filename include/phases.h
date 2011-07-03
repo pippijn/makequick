@@ -2,7 +2,6 @@
 
 #include "node.h"
 
-#include <cstdarg>
 #include <memory>
 
 struct annotation_map;
@@ -41,14 +40,30 @@ struct phase
   {
   }
 
-  phase (char const *name, ...)
+  phase (char const *name)
     : phases (name, true)
   {
-    va_list ap;
-    va_start (ap, name);
-    while (char const *dependency = va_arg (ap, char const *))
-      add_dependency (dependency);
-    va_end (ap);
+  }
+
+  phase (char const *name, char const *dep0)
+    : phases (name, true)
+  {
+    add_dependency (dep0);
+  }
+
+  phase (char const *name, char const *dep0, char const *dep1)
+    : phases (name, true)
+  {
+    add_dependency (dep0);
+    add_dependency (dep1);
+  }
+
+  phase (char const *name, char const *dep0, char const *dep1, char const *dep2)
+    : phases (name, true)
+  {
+    add_dependency (dep0);
+    add_dependency (dep1);
+    add_dependency (dep2);
   }
 
   void run1 (node_ptr doc, annotation_map &annots)
