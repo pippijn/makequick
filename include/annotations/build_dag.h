@@ -17,10 +17,12 @@ namespace annotations
     {
       struct file_base
       {
+        virtual std::string str () const = 0;
         virtual void print () const = 0;
+        virtual bool final () const = 0;
         virtual bool matches (fs::path const &file) const = 0;
         virtual bool exists (std::string const &stem, std::vector<fs::path> const &files) const = 0;
-        virtual std::string match (fs::path const &file) const = 0;
+        virtual std::string stem (fs::path const &file) const = 0;
       };
       
       template<typename T>
@@ -29,10 +31,12 @@ namespace annotations
       {
         T data;
 
+        virtual std::string str () const;
         virtual void print () const;
+        virtual bool final () const;
         virtual bool matches (fs::path const &file) const;
         virtual bool exists (std::string const &stem, std::vector<fs::path> const &files) const;
-        virtual std::string match (fs::path const &file) const;
+        virtual std::string stem (fs::path const &file) const;
 
         file_t (T const &data)
           : data (data)
@@ -44,6 +48,10 @@ namespace annotations
 
       file_base       *operator -> ()       { return file.get (); }
       file_base const *operator -> () const { return file.get (); }
+
+      bool operator < (promise const &rhs) const { return file->str () < rhs.file->str (); }
+      bool operator == (promise const &rhs) const { return file->str () == rhs.file->str (); }
+      bool final () const { return file->final (); }
 
       template<typename T>
       promise (T const &file)
@@ -59,7 +67,7 @@ namespace annotations
     ~build_dag ();
 
     void add_file (fs::path const &file);
-    void add_rule (std::string const &target, std::vector<promise> const &dependencies);
+    void add_rule (std::string const &target, std::vector<promise> const &prereqs);
 
     void add_rule (std::string const &target, promise const &dep0) { std::vector<promise> v; v.push_back (dep0); add_rule (target, v); }
     void add_rule (std::string const &target, promise const &dep0, promise const &dep1) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); add_rule (target, v); }
