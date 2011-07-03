@@ -13,9 +13,9 @@ main ()
   build_dag dag;
 
   dag.add_file ("yacc/cow.y.in");
-  dag.add_rule ("yacc/cow.y", S ("yacc/cow.y.in"));
-  dag.add_rule ("src/cow.c", S ("yacc/cow.y"));
-  dag.add_rule ("inc/cow.h", S ("yacc/cow.y"));
+  dag.add_rule ("%", R ("(.+)\\.in"));
+  dag.add_rule ("src/%.c", R ("yacc/(.+).y"));
+  dag.add_rule ("inc/%.h", R ("yacc/(.+).y"));
 
   dag.add_file ("/usr/bin/gcc");
 #if 1

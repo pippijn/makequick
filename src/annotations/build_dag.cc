@@ -118,96 +118,76 @@ struct inference_engine
   static void infer_partials (std::vector<rule> &rules, std::vector<fs::path> &files, partial_vec &partials)
   {
     foreach (fs::path const &f, files)
-      {
-        foreach (rule const &r, rules)
-          {
-            int ridx = &r - &*rules.begin ();
-            foreach (promise const &p, r.prereqs)
+      foreach (rule const &r, rules)
+        {
+          int ridx = &r - &*rules.begin ();
+          foreach (promise const &p, r.prereqs)
+            if (p->matches (f))
               {
-                if (p->matches (f))
-                  {
-                    // instantiate rule
-                    rule instance = r;
-                    instance.prereqs[&p - &*r.prereqs.begin ()] = f.native ();
-                    partials[ridx][p->stem (f)].push_back (instance);
-                  }
+                // instantiate rule
+                rule instance = r;
+                instance.prereqs[&p - &*r.prereqs.begin ()] = f.native ();
+                partials[ridx][p->stem (f)].push_back (instance);
               }
-          }
-      }
+        }
   }
 
   static void resolve_partial (partial_vec &partials, inferred &inferred)
   {
     foreach (partial_map &map, partials)
-      {
-        if (map.empty ())
-          continue;
+      foreach (partial_map::value_type &rules, map)
+        {
+          if (rules.second.empty ())
+            throw std::runtime_error ("stem `" + rules.first + "' has no rules");
 
-        foreach (partial_map::value_type &rules, map)
-          {
-            if (rules.second.empty ())
-              continue;
+          rule &mainrule = rules.second[0];
 
-            rule &mainrule = rules.second[0];
+          foreach (rule const &r, rules.second)
+            foreach (promise const &p, r.prereqs)
+              if (p->final ())
+                mainrule.prereqs[&p - &*r.prereqs.begin ()] = p;
 
-            foreach (rule const &r, rules.second)
-              {
-                foreach (promise const &p, r.prereqs)
-                  {
-                    if (p->final ())
-                      mainrule.prereqs[&p - &*r.prereqs.begin ()] = p;
-                  }
-              }
+          using namespace boost::phoenix;
+          using namespace boost::phoenix::arg_names;
+          using boost::algorithm::replace_first;
 
-            using namespace boost::phoenix;
-            using namespace boost::phoenix::arg_names;
-            using boost::algorithm::replace_first;
+          if (std::find_if (mainrule.prereqs.begin (),
+                            mainrule.prereqs.end (),
+                            !bind (&promise::final, arg1))
+              == mainrule.prereqs.end ())
+            {
+              mainrule.stem = rules.first;
+              replace_first (mainrule.target, "%", mainrule.stem);
 
-            if (std::find_if (mainrule.prereqs.begin (),
-                              mainrule.prereqs.end (),
-                              !bind (&promise::final, arg1))
-                == mainrule.prereqs.end ())
-              {
-                mainrule.stem = rules.first;
-                replace_first (mainrule.target, "%", mainrule.stem);
+              foreach (promise const &p, mainrule.prereqs)
+                if (p->matches (mainrule.target))
+                  throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
 
-                foreach (promise const &p, mainrule.prereqs)
-                  {
-                    if (p->matches (mainrule.target))
-                      throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
-                  }
+              inferred.rules.push_back (mainrule);
+              inferred.files.push_back (mainrule.target);
 
-                inferred.rules.push_back (mainrule);
-                inferred.files.push_back (mainrule.target);
-
-                map.erase (mainrule.stem);
-              }
-          }
-      }
+              map.erase (mainrule.stem);
+            }
+        }
   }
 
   static void print_partial (partial_vec const &partials)
   {
     foreach (partial_map const &map, partials)
-      {
-        if (map.empty ())
-          continue;
+      foreach (partial_map::value_type const &rules, map)
+        {
+          if (rules.second.empty ())
+            throw std::runtime_error ("stem `" + rules.first + "' has no rules");
 
-        foreach (partial_map::value_type const &rules, map)
-          {
-            if (rules.second.empty ())
-              continue;
+          printf ("stem: %s\n", rules.first.c_str ());
 
-            printf ("stem: %s\n", rules.first.c_str ());
-
-            foreach (rule const &r, rules.second)
-              {
-                printf ("  ");
-                r.print ();
-                printf ("\n");
-              }
-          }
-      }
+          foreach (rule const &r, rules.second)
+            {
+              printf ("  ");
+              r.print ();
+              printf ("\n");
+            }
+        }
   }
 
   static void infer (std::vector<rule> &rules, std::vector<fs::path> &files)
