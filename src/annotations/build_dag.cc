@@ -227,7 +227,7 @@ struct inference_engine
 
     rules.insert (rules.end (), inferred.rules.begin (), inferred.rules.end ());
 
-#if 1
+#if 0
     compact (files);
     compact (rules);
 #endif
