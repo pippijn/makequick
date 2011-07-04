@@ -8,14 +8,6 @@
 
 typedef inference_engine::rule rule;
 
-inference_engine::inference_engine ()
-{
-}
-
-inference_engine::~inference_engine ()
-{
-}
-
 
 void
 inference_engine::add_file (fs::path const &file)

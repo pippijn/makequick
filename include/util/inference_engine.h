@@ -76,9 +76,6 @@ struct inference_engine
   };
   information info;
 
-  inference_engine ();
-  ~inference_engine ();
-
   void add_file (fs::path const &file);
   void add_rule (std::string const &target, std::vector<promise> const &prereqs, node_ptr const &code);
 
