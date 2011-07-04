@@ -143,4 +143,4 @@ In the above example, the C<$(mathprog.link)> variable would expand to
 "C<mathsupport support -lm>". The expansion of C<$(mathprog.link : library)>
 would be "C<mathsupport support>", and expanding the pseudo-variable
 C<$(mathprog.link : math-library)> results in just "C<mathsupport>". This is
-especially useful in L<pattern rules>.
+especially useful in L<pattern rules|rules>.
