@@ -25,4 +25,10 @@ namespace C
   {
     return "\e[1;33m" + fn + "\e[0m";
   }
+
+  static inline std::string
+  blue (std::string const &fn)
+  {
+    return "\e[0;36m" + fn + "\e[0m";
+  }
 }

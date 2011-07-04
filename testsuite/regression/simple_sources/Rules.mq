@@ -1,0 +1,5 @@
+global {
+	%/foobar.c: %/main.c %/bar.c {
+		cat $+ > $@
+	}
+}

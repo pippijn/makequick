@@ -100,17 +100,20 @@ namespace tokens
     token (location const &loc, int tok, char const *text, int leng)
       : node (loc)
       , tok (tok)
-      , string (text, leng)
+      , mutable_string (text, leng)
+      , string (mutable_string)
     {
     }
     token (location const &loc, int tok, std::string const &string)
       : node (loc)
       , tok (tok)
-      , string (string)
+      , mutable_string (string)
+      , string (mutable_string)
     {
     }
 
     int const tok;
-    std::string const string;
+    std::string mutable_string;
+    std::string const &string;
   };
 }

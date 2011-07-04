@@ -8,10 +8,8 @@
 struct semantic_error
   : std::exception
 {
-  typedef std::vector<node_ptr> node_vec;
-
-  semantic_error (node_vec const &nodes, std::string const &message, bool error = true);
   semantic_error (node_ptr node, std::string const &message, bool error = true);
+  semantic_error (node_ptr node, std::string const &message, std::string const &note, bool error = true);
 
   ~semantic_error () throw ()
   {

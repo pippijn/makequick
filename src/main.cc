@@ -12,6 +12,8 @@
 #include "timing.h"
 
 #include <boost/bind.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/algorithm/transform.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -68,7 +70,11 @@ struct base_sort
 
   bool operator () (fs::path const &a, fs::path const &b)
   {
+#if 1
+    return a < b;
+#else
     return strcmp (a.c_str () + offset, b.c_str () + offset) < 0;
+#endif
   }
 
   size_t const offset;
@@ -83,8 +89,11 @@ is_rule_file (fs::path const &file)
 static node_ptr
 parse (std::vector<fs::path> const &files)
 {
-  std::vector<fs::path> rule_files;
-  grep (files.begin (), files.end (), back_inserter (rule_files), is_rule_file);
+  using namespace boost::adaptors;
+  using namespace boost::phoenix;
+  using namespace boost::phoenix::arg_names;
+  std::vector<fs::path const *> rule_files;
+  boost::transform (files | filtered (is_rule_file), std::back_inserter (rule_files), &arg1);
   lexer lex (rule_files);
   parser parse (lex);
 

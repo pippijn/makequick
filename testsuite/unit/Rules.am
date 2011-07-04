@@ -2,5 +2,6 @@ check_PROGRAMS += inference_engine_t
 TESTS += inference_engine_t
 
 inference_engine_t_SOURCES =		\
+	src/node.cc			\
 	src/util/inference_engine.cc	\
 	inference_engine_t.cc

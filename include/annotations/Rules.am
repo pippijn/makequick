@@ -1,3 +1,4 @@
 EXTRA_DIST +=			\
 	error_log.h		\
-	file_list.h
+	file_list.h		\
+	rule_info.h

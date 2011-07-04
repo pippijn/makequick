@@ -157,7 +157,7 @@ INTEGER	{DIGIT}+
 }
 
 <VAR_INIT>{
-	[@*<]				{ POP (); Return (TK_SHORTVAR); }
+	[@*<^+]				{ POP (); Return (TK_SHORTVAR); }
 	{INTEGER}			{ POP (); Return (TK_INTEGER); }
 	"("				{ BEGIN (VAR_RBODY); Return (TK_LBRACK); }
 	"["				{ BEGIN (VAR_SQBODY); Return (TK_LSQBRACK); }

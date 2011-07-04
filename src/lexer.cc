@@ -52,7 +52,7 @@ lexer::strstate (int state)
     }
 }
 
-lexer::lexer (std::vector<fs::path> const &files)
+lexer::lexer (std::vector<fs::path const *> const &files)
   : loc (0)
   , impl (new pimpl (files))
 {
@@ -112,9 +112,9 @@ lexer::wrap ()
   if (impl->it == impl->et)
     return 1;
 
-  FILE *fh = fopen (impl->it->c_str (), "r");
+  FILE *fh = fopen ((*impl->it)->c_str (), "r");
   if (!fh)
-    throw std::runtime_error ("Could not open " + impl->it->string () + " for reading");
+    throw std::runtime_error ("Could not open " + (*impl->it)->string () + " for reading");
   ++impl->it;
 
   yyset_in (fh, yyscanner);
@@ -133,7 +133,7 @@ lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int le
   if (column == 0)
     column = 1;
 
-  yylloc->file = &impl->it[-1];
+  yylloc->file = impl->it[-1];
   yylloc->first_line = lineno;
   yylloc->first_column = column;
 

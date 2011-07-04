@@ -24,6 +24,12 @@ namespace annotations
       add (new Exception (node, message));
     }
 
+    template<typename Exception>
+    void add (node_ptr const &node, std::string const &message, std::string const &note)
+    {
+      add (new Exception (node, message, note));
+    }
+
     bool has_errors () const;
     bool has_diagnostics () const;
     void print (fs::path const &path, char const *base) const;

@@ -1,6 +1,6 @@
 struct lexer::pimpl
 {
-  typedef std::vector<fs::path> file_vec;
+  typedef std::vector<fs::path const *> file_vec;
 
   std::string text;
 
@@ -11,7 +11,7 @@ struct lexer::pimpl
   template<short Tok> bool is_variable_token ();
   template<short Tok> int make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng);
 
-  pimpl (std::vector<fs::path> const &files)
+  pimpl (file_vec const &files)
     : it (files.begin ())
     , et (files.end ())
   {

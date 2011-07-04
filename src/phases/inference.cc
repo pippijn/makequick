@@ -1,11 +1,15 @@
+#include <typeinfo>
 #include "phase.h"
 
 #include "annotations/file_list.h"
+#include "annotations/rule_info.h"
 #include "colours.h"
 #include "foreach.h"
 #include "util/inference_engine.h"
+#include "util/regex_escape.h"
 
 using annotations::file_list;
+using annotations::rule_info;
 
 namespace
 {
@@ -22,7 +26,8 @@ namespace
       S_PREREQ
     };
 
-    inference_engine dag;
+    inference_engine engine;
+    rule_info &info;
 
     rule_state state;
 
@@ -30,20 +35,41 @@ namespace
     std::vector<inference_engine::promise> prereq;
 
     inference (annotation_map &annots)
-      : state (S_NONE)
+      : info (annots.put ("rule_info", new rule_info))
+      , state (S_NONE)
     {
       file_list const &files = annots.get ("files");
       foreach (fs::path const &f, boost::make_iterator_range (files.begin, files.end))
-        dag.add_file (files.rel (f));
+        engine.add_file (files.rel (f));
     }
 
     ~inference ()
     {
-      dag.infer ();
-      dag.print ();
+      engine.infer ();
+#if 0
+      engine.print ();
+#endif
 
+      swap (info.files, engine.info.files);
+      foreach (inference_engine::rule const &r, engine.info.rules)
+        {
+          using namespace boost::phoenix;
+          using namespace boost::phoenix::arg_names;
+          info.rules.push_back (rule_info::rule ());
+          rule_info::rule &ri = info.rules.back ();
+          ri.target = r.target;
+          std::transform (r.prereqs.begin (),
+                          r.prereqs.end (),
+                          back_inserter (ri.prereq),
+                          bind (&inference_engine::promise::str, arg1));
+          ri.stem = r.stem;
+          ri.code = r.code;
+        }
+
+#if 0
       if (!std::uncaught_exception ())
         throw "inference test";
+#endif
     }
   };
 
@@ -115,7 +141,7 @@ make_target (node_vec const &list)
           target += t.string;
           break;
         default:
-          throw tokname (t.tok);
+          throw semantic_error (n, "invalid token `" + t.string + "' of type " + tokname (t.tok));
         }
     }
 
@@ -125,27 +151,39 @@ make_target (node_vec const &list)
 static inference_engine::promise
 make_prereq (node_vec const &list)
 {
-  std::string re;
+  bool is_re = false;
+  std::string pr;
   foreach (node_ptr const &n, list)
     {
       token const &t = n->as<token> ();
       switch (t.tok)
         {
         case TK_FILENAME:
-          re += t.string;
+          if (is_re)
+            pr += regex_escape (t.string);
+          else
+            pr += t.string;
           break;
         case TK_FN_PERCENT:
-          re += "(.+)";
+          if (!is_re)
+            pr = regex_escape (pr);
+          pr += "(.+)";
+          is_re = true;
           break;
         case TK_FN_PERPERCENT:
-          re += ".*?([^/]+)";
+          if (!is_re)
+            pr = regex_escape (pr);
+          pr += ".*?([^/]+)";
+          is_re = true;
           break;
         default:
           throw tokname (t.tok);
         }
     }
 
-  return boost::regex (re);
+  if (is_re)
+    return boost::regex (pr);
+  return pr;
 }
 
 
@@ -177,7 +215,7 @@ inference::visit_rule (nodes::generic_node &n)
   n[1]->as<generic_node> ()[0]->accept (*this);
   state = S_NONE;
 
-  dag.add_rule (target, prereq);
+  engine.add_rule (target, prereq, n[2]);
   target.clear ();
   prereq.clear ();
 

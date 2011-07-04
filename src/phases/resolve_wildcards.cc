@@ -6,6 +6,7 @@
 #include "colours.h"
 #include "foreach.h"
 #include "util/create_file_list.h"
+#include "util/regex_escape.h"
 
 #include <numeric>
 
@@ -111,21 +112,6 @@ resolve_wildcards::visit_filename (nodes::generic_node &n)
 
 struct translate_wildcard
 {
-  static void escape (std::string &regex, std::string const &wc)
-  {
-    foreach (char c, wc)
-      switch (c)
-        {
-        case '(':
-        case ')':
-        case '.':
-          regex += '\\';
-        default:
-          regex += c;
-          break;
-        }
-  }
-
   std::string &operator () (std::string &regex, node_ptr const &n)
   {
     token const &t = n->as<token> ();
@@ -152,7 +138,7 @@ struct translate_wildcard
         if (in_alt == 2)
           regex += '|';
         in_alt = !!in_alt * 2;
-        escape (regex, t.string);
+        regex_escape (regex, t.string);
         break;
       }
     return regex;
@@ -205,9 +191,9 @@ resolve_wildcards::visit_sources (nodes::generic_node &n)
       foreach (generic_node_ptr const &wc, wildcards)
         {
           if (wc->list.front ()->as<token> ().tok == TK_FN_SLASH)
-            translate_wildcard::escape (regex, files.base.native ());
+            regex_escape (regex, files.base.native ());
           else
-            translate_wildcard::escape (regex, wc->loc.file->parent_path ().native () + "/");
+            regex_escape (regex, wc->loc.file->parent_path ().native () + "/");
           regex += accumulate (wc->list.begin (),
                                wc->list.end (),
                                std::string (),

@@ -8,54 +8,61 @@
 
 #include <boost/filesystem/path.hpp>
 
+enum severity_level
+{
+  WARNING,
+  ERROR,
+  NOTE
+};
+
 static std::string
-severity (bool error)
+severity (severity_level level)
 {
-  return error
-       ? C::red ("error: ")
-       : C::yellow ("warning: ")
-       ;
-}
-
-static std::string const
-make_message (semantic_error::node_vec const &nodes, std::string const &message, bool error)
-{
-  std::ostringstream s;
-  foreach (node_ptr const &n, nodes)
+  switch (level)
     {
-      if (&n != &nodes.back ())
-        s << "from ";
-      s << n->loc.file->native () << ":"
-        << n->loc.first_line << ":"
-        << n->loc.first_column;
-      if (&n == &nodes.back ())
-        s << ": " << severity (error) << message;
-      else
-        s << "\n";
+    case WARNING:
+      return C::yellow ("warning: ");
+    case ERROR:
+      return C::red ("error: ");
+    case NOTE:
+      return C::blue ("note: ");
     }
-  return s.str ();
+  assert (!"unreachable");
 }
 
-semantic_error::semantic_error (node_vec const &nodes, std::string const &message, bool error)
-  : message (make_message (nodes, message, error))
-  , error (error)
+static std::ostream &
+operator << (std::ostream &os, location const &loc)
 {
+  os << loc.file->native () << ":"
+     << loc.first_line << ":"
+     << loc.first_column << ": ";
+  return os;
 }
+
 
 static std::string const
-make_message (node_ptr node, std::string const &message, bool error)
+make_message (node_ptr node, std::string const &message, std::string const &note, bool error)
 {
   std::ostringstream s;
-  s << node->loc.file->native ()<< ":"
-    << node->loc.first_line << ":"
-    << node->loc.first_column << ": "
-    << severity (error)
+  s << node->loc
+    << severity (error ? ERROR : WARNING)
     << message;
+  if (!note.empty ())
+    s << "\n\t"
+      //<< node->loc
+      << severity (NOTE)
+      << note;
   return s.str ();
 }
 
 semantic_error::semantic_error (node_ptr node, std::string const &message, bool error)
-  : message (make_message (node, message, error))
+  : message (make_message (node, message, std::string (), error))
+  , error (error)
+{
+}
+
+semantic_error::semantic_error (node_ptr node, std::string const &message, std::string const &note, bool error)
+  : message (make_message (node, message, note, error))
   , error (error)
 {
 }
