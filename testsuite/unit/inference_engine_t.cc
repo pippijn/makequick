@@ -1,8 +1,6 @@
-#include "annotations/inference_engine.h"
+#include "util/inference_engine.h"
 
 #include <boost/lexical_cast.hpp>
-
-using annotations::inference_engine;
 
 typedef std::string S;
 typedef boost::regex R;

@@ -1,2 +1,3 @@
 makepp_SOURCES +=		\
-	create_file_list.cc
+	create_file_list.cc	\
+	inference_engine.cc

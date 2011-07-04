@@ -1,14 +1,11 @@
 #include "phase.h"
 
-#include "annotations/inference_engine.h"
-#include "annotations/error_log.h"
 #include "annotations/file_list.h"
 #include "colours.h"
 #include "foreach.h"
+#include "util/inference_engine.h"
 
-using annotations::inference_engine;
 using annotations::file_list;
-using annotations::error_log;
 
 namespace
 {
@@ -25,8 +22,6 @@ namespace
       S_PREREQ
     };
 
-    file_list const &files;
-    error_log &errors;
     inference_engine dag;
 
     rule_state state;
@@ -35,10 +30,9 @@ namespace
     std::vector<inference_engine::promise> prereq;
 
     inference (annotation_map &annots)
-      : files (annots.get ("files"))
-      , errors (annots.get ("errors"))
-      , state (S_NONE)
+      : state (S_NONE)
     {
+      file_list const &files = annots.get ("files");
       foreach (fs::path const &f, boost::make_iterator_range (files.begin, files.end))
         dag.add_file (files.rel (f));
     }

@@ -1,12 +1,12 @@
-#include "annotations/inference_engine.h"
+#include "util/inference_engine.h"
 #include "foreach.h"
 #include "timing.h"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/implicit_cast.hpp>
 #include <boost/regex.hpp>
 
-namespace annotations
-{
+using boost::implicit_cast;
 
 struct rule
 {
@@ -54,54 +54,6 @@ inference_engine::add_rule (std::string const &target, std::vector<promise> cons
   self->rules.push_back (rule (target, prereqs));
 }
 
-
-// check if any of the prereqs matches this file
-static std::string
-matches (fs::path const &f, std::vector<rule::promise> const &prereqs)
-{
-  foreach (rule::promise const &p, prereqs)
-    if (p->matches (f))
-      return p->stem (f);
-  return "";
-}
-
-// check if all the prereqs match the same way
-static bool
-prereqs_exist (std::string const &stem,
-               std::vector<fs::path> const &files,
-               std::vector<rule::promise> const &prereqs)
-{
-  foreach (rule::promise const &p, prereqs)
-    if (!p->exists (stem, files))
-      return false;
-  return true;
-}
-
-static bool
-operator < (rule const &r1, rule const &r2)
-{
-  return r1.target < r2.target
-      || r1.prereqs < r2.prereqs
-      || r1.stem < r2.stem
-      ;;
-}
-
-static bool
-operator == (rule const &r1, rule const &r2)
-{
-  return r1.target == r2.target
-      && r1.prereqs == r2.prereqs
-      && r1.stem == r2.stem
-      ;;
-}
-
-template<typename T>
-static void
-compact (std::vector<T> &vec)
-{
-  sort (vec.begin (), vec.end ());
-  vec.erase (unique (vec.begin (), vec.end ()), vec.end ());
-}
 
 struct engine
 {
@@ -162,9 +114,11 @@ struct engine
                 mainrule.stem = rules.first;
                 replace_first (mainrule.target, "%", mainrule.stem);
 
-                foreach (promise const &p, mainrule.prereqs)
-                  if (p->matches (mainrule.target))
-                    throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
+                if (std::find_if (mainrule.prereqs.begin (),
+                                  mainrule.prereqs.end (),
+                                  bind (&promise::matches, arg1, mainrule.target))
+                    != mainrule.prereqs.end ())
+                  throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
 
                 inferred.rules.push_back (mainrule);
                 inferred.files.push_back (mainrule.target);
@@ -197,6 +151,14 @@ struct engine
         }
   }
 
+  template<typename T>
+  static void
+  compact (std::vector<T> &vec)
+  {
+    sort (vec.begin (), vec.end ());
+    vec.erase (unique (vec.begin (), vec.end ()), vec.end ());
+  }
+
   static void infer (std::vector<rule> &rules, std::vector<fs::path> &files)
   {
     partial_vec partials (rules.size ());
@@ -214,10 +176,7 @@ struct engine
 
     rules.insert (rules.end (), inferred.rules.begin (), inferred.rules.end ());
 
-#if 0
     compact (files);
-    compact (rules);
-#endif
   }
 };
 
@@ -262,13 +221,6 @@ rule::print () const
 
 
 template<>
-std::string
-inference_engine::promise::file_t<std::string>::str () const
-{
-  return data;
-}
-
-template<>
 void
 inference_engine::promise::file_t<std::string>::print () const
 {
@@ -290,29 +242,12 @@ inference_engine::promise::file_t<std::string>::matches (fs::path const &file) c
 }
 
 template<>
-bool
-inference_engine::promise::file_t<std::string>::exists (std::string const &stem, std::vector<fs::path> const &files) const
-{
-  foreach (fs::path const &f, files)
-    if (f == data)
-      return true;
-  return false;
-}
-
-template<>
 std::string
 inference_engine::promise::file_t<std::string>::stem (fs::path const &file) const
 {
   return file == data ? file.native () : "";
 }
 
-
-template<>
-std::string
-inference_engine::promise::file_t<boost::regex>::str () const
-{
-  return data.str ();
-}
 
 template<>
 void
@@ -336,26 +271,10 @@ inference_engine::promise::file_t<boost::regex>::matches (fs::path const &file) 
 }
 
 template<>
-bool
-inference_engine::promise::file_t<boost::regex>::exists (std::string const &stem, std::vector<fs::path> const &files) const
-{
-  foreach (fs::path const &f, files)
-    {
-      boost::smatch matches;
-      if (regex_match (f.native (), matches, data) && matches.str (1) == stem)
-        return true;
-    }
-  return false;
-}
-
-template<>
 std::string
 inference_engine::promise::file_t<boost::regex>::stem (fs::path const &file) const
 {
   boost::smatch matches;
   regex_match (file.native (), matches, data);
   return matches.str (1);
-}
-
-
 }
