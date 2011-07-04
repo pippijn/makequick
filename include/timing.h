@@ -36,9 +36,33 @@ operator + (double d, timeval const &t)
 
 struct timer
 {
-  typedef std::vector<timeval> timervec;
+  timer (char const *name)
+    : name (name)
+    , start (now ())
+  {
+  }
 
   ~timer ()
+  {
+    printf ("%%%% %s: %.3gsec\n", name, 0.0 + (now () - start));
+  }
+
+  char const *name;
+  timeval start;
+};
+
+struct lex_timer
+  : timer
+{
+  typedef std::vector<timeval> timervec;
+
+  lex_timer ()
+    : timer ("parsing")
+    , prev (now ())
+  {
+  }
+
+  ~lex_timer ()
   {
     std::sort (times.begin (), times.end ());
     if (times.empty ())
@@ -47,7 +71,7 @@ struct timer
 
     double average = std::accumulate (times.begin (), times.end (), 0.0) / times.size ();
 
-    printf ("%d tokens - avg: %.3gsec (%.1f tokens/sec)\n", times.size (), average, 1 / average);
+    printf ("%%%% lex: %d tokens - avg: %.3gsec (%.1f tokens/sec)\n", times.size (), average, 1 / average);
   }
 
   void next ()

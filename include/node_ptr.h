@@ -1,13 +1,10 @@
 #pragma once
 
+#include <vector>
+
 #include <boost/intrusive_ptr.hpp>
 
-#define NODE(T) struct T; typedef boost::intrusive_ptr<T> T##_ptr
-
-#if EXTERN_TEMPLATE
-#include <vector>
-extern template class std::vector<node_ptr>;
-#endif
+#define NODE(T) struct T; typedef boost::intrusive_ptr<T> T##_ptr; typedef std::vector<T##_ptr> T##_vec
 
 struct location;
 

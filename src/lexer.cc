@@ -82,10 +82,6 @@ lexer::close_file ()
   return false;
 }
 
-#include "timing.h"
-
-static timer T;
-
 int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
@@ -126,7 +122,7 @@ lexer::wrap ()
 }
 
 void
-lexer::lloc (YYLTYPE *yylloc, int lineno, int column, int leng)
+lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int leng)
 {
   assert (yylloc != NULL);
   assert (lineno >= 1);
@@ -134,13 +130,24 @@ lexer::lloc (YYLTYPE *yylloc, int lineno, int column, int leng)
   assert (leng >= 1);
   assert (UINT_MAX - column - leng > INT_MAX);
 
-  column++;
+  if (column == 0)
+    column = 1;
 
   yylloc->file = &impl->it[-1];
   yylloc->first_line = lineno;
   yylloc->first_column = column;
+
+  for (char const *p = text; p != text + leng; ++p)
+    if (*p == '\n')
+      {
+        lineno++;
+        column = 1;
+      }
+    else
+      column++;
+
   yylloc->last_line = lineno;
-  yylloc->last_column = column + leng;
+  yylloc->last_column = column;
 
   loc = yylloc;
 }

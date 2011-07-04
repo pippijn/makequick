@@ -49,6 +49,7 @@ xml::visit (token &n)
 #else
   switch (n.tok)
     {
+#if 0
     case TK_FILENAME:
     case TK_FN_DOT:
     case TK_FN_LBRACE:
@@ -67,8 +68,12 @@ xml::visit (token &n)
         printf ("%s", n.string.c_str ());
         break;
       }
+#endif
     default:
-      printf ("%*s%s: \"%s\"\n", indent, "", tokname (n.tok), n.string.c_str ());
+      printf ("%*s%s[%d:%d-%d:%d]: \"%s\"\n", indent, "", tokname (n.tok),
+              n.loc.first_line, n.loc.first_column,
+              n.loc.last_line, n.loc.last_column,
+              n.string.c_str ());
     }
 #endif
 }
@@ -79,16 +84,22 @@ xml::visit (generic_node &n)
 #if VALID_XML
   printf ("%*s<n:%s>\n", indent, "", node_type_name[n.type]);
 #else
-  printf ("%*s<%s>\n", indent, "", node_type_name[n.type]);
+  printf ("%*s<%s s='%d:%d' e='%d:%d'>\n", indent, "", node_type_name[n.type],
+          n.loc.first_line, n.loc.first_column,
+          n.loc.last_line, n.loc.last_column);
 #endif
   indent += 2;
+#if 0
   if (n.type == n_filename)
     printf ("%*s", indent, "");
+#endif
   foreach (node_ptr const &p, n.list)
     if (p)
       p->accept (*this);
+#if 0
   if (n.type == n_filename)
     printf ("\n");
+#endif
   indent -= 2;
 #if VALID_XML
   printf ("%*s</n:%s>\n", indent, "", node_type_name[n.type]);

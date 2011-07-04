@@ -1,5 +1,5 @@
-check_PROGRAMS += build_dag_t
+check_PROGRAMS += inference_engine_t
 
-build_dag_t_SOURCES =			\
-	src/annotations/build_dag.cc	\
-	build_dag_t.cc
+inference_engine_t_SOURCES =			\
+	src/annotations/inference_engine.cc	\
+	inference_engine_t.cc

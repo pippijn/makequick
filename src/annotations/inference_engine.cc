@@ -1,5 +1,6 @@
-#include "annotations/build_dag.h"
+#include "annotations/inference_engine.h"
 #include "foreach.h"
+#include "timing.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/regex.hpp>
@@ -9,7 +10,7 @@ namespace annotations
 
 struct rule
 {
-  typedef build_dag::promise promise;
+  typedef inference_engine::promise promise;
 
   std::string target;
   std::vector<promise> prereqs;
@@ -25,30 +26,30 @@ struct rule
 };
 
 
-struct build_dag::pimpl
+struct inference_engine::pimpl
 {
   std::vector<fs::path> files;
   std::vector<rule> rules;
 };
 
-build_dag::build_dag ()
+inference_engine::inference_engine ()
   : self (new pimpl)
 {
 }
 
-build_dag::~build_dag ()
+inference_engine::~inference_engine ()
 {
 }
 
 
 void
-build_dag::add_file (fs::path const &file)
+inference_engine::add_file (fs::path const &file)
 {
   self->files.push_back (file);
 }
 
 void
-build_dag::add_rule (std::string const &target, std::vector<promise> const &prereqs)
+inference_engine::add_rule (std::string const &target, std::vector<promise> const &prereqs)
 {
   self->rules.push_back (rule (target, prereqs));
 }
@@ -102,7 +103,7 @@ compact (std::vector<T> &vec)
   vec.erase (unique (vec.begin (), vec.end ()), vec.end ());
 }
 
-struct inference_engine
+struct engine
 {
   typedef rule::promise promise;
 
@@ -135,40 +136,46 @@ struct inference_engine
   static void resolve_partial (partial_vec &partials, inferred &inferred)
   {
     foreach (partial_map &map, partials)
-      foreach (partial_map::value_type &rules, map)
-        {
-          if (rules.second.empty ())
-            throw std::runtime_error ("stem `" + rules.first + "' has no rules");
+      {
+        std::vector<std::string> complete;
+        foreach (partial_map::value_type &rules, map)
+          {
+            if (rules.second.empty ())
+              throw std::runtime_error ("stem `" + rules.first + "' has no rules");
 
-          rule &mainrule = rules.second[0];
+            rule &mainrule = rules.second[0];
 
-          foreach (rule const &r, rules.second)
-            foreach (promise const &p, r.prereqs)
-              if (p->final ())
-                mainrule.prereqs[&p - &*r.prereqs.begin ()] = p;
+            foreach (rule const &r, rules.second)
+              foreach (promise const &p, r.prereqs)
+                if (p->final ())
+                  mainrule.prereqs[&p - &*r.prereqs.begin ()] = p;
 
-          using namespace boost::phoenix;
-          using namespace boost::phoenix::arg_names;
-          using boost::algorithm::replace_first;
+            using namespace boost::phoenix;
+            using namespace boost::phoenix::arg_names;
+            using boost::algorithm::replace_first;
 
-          if (std::find_if (mainrule.prereqs.begin (),
-                            mainrule.prereqs.end (),
-                            !bind (&promise::final, arg1))
-              == mainrule.prereqs.end ())
-            {
-              mainrule.stem = rules.first;
-              replace_first (mainrule.target, "%", mainrule.stem);
+            if (std::find_if (mainrule.prereqs.begin (),
+                              mainrule.prereqs.end (),
+                              !bind (&promise::final, arg1))
+                == mainrule.prereqs.end ())
+              {
+                mainrule.stem = rules.first;
+                replace_first (mainrule.target, "%", mainrule.stem);
 
-              foreach (promise const &p, mainrule.prereqs)
-                if (p->matches (mainrule.target))
-                  throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
+                foreach (promise const &p, mainrule.prereqs)
+                  if (p->matches (mainrule.target))
+                    throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
 
-              inferred.rules.push_back (mainrule);
-              inferred.files.push_back (mainrule.target);
+                inferred.rules.push_back (mainrule);
+                inferred.files.push_back (mainrule.target);
 
-              map.erase (mainrule.stem);
-            }
-        }
+                complete.push_back (mainrule.stem);
+              }
+          }
+
+        foreach (std::string const &stem, complete)
+          map.erase (stem);
+      }
   }
 
   static void print_partial (partial_vec const &partials)
@@ -215,15 +222,16 @@ struct inference_engine
 };
 
 void
-build_dag::infer ()
+inference_engine::infer ()
 {
+  timer T ("inference");
   printf ("running inference with %lu rules and %lu files\n", self->rules.size (), self->files.size ());
-  inference_engine::infer (self->rules, self->files);
+  engine::infer (self->rules, self->files);
   printf ("after inference, we have %lu rules and %lu files\n", self->rules.size (), self->files.size ());
 }
 
 void
-build_dag::print () const
+inference_engine::print () const
 {
   std::cout << "files:\n";
   foreach (fs::path const &f, self->files)
@@ -255,35 +263,35 @@ rule::print () const
 
 template<>
 std::string
-build_dag::promise::file_t<std::string>::str () const
+inference_engine::promise::file_t<std::string>::str () const
 {
   return data;
 }
 
 template<>
 void
-build_dag::promise::file_t<std::string>::print () const
+inference_engine::promise::file_t<std::string>::print () const
 {
   std::cout << '"' << data << '"';
 }
 
 template<>
 bool
-build_dag::promise::file_t<std::string>::final () const
+inference_engine::promise::file_t<std::string>::final () const
 {
   return true;
 }
 
 template<>
 bool
-build_dag::promise::file_t<std::string>::matches (fs::path const &file) const
+inference_engine::promise::file_t<std::string>::matches (fs::path const &file) const
 {
   return file == data;
 }
 
 template<>
 bool
-build_dag::promise::file_t<std::string>::exists (std::string const &stem, std::vector<fs::path> const &files) const
+inference_engine::promise::file_t<std::string>::exists (std::string const &stem, std::vector<fs::path> const &files) const
 {
   foreach (fs::path const &f, files)
     if (f == data)
@@ -293,7 +301,7 @@ build_dag::promise::file_t<std::string>::exists (std::string const &stem, std::v
 
 template<>
 std::string
-build_dag::promise::file_t<std::string>::stem (fs::path const &file) const
+inference_engine::promise::file_t<std::string>::stem (fs::path const &file) const
 {
   return file == data ? file.native () : "";
 }
@@ -301,35 +309,35 @@ build_dag::promise::file_t<std::string>::stem (fs::path const &file) const
 
 template<>
 std::string
-build_dag::promise::file_t<boost::regex>::str () const
+inference_engine::promise::file_t<boost::regex>::str () const
 {
   return data.str ();
 }
 
 template<>
 void
-build_dag::promise::file_t<boost::regex>::print () const
+inference_engine::promise::file_t<boost::regex>::print () const
 {
   std::cout << '{' << data << '}';
 }
 
 template<>
 bool
-build_dag::promise::file_t<boost::regex>::final () const
+inference_engine::promise::file_t<boost::regex>::final () const
 {
   return false;
 }
 
 template<>
 bool
-build_dag::promise::file_t<boost::regex>::matches (fs::path const &file) const
+inference_engine::promise::file_t<boost::regex>::matches (fs::path const &file) const
 {
   return regex_match (file.native (), data);
 }
 
 template<>
 bool
-build_dag::promise::file_t<boost::regex>::exists (std::string const &stem, std::vector<fs::path> const &files) const
+inference_engine::promise::file_t<boost::regex>::exists (std::string const &stem, std::vector<fs::path> const &files) const
 {
   foreach (fs::path const &f, files)
     {
@@ -342,7 +350,7 @@ build_dag::promise::file_t<boost::regex>::exists (std::string const &stem, std::
 
 template<>
 std::string
-build_dag::promise::file_t<boost::regex>::stem (fs::path const &file) const
+inference_engine::promise::file_t<boost::regex>::stem (fs::path const &file) const
 {
   boost::smatch matches;
   regex_match (file.native (), matches, data);

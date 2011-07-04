@@ -11,17 +11,16 @@ namespace annotations
   struct file_list
     : annotation
   {
-    typedef std::vector<fs::path> file_vec;
+    typedef std::vector<fs::path> vector;
+    typedef vector::const_iterator iterator;
 
     fs::path const &base;
-    file_vec::const_iterator const begin;
-    file_vec::const_iterator const end;
+    iterator const begin;
+    iterator const end;
 
-    file_list (fs::path const &base, file_vec::const_iterator it, file_vec::const_iterator et)
-      : base (base)
-      , begin (it)
-      , end (et)
-    {
-    }
+    void print () const;
+    fs::path rel (fs::path const &file) const;
+
+    file_list (fs::path const &base, iterator it, iterator et);
   };
 }

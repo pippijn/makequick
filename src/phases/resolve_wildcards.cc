@@ -26,7 +26,7 @@ namespace
     annotations::error_log &errors;
 
     std::vector<fs::path> source_files;
-    std::vector<generic_node_ptr> wildcards;
+    generic_node_vec wildcards;
 
     resolve_wildcards (annotation_map &annots)
       : in_sources (false)
@@ -36,7 +36,7 @@ namespace
     }
   };
 
-  static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
+  //static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 }
 
 bool resolve_wildcards::visit_ac_check (nodes::generic_node &n) { return true; }
@@ -73,6 +73,7 @@ bool resolve_wildcards::visit_project (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_rule_line (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_rule_lines (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_rule (nodes::generic_node &n) { return true; }
+bool resolve_wildcards::visit_rules (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_section_members (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_section (nodes::generic_node &n) { return true; }
 bool resolve_wildcards::visit_sources_members (nodes::generic_node &n) { return true; }

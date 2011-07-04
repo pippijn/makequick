@@ -1,8 +1,8 @@
-#include "annotations/build_dag.h"
+#include "annotations/inference_engine.h"
 
 #include <boost/lexical_cast.hpp>
 
-using annotations::build_dag;
+using annotations::inference_engine;
 
 typedef std::string S;
 typedef boost::regex R;
@@ -10,7 +10,7 @@ typedef boost::regex R;
 int
 main ()
 {
-  build_dag dag;
+  inference_engine dag;
 
   dag.add_file ("yacc/cow.y.in");
   dag.add_rule ("%", R ("(.+)\\.in"));

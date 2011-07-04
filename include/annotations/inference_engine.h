@@ -10,7 +10,7 @@
 
 namespace annotations
 {
-  struct build_dag
+  struct inference_engine
     : annotation
   {
     struct promise
@@ -63,8 +63,8 @@ namespace annotations
     struct pimpl;
     std::auto_ptr<pimpl> const self;
 
-    build_dag ();
-    ~build_dag ();
+    inference_engine ();
+    ~inference_engine ();
 
     void add_file (fs::path const &file);
     void add_rule (std::string const &target, std::vector<promise> const &prereqs);

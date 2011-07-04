@@ -1,3 +1,4 @@
 makepp_SOURCES +=		\
-	build_dag.cc		\
-	error_log.cc
+	error_log.cc		\
+	file_list.cc		\
+	inference_engine.cc

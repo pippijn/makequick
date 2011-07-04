@@ -138,7 +138,7 @@ using namespace nodes;
 %type<list> sources target_definition
 %type<list> program library template target_member target_members toplevel_declarations toplevel_declaration
 %type<list> filename filenames.0 filenames.1 sources_member sources_members extra_dist nodist_sources
-%type<list> rule rule_lines rule_line link link_body vardecl vardecl_body
+%type<list> rules rule rule_lines rule_line link link_body vardecl vardecl_body
 %type<list> description inheritance.opt inheritance if.opt if destination.opt destination
 %type<list> tool_flags flags identifiers
 %type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
@@ -165,7 +165,7 @@ toplevel_declarations
 	: toplevel_declaration
 		{ $$ = new generic_node (n_toplevel_declarations, @$, $1); }
 	| toplevel_declarations toplevel_declaration
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 toplevel_declaration
@@ -179,7 +179,7 @@ toplevel_declaration
 		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| extra_dist
 		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
-	| "global" "{" rule "}"
+	| "global" "{" rules "}"
 		{ $$ = new generic_node (n_toplevel_declaration, @$, $3); delete $1; delete $2; delete $4; }
 	;
 
@@ -198,7 +198,7 @@ project_members
 	: project_member
 		{ $$ = new generic_node (n_project_members, @$, $1); }
 	| project_members project_member
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 project_member
@@ -220,7 +220,7 @@ section_members
 	: section_member
 		{ $$ = new generic_node (n_section_members, @$, $1); }
 	| section_members section_member
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 section_member
@@ -280,7 +280,7 @@ arg_enable_choices
 	: arg_enable_choice
 		{ $$ = new generic_node (n_arg_enable_choices, @$, $1); }
 	| arg_enable_choices arg_enable_choice
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 arg_enable_choice
@@ -384,7 +384,7 @@ target_members
 	: target_member
 		{ $$ = new generic_node (n_target_members, @$, $1); }
 	| target_members target_member
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 target_member
@@ -427,7 +427,7 @@ sources_members
 	: sources_member
 		{ $$ = new generic_node (n_sources_members, @$, $1); }
 	| sources_members sources_member
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 sources_member
@@ -466,7 +466,7 @@ flags
 	:
 		{ $$ = new generic_node (n_flags, @$); }
 	| flags TK_FLAG
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 /****************************************************************************
@@ -474,6 +474,13 @@ flags
  *	Custom rules
  *
  ****************************************************************************/
+rules
+	: rule
+		{ $$ = new generic_node (n_rules, @$, $1); }
+	| rules rule
+		{ ($$ = $1)->add ($2)->loc = @$; }
+	;
+
 rule
 	: filenames.1 ":" filenames.0 rule_begin rule_lines rule_end
 		{ $$ = new generic_node (n_rule, @$, $1, $3, $5); delete $2; }
@@ -493,28 +500,28 @@ rule_lines
 	: rule_line TK_WHITESPACE
 		{ $$ = new generic_node (n_rule_lines, @$, $1); delete $2; }
 	| rule_lines rule_line TK_WHITESPACE
-		{ ($$ = $1)->add ($2); delete $3; }
+		{ ($$ = $1)->add ($2)->loc = @$; delete $3; }
 	;
 
 rule_line
 	: code_frag
 		{ $$ = new generic_node (n_rule_line, @$, $1); }
 	| rule_line code_frag
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 filenames.0
 	:
 		{ $$ = new generic_node (n_filenames, @$); }
 	| filenames.0 filename TK_WHITESPACE
-		{ ($$ = $1)->add ($2); $$->loc.file = $2->loc.file; delete $3; }
+		{ ($$ = $1)->add ($2)->loc = @$; $$->loc.file = $2->loc.file; delete $3; }
 	;
 
 filenames.1
 	: filename
 		{ $$ = new generic_node (n_filenames, @$, $1); }
 	| filenames.1 TK_WHITESPACE filename
-		{ ($$ = $1)->add ($3); delete $2; }
+		{ ($$ = $1)->add ($3)->loc = @$; delete $2; }
 	;
 
 /****************************************************************************
@@ -539,7 +546,7 @@ link_body
 	: link_item
 		{ $$ = new generic_node (n_link_body, @$, $1); }
 	| link_body link_item
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 link_item
@@ -566,7 +573,7 @@ vardecl_body
 	: code_frag
 		{ $$ = new generic_node (n_vardecl_body, @$, $1); }
 	| vardecl_body code_frag
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 /****************************************************************************
@@ -607,14 +614,14 @@ identifiers
 	: identifier
 		{ $$ = new generic_node (n_identifiers, @$, $1); }
 	| identifiers identifier
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 filename
 	: filename_part
 		{ $$ = new generic_node (n_filename, @$, $1); }
 	| filename filename_part
-		{ ($$ = $1)->add ($2); }
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 filename_part

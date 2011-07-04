@@ -1,5 +1,6 @@
 #pragma once
 
+#include "timing.h"
 #include "ylcode.h"
 
 #include <memory>
@@ -24,7 +25,7 @@ struct lexer
   int lex (YYSTYPE *yylval, YYLTYPE *yylloc);
   int next (YYSTYPE *yylval, YYLTYPE *yylloc);
   int wrap ();
-  void lloc (YYLTYPE *yylloc, int lineno, int column, int leng);
+  void lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int leng);
 
   static char const *STRSTATE (int state);
   static char const *strstate (int state);
@@ -38,4 +39,6 @@ struct lexer
 
   struct pimpl;
   std::auto_ptr<pimpl> const impl;
+
+  lex_timer T;
 };

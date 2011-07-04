@@ -9,6 +9,7 @@ struct annotation_map;
 struct phases
 {
   static void run (std::string const &name, node_ptr doc, annotation_map &annots);
+  static void run (std::string const &name, node_ptr doc);
   static void run (node_ptr doc, annotation_map &annots);
 
 private:

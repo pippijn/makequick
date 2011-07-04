@@ -10,14 +10,7 @@ move (std::string &s)
   return r;
 }
 
-#define YY_USER_ACTION					\
-  {							\
-    lloc (yylloc, yylineno, yycolumn, yyleng);		\
-    if (strchr (yytext, '\n'))				\
-      yycolumn = 0;					\
-    else						\
-      yycolumn += yyleng;				\
-  }
+#define YY_USER_ACTION lloc (yylloc, yylineno, yycolumn, yytext, yyleng);
 
 #define Return(TOK)					\
   return impl->make_token<TOK> (yylval, yylloc, yytext, yyleng)
@@ -38,7 +31,7 @@ move (std::string &s)
 %option bison-locations
 %option reentrant
 /*%option ecs full 8bit*/
-%option yylineno stack
+%option stack
 %option nounput noinput nounistd
 %option nodefault
 %option never-interactive
@@ -54,7 +47,7 @@ NWS	[^ \t\v\n\r]
 FLAG	[^ \t\v\n\r{}]
 /* Filenames */
 FN	[^ \t\v\n\r{}/%*.:?]
-FNSTART	([./*%{?]|"**")
+FNSTART	([./*%{?]|"**"|"%%")
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 /* Rule start */
@@ -250,7 +243,7 @@ lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, 
   else
     lval->token = new tokens::token (*lloc, Tok, text, leng);
 #if LEXER_VERBOSE
-  printf ("[%d:%d-%d:%d]: %s\n",
+  printf ("[%d:%d-%d:%d]: <<%s>>\n",
           lloc->first_line,
           lloc->first_column,
           lloc->last_line,

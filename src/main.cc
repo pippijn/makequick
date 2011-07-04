@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "phases.h"
 #include "sighandler.h"
+#include "timing.h"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -58,10 +59,36 @@ collect (fs::path const &path, std::vector<fs::path> &files)
     files.push_back (path);
 }
 
+struct base_sort
+{
+  base_sort (fs::path const &base)
+    : offset (base.native ().length () + 1)
+  {
+  }
+
+  bool operator () (fs::path const &a, fs::path const &b)
+  {
+    return strcmp (a.c_str () + offset, b.c_str () + offset) < 0;
+  }
+
+  size_t const offset;
+};
+
 static bool
 is_rule_file (fs::path const &file)
 {
   return file.extension () == ".mq";
+}
+
+static node_ptr
+parse (std::vector<fs::path> const &files)
+{
+  std::vector<fs::path> rule_files;
+  grep (files.begin (), files.end (), back_inserter (rule_files), is_rule_file);
+  lexer lex (rule_files);
+  parser parse (lex);
+
+  return parse ();
 }
 
 int
@@ -94,8 +121,14 @@ try
     }
 
   std::vector<fs::path> files;
-  collect (path, files);
-  sort (files.begin (), files.end ());
+  {
+    timer T ("reading directory");
+    collect (path, files);
+  }
+  {
+    timer T ("sorting files");
+    sort (files.begin (), files.end (), base_sort (path));
+  }
 
 #if 0
   copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));
@@ -114,12 +147,7 @@ try
   return EXIT_SUCCESS;
 #endif
 
-  std::vector<fs::path> rule_files;
-  grep (files.begin (), files.end (), back_inserter (rule_files), is_rule_file);
-  lexer lex (rule_files);
-  parser parse (lex);
-
-  if (node_ptr doc = parse ())
+  if (node_ptr doc = parse (files))
     {
       using namespace annotations;
 
@@ -144,5 +172,15 @@ try
 catch (std::exception const &e)
 {
   printf ("\e[1;31m%%%% runtime error\e[0m: %s\n", e.what ());
+  return EXIT_FAILURE;
+}
+catch (int i)
+{
+  printf ("\e[1;31m%%%% runtime error\e[0m: %d\n", i);
+  return EXIT_FAILURE;
+}
+catch (char const *s)
+{
+  printf ("\e[1;31m%%%% runtime error\e[0m: %s\n", s);
   return EXIT_FAILURE;
 }

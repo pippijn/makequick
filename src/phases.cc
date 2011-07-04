@@ -45,6 +45,13 @@ phases::run (std::string const &name, node_ptr doc, annotation_map &annots)
   phase->run1 (doc, annots);
 }
 
+void
+phases::run (std::string const &name, node_ptr doc)
+{
+  annotation_map annots;
+  run (name, doc, annots);
+}
+
 struct pair_equals
 {
   pair_equals (std::string const &s)

@@ -3,7 +3,6 @@
 #include "visitor.h"
 
 #include <string>
-#include <vector>
 
 #include <boost/filesystem_fwd.hpp>
 
@@ -15,10 +14,6 @@ struct location
   int last_line;
   int last_column;
 };
-
-#if EXTERN_TEMPLATE
-extern template class std::vector<node_ptr>;
-#endif
 
 namespace nodes
 {
@@ -47,13 +42,13 @@ namespace nodes
   struct node_list
     : node
   {
-    void add (node_ptr n) { list.push_back (n); }
+    node_list *add (node_ptr n) { list.push_back (n); return this; }
     size_t size () const { return list.size (); }
     node_ptr &operator [] (size_t index) { return list.at (index); }
 
     node_list (location const &loc) : node (loc) { }
 
-    std::vector<node_ptr> list;
+    node_vec list;
   };
 
 

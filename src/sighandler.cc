@@ -7,7 +7,7 @@
 bool should_terminate = false;
 
 static void
-throw_signal (int signum)
+maybe_exit (int signum)
 {
   if (should_terminate)
     {
@@ -18,10 +18,17 @@ throw_signal (int signum)
   should_terminate = true;
 }
 
+static void
+throw_signal (int signum)
+{
+  throw std::runtime_error (strsignal (signum));
+}
+
 static bool
 init ()
 {
-  signal (SIGINT, throw_signal);
+  signal (SIGINT, maybe_exit);
+  signal (SIGSEGV, throw_signal);
   return true;
 }
 

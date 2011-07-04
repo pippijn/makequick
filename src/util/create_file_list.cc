@@ -5,7 +5,7 @@
 
 void
 create_file_list (std::vector<fs::path> const &source_files,
-                  std::vector<node_ptr> &list,
+                  nodes::node_vec &list,
                   location const &loc)
 {
   using namespace nodes;
