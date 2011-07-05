@@ -3,15 +3,25 @@
 #include "algorithm/grep.h"
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
+#include "annotations/rule_info.h"
 #include "colours.h"
 #include "foreach.h"
-#include "util/create_file_list.h"
 
-#include <numeric>
-
-#include <boost/regex.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+
+template<typename ForwardIterator>
+static bool
+is_sorted (ForwardIterator it, ForwardIterator et)
+{
+  ForwardIterator prev = it;
+  while (++it != et)
+    {
+      if (*prev > *it)
+        return false;
+      prev = it;
+    }
+  return true;
+}
 
 namespace
 {
@@ -23,20 +33,29 @@ namespace
 
     bool in_sources;
     annotations::file_list const &files;
+    annotations::rule_info const &rule_info;
     annotations::error_log &errors;
-
-    generic_node_vec plainfiles;
-    generic_node_vec wildcards;
 
     resolve_sources (annotation_map &annots)
       : in_sources (false)
       , files (annots.get ("files"))
+      , rule_info (annots.get ("rule_info"))
       , errors (annots.get ("errors"))
     {
+      assert (is_sorted (files.begin, files.end));
+      assert (is_sorted (rule_info.files.begin (), rule_info.files.end ()));
+    }
+
+    ~resolve_sources ()
+    {
+#if 0
+      if (!std::uncaught_exception ())
+        throw __func__;
+#endif
     }
   };
 
-  //static phase<resolve_sources> thisphase ("resolve_sources", "audit");
+  static phase<resolve_sources> thisphase ("resolve_sources", "inference");
 }
 
 bool resolve_sources::visit_ac_check (nodes::generic_node &n) { return true; }
@@ -90,21 +109,23 @@ bool resolve_sources::visit_variable_content (nodes::generic_node &n) { return t
 bool resolve_sources::visit_variable (nodes::generic_node &n) { return true; }
 
 
-
 static bool
-is_wildcard (node_ptr const &n)
+try_resolve (annotations::file_list const &files,
+             std::vector<fs::path> const &buildable,
+             std::string &file, fs::path const &dir)
 {
-  switch (n->as<token> ().tok)
+  fs::path const &path = dir / file;
+  fs::path const &relpath = files.rel (path);
+#if 0
+  std::cout << "looking for " << files.rel (path) << "\n";
+#endif
+  if (exists (path) || std::binary_search (buildable.begin (), buildable.end (), relpath))
     {
-    case TK_FN_LBRACE:
-    case TK_FN_RBRACE:
-    case TK_FN_QMARK:
-    case TK_FN_STARSTAR:
-    case TK_FN_STAR:
+      file = relpath.native ();
       return true;
-    default:
-      return false;
     }
+
+  return false;
 }
 
 bool
@@ -112,77 +133,32 @@ resolve_sources::visit_filename (nodes::generic_node &n)
 {
   if (in_sources)
     {
-      if (find_if (n.list.begin (), n.list.end (),
-                   is_wildcard) != n.list.end ())
-        wildcards.push_back (&n);
-      else
-        plainfiles.push_back (&n);
+      // only plain files, no wildcards
+      if (n.size () == 1)
+        {
+          token &t = n[0]->as<token> ();
+          fs::path file = t.string;
+#if 0
+          std::cout << "resolving " << file << "\n";
+#endif
+
+          if (!try_resolve (files, rule_info.files, t.mutable_string, n.loc.file->parent_path ()))
+            if (!try_resolve (files, rule_info.files, t.mutable_string, files.base))
+              errors.add<semantic_error> (&n, "could not resolve file: " + C::filename (t.string),
+                                          "not in file system and no rule to build it");
+        }
     }
   return false;
 }
 
 
 
-static std::string &
-concat_token (std::string &p1, node_ptr const &p2)
-{
-  return p1 += p2->as<token> ().string;
-}
-
 bool
 resolve_sources::visit_sources (nodes::generic_node &n)
 {
-  if (!plainfiles.empty ())
-    throw std::runtime_error ("found source files somewhere outside sources");
-
   in_sources = true;
   resume_list ();
   in_sources = false;
-
-  //printf ("%lu plain files\n", plainfiles.size ());
-
-  std::vector<fs::path> source_files;
-  foreach (generic_node_ptr const &f, plainfiles)
-    {
-      fs::path filename = accumulate (f->list.begin (),
-                                      f->list.end (),
-                                      std::string (),
-                                      concat_token);
-
-      fs::path path;
-      // relative path
-      if (filename.native ()[0] != '.')
-        {
-          path = files.base / filename;
-          if (!is_regular_file (path))
-            path.clear ();
-        }
-      // absolute (source-root relative) path
-      if (path.empty () && !filename.is_absolute ())
-        {
-          path = n.loc.file->parent_path () / filename;
-          if (!is_regular_file (path))
-            path.clear ();
-        }
-      if (path.empty ())
-        {
-          errors.add<semantic_error> (f, "could not find file " + C::filename (filename));
-          continue;
-        }
-
-      if (!std::equal (files.base.begin (),
-                       files.base.end (),
-                       path.begin ()))
-        throw std::runtime_error ("source file found outside source root: " + C::filename (path));
-
-      source_files.push_back (path);
-    }
-  plainfiles.clear ();
-
-  n.list.clear ();
-  n.list.insert (n.list.end (), wildcards.begin (), wildcards.end ());
-
-  create_file_list (source_files, n.list, n.loc);
 
   return false;
 }

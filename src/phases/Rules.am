@@ -6,7 +6,6 @@ makepp_SOURCES +=		\
 	instantiate_rules.cc	\
 	name.cc			\
 	resolve_sources.cc	\
-	resolve_sources_v2.cc	\
 	resolve_vars.cc		\
 	resolve_wildcards.cc	\
 	xml.cc
