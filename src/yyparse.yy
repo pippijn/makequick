@@ -145,7 +145,8 @@ using namespace nodes;
 %type<list> define arg_enable arg_enable_options arg_enable_choices
 %type<list> arg_enable_choice arg_enable_content project project_members project_member
 %type<list> code_frag variable variable_content section section_members section_member
-%type<token> identifier filename_part link_item flag_keyword string.opt identifier.opt ac_checks
+%type<node> filename_part
+%type<token> identifier filename_token link_item flag_keyword string.opt identifier.opt ac_checks
 %type<token> arg_default check_library_notfound.opt
 
 %destructor { delete $$; } <*>
@@ -625,6 +626,13 @@ filename
 	;
 
 filename_part
+	: filename_token
+		{ $$ = $1; }
+	| "$" variable
+		{ $$ = $2; delete $1; }
+	;
+
+filename_token
 	: TK_FILENAME
 	| TK_IDENTIFIER
 	| "?"

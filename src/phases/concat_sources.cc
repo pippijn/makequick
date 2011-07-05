@@ -88,21 +88,23 @@ bool concat_sources::visit_sources (nodes::generic_node &n) { return true; }
 
 
 static bool
-is_wildcard (node_ptr const &n)
+can_concat (node_ptr const &n)
 {
-  switch (n->as<token> ().tok)
-    {
-    case TK_FN_LBRACE:
-    case TK_FN_PERCENT:
-    case TK_FN_PERPERCENT:
-    case TK_FN_QMARK:
-    case TK_FN_RBRACE:
-    case TK_FN_STAR:
-    case TK_FN_STARSTAR:
-      return true;
-    default:
-      return false;
-    }
+  if (token const *t = n->is<token> ())
+    switch (t->tok)
+      {
+      case TK_FN_LBRACE:
+      case TK_FN_PERCENT:
+      case TK_FN_PERPERCENT:
+      case TK_FN_QMARK:
+      case TK_FN_RBRACE:
+      case TK_FN_STAR:
+      case TK_FN_STARSTAR:
+        return false;
+      default:
+        return true;
+      }
+  return false;
 }
 
 static std::string &
@@ -134,7 +136,7 @@ concat_sources::visit_filename (nodes::generic_node &n)
     {
       loc.last_line = p->loc.last_line;
       loc.last_column = p->loc.last_column;
-      if (is_wildcard (p))
+      if (!can_concat (p))
         {
           commit (fn, n.list, loc);
           n.list.push_back (p);

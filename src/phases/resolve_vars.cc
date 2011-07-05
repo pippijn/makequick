@@ -19,6 +19,7 @@ namespace
     bool in_sources;
     error_log &errors;
     symbol_table &symtab;
+    generic_node_ptr sym;
 
     resolve_vars (annotation_map &annots)
       : in_sources (false)
@@ -52,7 +53,6 @@ bool resolve_vars::visit_destination (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_error (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_exclude (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_extra_dist (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_filename (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_filenames (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_flags (nodes::generic_node &n) { return true; }
 bool resolve_vars::visit_identifiers (nodes::generic_node &n) { return true; }
@@ -89,9 +89,8 @@ resolve_vars::visit_variable_content (nodes::generic_node &n)
 {
   if (!n[1])
     {
-      puts ("oi!");
-      generic_node_ptr sym = symtab.lookup (T_VARIABLE, n[0]->as<token> ().string);
-      phases::run ("xml", sym);
+      sym = symtab.lookup (T_VARIABLE, n[0]->as<token> ().string);
+      //phases::run ("xml", sym);
     }
   return true;
 }
@@ -100,6 +99,22 @@ bool
 resolve_vars::visit_variable (nodes::generic_node &n)
 {
   return true;
+}
+
+
+bool
+resolve_vars::visit_filename (nodes::generic_node &n)
+{
+  foreach (node_ptr &p, n.list)
+    {
+      p->accept (*this);
+      if (sym)
+        {
+          p = sym->list[0]->as<generic_node> ()[0];
+          sym = 0;
+        }
+    }
+  return false;
 }
 
 

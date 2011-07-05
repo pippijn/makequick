@@ -46,7 +46,7 @@ WS	[ \t\v\n\r]
 NWS	[^ \t\v\n\r]
 FLAG	[^ \t\v\n\r{}]
 /* Filenames */
-FN	[^ \t\v\n\r{}/%*.:?]
+FN	[^ \t\v\n\r{}/%*.:?$]
 FNSTART	([./*%{?]|"**"|"%%")
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
@@ -126,6 +126,7 @@ INTEGER	{DIGIT}+
 	"**"				{ Return (TK_FN_STARSTAR); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
+	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 <MULTIFILE>{
 	{WS}+				{ }

@@ -28,8 +28,8 @@ namespace nodes
 
     location loc;
 
-    template<typename T> T   &as () { return dynamic_cast<T &> (*this); }
-    template<typename T> bool is () { return dynamic_cast<T *> ( this); }
+    template<typename T> T &as () { return dynamic_cast<T &> (*this); }
+    template<typename T> T *is () { return dynamic_cast<T *> ( this); }
 
     int refcnt;
     int index;
