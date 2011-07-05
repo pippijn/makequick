@@ -48,6 +48,8 @@ namespace
       engine.infer ();
 #if 0
       engine.print ();
+      if (!std::uncaught_exception ())
+        throw "inference test";
 #endif
 
       swap (info.files, engine.info.files);
@@ -65,11 +67,6 @@ namespace
           ri.stem = r.stem;
           ri.code = r.code;
         }
-
-#if 0
-      if (!std::uncaught_exception ())
-        throw "inference test";
-#endif
     }
   };
 

@@ -30,8 +30,10 @@ inference_engine::add_rule (std::string const &target, std::vector<promise> cons
     info.baserules.push_back (r);
   else
     {
-      info.files.push_back (target);
-      info.rules.push_back (r);
+      // XXX: we can't do this, yet
+      //info.files.push_back (target);
+      //info.rules.push_back (r);
+      info.baserules.push_back (r);
     }
 }
 
