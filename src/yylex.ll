@@ -185,6 +185,7 @@ INTEGER	{DIGIT}+
 	\n				{ }
 	^\t{2}				{ }
 	^\t{1}				{ Return (TK_WHITESPACE); }
+	^{NWS}				{ BACKTRACK (0); Return (TK_WHITESPACE); }
 	[^\n\t$]+			{ Return (TK_CODE); }
 	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }

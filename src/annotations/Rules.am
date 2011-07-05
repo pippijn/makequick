@@ -1,3 +1,4 @@
 makepp_SOURCES +=		\
 	error_log.cc		\
-	file_list.cc
+	file_list.cc		\
+	symbol_table.cc

@@ -1,0 +1,9 @@
+program foo {
+	sources {
+		foo.c
+	}
+
+	FOO = a
+
+	$(FOO).o: $(FOO).c ;
+}

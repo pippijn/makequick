@@ -22,6 +22,22 @@ struct phases::pimpl
   std::tr1::unordered_set<std::string> dependencies;
 };
 
+void
+phases::print ()
+{
+  foreach (phase_map::value_type const &pair, map)
+    {
+      std::cout << "    " << pair.first;
+      std::tr1::unordered_set<std::string> const &deps = pair.second->self->dependencies;
+      if (!deps.empty ())
+        std::cout << ':';
+      foreach (std::string const &dep, deps)
+        std::cout << ' ' << dep;
+      std::cout << '\n';
+    }
+}
+
+
 phases::phases (std::string const &name, bool autorun)
   : autorun (autorun)
   , self (new pimpl)

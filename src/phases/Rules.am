@@ -2,8 +2,11 @@ makepp_SOURCES +=		\
 	audit.cc		\
 	concat_sources.cc	\
 	inference.cc		\
+	insert_syms.cc		\
 	instantiate_rules.cc	\
+	name.cc			\
 	resolve_sources.cc	\
 	resolve_sources_v2.cc	\
+	resolve_vars.cc		\
 	resolve_wildcards.cc	\
 	xml.cc

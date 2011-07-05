@@ -104,19 +104,30 @@ int
 main (int argc, char *argv[])
 try
 {
-  if (!argv[1] || !strcmp (argv[1], "--help"))
+  ++argv;
+
+  if (!argv[0] || !strcmp (argv[0], "--help"))
     {
-      puts ("usage: "PACKAGE_TARNAME" <srcdir>");
-      return argv[1] ? EXIT_SUCCESS : EXIT_FAILURE;
+      puts ("usage: "PACKAGE_TARNAME" [phases...] <srcdir>");
+      puts ("  available phases:");
+      phases::print ();
+      return argv[0] ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-  if (!strcmp (argv[1], "--version"))
+  if (!strcmp (argv[0], "--version"))
     {
       puts (PACKAGE_STRING);
       return EXIT_SUCCESS;
     }
 
-  fs::path const path (resolve (absolute (fs::path (argv[1]))));
+  std::vector<char const *> to_run;
+  while (!strncmp (argv[0], "--", 2))
+    {
+      to_run.push_back (argv[0] + 2);
+      ++argv;
+    }
+
+  fs::path const path (resolve (absolute (fs::path (argv[0]))));
   if (!exists (path))
     {
       puts ("path does not exist");
@@ -164,14 +175,21 @@ try
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
       annots.put ("errors", new error_log);
 
-      phases::run (doc, annots);
+      if (!to_run.empty ())
+        foreach (char const *phase, to_run)
+          phases::run (phase, doc, annots);
+      else
+        {
+          phases::run (doc, annots);
+        }
 
       error_log &errors = annots.get ("errors");
-      errors.print (path, argv[1]);
+      errors.print (path, argv[0]);
       if (errors.has_errors ())
         return EXIT_FAILURE;
 
-      phases::run ("xml", doc, annots);
+      if (to_run.empty ())
+        phases::run ("xml", doc, annots);
     }
   else
     return EXIT_FAILURE;

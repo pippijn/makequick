@@ -73,7 +73,7 @@ namespace
     }
   };
 
-  static phase<inference> thisphase ("inference", "concat_sources");
+  static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars");
 }
 
 bool inference::visit_ac_check (nodes::generic_node &n) { return true; }
