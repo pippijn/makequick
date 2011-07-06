@@ -1,26 +1,21 @@
-/**
- * concat_sources:
- *
- * This phase concatenates all non-wildcard path parts in filenames.
- */
 #include "phase.h"
 
 #include "foreach.h"
 
-namespace
+/** \brief Concatenate all non-wildcard path parts in filenames.
+ */
+struct concat_sources
+  : visitor
 {
-  struct concat_sources
-    : visitor
+  void visit (t_filename &n);
+
+  concat_sources (annotation_map &annots)
   {
-    void visit (t_filename &n);
+  }
+};
 
-    concat_sources (annotation_map &annots)
-    {
-    }
-  };
+static phase<concat_sources> thisphase ("concat_sources", "resolve_vars");
 
-  static phase<concat_sources> thisphase ("concat_sources", "resolve_vars");
-}
 
 static bool
 is_multi (node_ptr const &n)

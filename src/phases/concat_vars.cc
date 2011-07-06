@@ -2,20 +2,17 @@
 
 #include "foreach.h"
 
-namespace
+struct concat_vars
+  : visitor
 {
-  struct concat_vars
-    : visitor
+  void visit (t_vardecl_body &n);
+
+  concat_vars (annotation_map &annots)
   {
-    void visit (t_vardecl_body &n);
+  }
+};
 
-    concat_vars (annotation_map &annots)
-    {
-    }
-  };
-
-  static phase<concat_vars> thisphase ("concat_vars");
-}
+static phase<concat_vars> thisphase ("concat_vars");
 
 
 static bool

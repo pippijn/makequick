@@ -4,21 +4,19 @@
 
 #include <algorithm>
 
-namespace
+struct xml
+  : visitor
 {
-  struct xml
-    : visitor
-  {
-    virtual void visit (token &n);
-    virtual void visit (generic_node &n);
+  virtual void visit (token &n);
+  virtual void visit (generic_node &n);
 
-    int in_multifile;
+  int in_multifile;
 
-    xml (annotation_map &annots) : in_multifile (0) { }
-  };
+  xml (annotation_map &annots) : in_multifile (0) { }
+};
 
-  static phase<xml> thisphase ("xml", noauto);
-}
+static phase<xml> thisphase ("xml", noauto);
+
 
 static int indent;
 

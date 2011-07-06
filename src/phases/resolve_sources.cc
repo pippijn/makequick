@@ -23,40 +23,37 @@ is_sorted (ForwardIterator it, ForwardIterator et)
   return true;
 }
 
-namespace
+struct resolve_sources
+  : visitor
 {
-  struct resolve_sources
-    : visitor
+  void visit (t_filename &n);
+  void visit (t_sources &n);
+
+  bool in_sources;
+  annotations::file_list const &files;
+  annotations::rule_info const &rule_info;
+  annotations::error_log &errors;
+
+  resolve_sources (annotation_map &annots)
+    : in_sources (false)
+    , files (annots.get ("files"))
+    , rule_info (annots.get ("rule_info"))
+    , errors (annots.get ("errors"))
   {
-    void visit (t_filename &n);
-    void visit (t_sources &n);
+    assert (is_sorted (files.begin, files.end));
+    assert (is_sorted (rule_info.files.begin (), rule_info.files.end ()));
+  }
 
-    bool in_sources;
-    annotations::file_list const &files;
-    annotations::rule_info const &rule_info;
-    annotations::error_log &errors;
-
-    resolve_sources (annotation_map &annots)
-      : in_sources (false)
-      , files (annots.get ("files"))
-      , rule_info (annots.get ("rule_info"))
-      , errors (annots.get ("errors"))
-    {
-      assert (is_sorted (files.begin, files.end));
-      assert (is_sorted (rule_info.files.begin (), rule_info.files.end ()));
-    }
-
-    ~resolve_sources ()
-    {
+  ~resolve_sources ()
+  {
 #if 0
-      if (!std::uncaught_exception ())
-        throw __func__;
+    if (!std::uncaught_exception ())
+      throw __func__;
 #endif
-    }
-  };
+  }
+};
 
-  static phase<resolve_sources> thisphase ("resolve_sources", "inference");
-}
+static phase<resolve_sources> thisphase ("resolve_sources", "inference");
 
 
 static bool

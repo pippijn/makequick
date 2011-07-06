@@ -14,31 +14,28 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-namespace
+struct resolve_wildcards
+  : visitor
 {
-  struct resolve_wildcards
-    : visitor
+  void visit (t_filename &n);
+  void visit (t_sources &n);
+
+  bool in_sources;
+  annotations::file_list const &files;
+  annotations::error_log &errors;
+
+  std::vector<fs::path> source_files;
+  generic_node_vec wildcards;
+
+  resolve_wildcards (annotation_map &annots)
+    : in_sources (false)
+    , files (annots.get ("files"))
+    , errors (annots.get ("errors"))
   {
-    void visit (t_filename &n);
-    void visit (t_sources &n);
+  }
+};
 
-    bool in_sources;
-    annotations::file_list const &files;
-    annotations::error_log &errors;
-
-    std::vector<fs::path> source_files;
-    generic_node_vec wildcards;
-
-    resolve_wildcards (annotation_map &annots)
-      : in_sources (false)
-      , files (annots.get ("files"))
-      , errors (annots.get ("errors"))
-    {
-    }
-  };
-
-  //static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
-}
+//static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 
 
 

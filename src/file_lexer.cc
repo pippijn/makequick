@@ -8,7 +8,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-file_lexer::file_lexer (std::vector<fs::path const *> const &files)
+file_lexer::file_lexer (file_vec const &files)
   : it (files.begin ())
   , et (files.end ())
 {

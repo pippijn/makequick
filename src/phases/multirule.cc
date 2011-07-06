@@ -4,34 +4,31 @@
 
 #include <algorithm>
 
-namespace
+struct multirule
+  : visitor
 {
-  struct multirule
-    : visitor
+  void visit (t_filename &n);
+  void visit (t_rule &n);
+  void visit (t_rules &n);
+
+  enum rule_state
   {
-    void visit (t_filename &n);
-    void visit (t_rule &n);
-    void visit (t_rules &n);
-
-    enum rule_state
-    {
-      S_NONE,
-      S_TARGET,
-      S_PREREQ
-    };
-
-    std::vector<token_vec> instances;
-    std::vector<t_rule_ptr> rules;
-    rule_state state;
-
-    multirule (annotation_map &annots)
-      : state (S_NONE)
-    {
-    }
+    S_NONE,
+    S_TARGET,
+    S_PREREQ
   };
 
-  static phase<multirule> thisphase ("multirule", "resolve_vars");
-}
+  std::vector<token_vec> instances;
+  std::vector<t_rule_ptr> rules;
+  rule_state state;
+
+  multirule (annotation_map &annots)
+    : state (S_NONE)
+  {
+  }
+};
+
+static phase<multirule> thisphase ("multirule", "resolve_vars");
 
 
 static bool lbrace (token_ptr const &t) { return t->tok == TK_FN_LBRACE; }

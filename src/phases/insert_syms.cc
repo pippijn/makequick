@@ -10,46 +10,43 @@
 using annotations::error_log;
 using annotations::symbol_table;
 
-namespace
+struct insert_syms
+  : visitor
 {
-  struct insert_syms
-    : visitor
+  void visit (t_vardecl &n);
+  void visit (t_target_definition &n);
+  void visit (t_program &n);
+  void visit (t_library &n);
+  void visit (t_template &n);
+  void visit (t_document &n);
+
+  error_log &errors;
+  symbol_table &symtab;
+
+  enum visit_state
   {
-    void visit (t_vardecl &n);
-    void visit (t_target_definition &n);
-    void visit (t_program &n);
-    void visit (t_library &n);
-    void visit (t_template &n);
-    void visit (t_document &n);
+    S_NONE,
+    S_PROGRAM,
+    S_LIBRARY,
+    S_TEMPLATE,
+  } state;
 
-    error_log &errors;
-    symbol_table &symtab;
-
-    enum visit_state
-    {
-      S_NONE,
-      S_PROGRAM,
-      S_LIBRARY,
-      S_TEMPLATE,
-    } state;
-
-    insert_syms (annotation_map &annots)
-      : errors (annots.get ("errors"))
-      , symtab (annots.put ("symtab", new symbol_table))
-      , state (S_NONE)
-    {
-    }
+  insert_syms (annotation_map &annots)
+    : errors (annots.get ("errors"))
+    , symtab (annots.put ("symtab", new symbol_table))
+    , state (S_NONE)
+  {
+  }
 
 #if 1
-    ~insert_syms ()
-    {
-      symtab.print ();
-    }
+  ~insert_syms ()
+  {
+    symtab.print ();
+  }
 #endif
-  };
+};
 
-  static phase<insert_syms> thisphase ("insert_syms", "audit");
-}
+static phase<insert_syms> thisphase ("insert_syms", "audit");
 
 
 void

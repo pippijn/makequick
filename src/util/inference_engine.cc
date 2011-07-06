@@ -17,7 +17,9 @@ inference_engine::add_file (fs::path const &file)
 }
 
 void
-inference_engine::add_rule (std::string const &target, std::vector<promise> const &prereqs, node_ptr const &code)
+inference_engine::add_rule (std::string const &target,
+                            std::vector<promise> const &prereqs,
+                            node_ptr const &code)
 {
   rule r (target, prereqs, code);
 
@@ -39,10 +41,13 @@ inference_engine::add_rule (std::string const &target, std::vector<promise> cons
 }
 
 
-struct engine
+/** \brief The actual inference algorithm implementation.
+ *
+ * This class implements the actual inference algorithm. It does not keep
+ * state.
+ */
+class inference_engine::engine
 {
-  typedef inference_engine::promise promise;
-
   typedef std::map<std::string, std::vector<rule> > partial_map;
   typedef std::vector<partial_map> partial_vec;
 
@@ -52,12 +57,29 @@ struct engine
     std::vector<fs::path> files;
   };
 
-  static void infer_partials (std::vector<rule> &rules, std::vector<fs::path> &files, partial_vec &partials)
+  /** \brief Infer partial rules from patterns.
+   *
+   * The first step of the algorithm is to infer rules from pattern rules. It
+   * is possible that a rule prerequisite does not exist, yet, but is shown to
+   * be buildable, later on, after more rules have been inferred. The \c
+   * infer_partials function stores completely and also partially fulfilled
+   * rules in the \p partials list.
+   *
+   * The complexity of this algorithm is \f$\Theta(f * r)\f$, as it always
+   * processes the complete input. The actual time spent is, however, also
+   * dependent on the number of prerequisites each rule has. This is considered
+   * to be relatively constant, though.
+   *
+   * <h3>Implementation</h3>
+   */
+  static void infer_partials (std::vector<rule> const &rules,
+                              std::vector<fs::path> const &files,
+                              partial_vec &partials)
   {
     foreach (fs::path const &f, files)
       foreach (rule const &r, rules)
         {
-          int ridx = &r - &*rules.begin ();
+          ptrdiff_t ridx = &r - &*rules.begin ();
           foreach (promise const &p, r.prereqs)
             if (p->matches (f))
               {
@@ -102,7 +124,10 @@ struct engine
                                   mainrule.prereqs.end (),
                                   bind (&promise::matches, arg1, mainrule.target))
                     != mainrule.prereqs.end ())
-                  throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
+                  if (mainrule.stem == mainrule.target)
+                    throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
+                  else
+                    continue;
 
                 inferred.rules.push_back (mainrule);
                 inferred.files.push_back (mainrule.target);
@@ -135,15 +160,31 @@ struct engine
         }
   }
 
+  /** \brief Sort and unique a range.
+   * 
+   * This function ensures that the passed vector is sorted and has no
+   * duplicate elements. It is used to compress the file list after inference,
+   * as there may be many rules for a single file.
+   */
   template<typename T>
   static void
-  compact (std::vector<T> &vec)
+  compact (std::vector<T> &range)
   {
-    sort (vec.begin (), vec.end ());
-    vec.erase (unique (vec.begin (), vec.end ()), vec.end ());
+    sort (range.begin (), range.end ());
+    range.erase (unique (range.begin (), range.end ()), range.end ());
   }
 
-  static void infer (std::vector<rule> &baserules, std::vector<rule> &rules, std::vector<fs::path> &files)
+public:
+  /** \brief Main entry point for the inference algorithm.
+   *
+   * \param baserules are the rules added via \c add_rule.
+   * \param rules is where the inferred rules are stored.
+   * \param files is the input file list. Inferred files will be added to this
+   * list.
+   */
+  static void infer (std::vector<rule> const &baserules,
+                     std::vector<rule> &rules,
+                     std::vector<fs::path> &files)
   {
     partial_vec partials (baserules.size ());
 
@@ -167,6 +208,7 @@ struct engine
 void
 inference_engine::infer ()
 {
+  assert (info.rules.empty ());
 #if 0
   timer T ("inference");
   printf ("running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());

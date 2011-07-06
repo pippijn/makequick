@@ -2,39 +2,37 @@
 
 #include "foreach.h"
 
-namespace
+struct default_destdir
+  : visitor
 {
-  struct default_destdir
-    : visitor
+  void visit (t_target_definition &n);
+  void visit (t_program &n);
+  void visit (t_library &n);
+
+  t_destination_ptr bindir;
+  t_destination_ptr libdir;
+
+  enum visit_state
   {
-    void visit (t_target_definition &n);
-    void visit (t_program &n);
-    void visit (t_library &n);
+    S_NONE,
+    S_PROGRAM,
+    S_LIBRARY
+  } state;
 
-    t_destination_ptr bindir;
-    t_destination_ptr libdir;
+  static t_destination_ptr make_dest (char const *dir)
+  {
+    return new t_destination (location::generated, new token (location::generated, TK_IDENTIFIER, "bin"));
+  }
 
-    enum visit_state
-    {
-      S_NONE,
-      S_PROGRAM,
-      S_LIBRARY
-    } state;
+  default_destdir (annotation_map &annots)
+    : bindir (make_dest ("bin"))
+    , libdir (make_dest ("lib"))
+  {
+  }
+};
 
-    static t_destination_ptr make_dest (char const *dir)
-    {
-      return new t_destination (location::generated, new token (location::generated, TK_IDENTIFIER, "bin"));
-    }
+static phase<default_destdir> thisphase ("default_destdir", "audit");
 
-    default_destdir (annotation_map &annots)
-      : bindir (make_dest ("bin"))
-      , libdir (make_dest ("lib"))
-    {
-    }
-  };
-
-  static phase<default_destdir> thisphase ("default_destdir", "audit");
-}
 
 void
 default_destdir::visit (t_target_definition &n)

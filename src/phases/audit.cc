@@ -1,22 +1,20 @@
 #include "phase.h"
 
-namespace
+struct audit
+  : visitor
 {
-  struct audit
-    : visitor
+  void visit (generic_node &n);
+
+  std::vector<bool> s;
+
+  audit (annotation_map &annots)
+    : s (node::node_count ())
   {
-    virtual void visit (generic_node &n);
+  }
+};
 
-    std::vector<bool> s;
+static phase<audit> thisphase ("audit");
 
-    audit (annotation_map &annots)
-      : s (node::node_count ())
-    {
-    }
-  };
-
-  static phase<audit> thisphase ("audit");
-}
 
 void 
 audit::visit (generic_node &n)
