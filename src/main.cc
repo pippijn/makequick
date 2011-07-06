@@ -5,12 +5,11 @@
 #include "annotations/error_log.h"
 #include "annotation_map.h"
 #include "foreach.h"
-#include "lexer.h"
-#include "parser.h"
 #include "parseutil.h"
 #include "phases.h"
 #include "sighandler.h"
-#include "timing.h"
+
+#include <cstdio>
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -120,14 +119,8 @@ try
     }
 
   std::vector<fs::path> files;
-  {
-    timer T ("reading directory");
-    collect (path, files);
-  }
-  {
-    timer T ("sorting files");
-    sort (files.begin (), files.end (), base_sort (path));
-  }
+  collect (path, files);
+  sort (files.begin (), files.end (), base_sort (path));
 
 #if 0
   copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));

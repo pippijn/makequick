@@ -4,8 +4,10 @@
 #include "file_lexer.h"
 #include "string_lexer.h"
 
+#include <boost/filesystem/path.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/spirit/home/phoenix.hpp>
 
 
 static node_ptr

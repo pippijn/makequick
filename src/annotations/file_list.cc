@@ -1,5 +1,7 @@
 #include "annotations/file_list.h"
 
+#include <boost/filesystem/path.hpp>
+
 using annotations::file_list;
 
 void

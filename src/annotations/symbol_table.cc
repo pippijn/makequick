@@ -1,7 +1,11 @@
 #include "annotations/symbol_table.h"
 
+#include "foreach.h"
 #include "phases.h"
 #include "node.h"
+
+#include <cstdio>
+#include <stdexcept>
 
 using annotations::symbol_table;
 using nodes::generic_node_ptr;
@@ -80,14 +84,14 @@ symbol_table::print () const
   using nodes::node_type_name;
 
   puts ("symbol table:");
-  BOOST_FOREACH (scope_map::const_reference scope, scopes)
+  foreach (scope_map::const_reference scope, scopes)
     {
       printf ("scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
-      BOOST_FOREACH (node_map const &type, scope.second)
+      foreach (node_map const &type, scope.second)
         if (!type.empty ())
           {
             printf ("  type %s\n", symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
-            BOOST_FOREACH (node_map::const_reference sym, type)
+            foreach (node_map::const_reference sym, type)
               {
                 printf ("    sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index);
               }

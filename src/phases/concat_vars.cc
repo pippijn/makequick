@@ -1,5 +1,7 @@
 #include "phase.h"
 
+#include "foreach.h"
+
 namespace
 {
   struct concat_vars

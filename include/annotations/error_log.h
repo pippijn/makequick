@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include <boost/filesystem_fwd.hpp>
+
 namespace annotations
 {
   struct error_log

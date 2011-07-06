@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 using annotations::error_log;

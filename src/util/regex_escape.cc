@@ -1,5 +1,7 @@
 #include "util/regex_escape.h"
 
+#include "foreach.h"
+
 void
 regex_escape (std::string &regex, std::string const &wc)
 {

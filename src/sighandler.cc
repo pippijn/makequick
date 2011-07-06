@@ -3,6 +3,8 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <stdexcept>
 
 bool should_terminate = false;
 

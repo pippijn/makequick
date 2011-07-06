@@ -2,6 +2,9 @@
 
 #include "ylcode.h"
 
+#include <boost/filesystem/path.hpp>
+#include <boost/spirit/home/phoenix.hpp>
+
 void
 create_file_list (std::vector<fs::path> const &source_files,
                   nodes::node_vec &list,

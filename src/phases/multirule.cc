@@ -1,7 +1,8 @@
 #include "phase.h"
-#include <typeinfo>
 
 #include "foreach.h"
+
+#include <algorithm>
 
 namespace
 {

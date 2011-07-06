@@ -3,10 +3,14 @@
 
 #include "annotations/file_list.h"
 #include "annotations/rule_info.h"
-#include "colours.h"
 #include "foreach.h"
 #include "util/inference_engine.h"
 #include "util/regex_escape.h"
+
+#include <boost/filesystem/path.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <boost/regex.hpp>
+#include <boost/spirit/home/phoenix.hpp>
 
 using annotations::file_list;
 using annotations::rule_info;
