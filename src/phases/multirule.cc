@@ -20,7 +20,7 @@ namespace
     };
 
     std::vector<token_vec> instances;
-    generic_node_ptr rules;
+    std::vector<t_rule_ptr> rules;
     rule_state state;
 
     multirule (annotation_map &annots)
@@ -119,7 +119,7 @@ multirule::visit (t_rule &n)
         , (new t_filenames (loc))->add (make_filename (loc, instance))
         , &target
         , 0);
-      rules->add (rule);
+      rules.push_back (rule);
     }
 
   instances.clear ();
@@ -128,10 +128,10 @@ multirule::visit (t_rule &n)
 void
 multirule::visit (t_rules &n)
 {
-  rules = &n;
   foreach (node_ptr const &p, n.list)
     {
       p->accept (*this);
     }
-  rules = 0;
+  n.list.insert (n.list.end (), rules.begin (), rules.end ());
+  rules.clear ();
 }

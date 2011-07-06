@@ -71,7 +71,7 @@ struct lex_timer
 
     double average = std::accumulate (times.begin (), times.end (), 0.0) / times.size ();
 
-    printf ("%%%% lex: %d tokens - avg: %.3gsec (%.1f tokens/sec)\n", times.size (), average, 1 / average);
+    printf ("%%%% lex: %lu tokens - avg: %.3gsec (%.1f tokens/sec)\n", times.size (), average, 1 / average);
   }
 
   void next ()
