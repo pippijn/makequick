@@ -59,7 +59,7 @@ error_log::print (fs::path const &path, char const *base) const
           break;
         }
       std::string what = e.what ();
-      boost::algorithm::replace_all (what, path.native (), base);
+      boost::replace_all (what, path.native (), base);
       puts (what.c_str ());
     }
 }

@@ -88,7 +88,7 @@ struct engine
 
             using namespace boost::phoenix;
             using namespace boost::phoenix::arg_names;
-            using boost::algorithm::replace_first;
+            using boost::replace_first;
 
             if (std::find_if (mainrule.prereqs.begin (),
                               mainrule.prereqs.end (),

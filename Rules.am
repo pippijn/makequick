@@ -4,7 +4,7 @@ include automake/cppinc.am
 AM_YFLAGS += -d --verbose
 AM_CPPFLAGS += -ggdb3
 #AM_CPPFLAGS += -include stdafx/stdafx.h
-AM_CPPFLAGS += -include stdafx.h
+#AM_CPPFLAGS += -include stdafx.h
 #AM_CPPFLAGS += -include-pch stdafx.h.pch
 #AM_CPPFLAGS += -D_GLIBCXX_DEBUG
 AM_CXXFLAGS += -fnon-call-exceptions

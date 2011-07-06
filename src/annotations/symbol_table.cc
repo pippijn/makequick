@@ -68,11 +68,14 @@ symbol_table::lookup (symbol_type type, std::string const &name)
 }
 
 static char const *
-symbol_type_name (int type)
+symbol_type_name (size_t type)
 {
   switch (type)
     {
     case T_VARIABLE: return "variable";
+    case T_PROGRAM : return "program";
+    case T_LIBRARY : return "library";
+    case T_TEMPLATE: return "template";
     }
 
   throw std::runtime_error ("invalid symbol type");

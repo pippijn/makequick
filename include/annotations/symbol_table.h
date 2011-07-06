@@ -9,7 +9,10 @@
 
 enum symbol_type
 {
-  T_VARIABLE
+  T_VARIABLE,
+  T_PROGRAM,
+  T_LIBRARY,
+  T_TEMPLATE
 };
 
 namespace annotations

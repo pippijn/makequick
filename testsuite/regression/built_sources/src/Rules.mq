@@ -2,5 +2,7 @@ program datagen {
 	sources {
 		main.c
 		foo.c
+
+		foobar.c
 	}
 }

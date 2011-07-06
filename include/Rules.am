@@ -24,7 +24,6 @@ EXTRA_DIST +=			\
 	phases.h		\
 	sighandler.h		\
 	string_lexer.h		\
-	timing.h		\
 	visitor.h		\
 	y.tab.h			\
 	ylcode.h
