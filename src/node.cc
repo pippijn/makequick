@@ -2,6 +2,11 @@
 
 #include "object_pool.h"
 
+#include <boost/filesystem/path.hpp>
+
+static fs::path const generated_file = "<generated>";
+location const location::generated = { &generated_file, 0, 0, 0, 0 };
+
 namespace nodes
 {
   void intrusive_ptr_release (node *n) { if (!--n->refcnt) delete n; }
@@ -68,8 +73,8 @@ namespace nodes
   bool
   node::audit_hash ()
   {
-    std::vector<node *>::reverse_iterator it = nodes.rbegin ();
-    std::vector<node *>::reverse_iterator et = nodes.rend ();
+    std::vector<node *>::const_reverse_iterator it = nodes.rbegin ();
+    std::vector<node *>::const_reverse_iterator et = nodes.rend ();
 
     while (it != et)
       {

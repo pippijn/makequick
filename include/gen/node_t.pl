@@ -23,7 +23,8 @@ for my $node (keys %$nodes) {
       } else {
          $params .= ", node_ptr const &$_";
          $args .= ", $_";
-         $accessors .= "\n  node_ptr &$_ () { return (*this)[$i]; }";
+         $accessors .= "\n  node_ptr const &$_ () { return (*this)[$i]; }";
+         $accessors .= "\n  void $_ (node_ptr const &n) { (*this)[$i] = n; }";
       }
       ++$i;
    }

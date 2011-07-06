@@ -10,6 +10,15 @@
 using annotations::symbol_table;
 using nodes::generic_node_ptr;
 
+namespace nodes
+{
+  static bool
+  operator < (generic_node_ptr const &a, generic_node_ptr const &b)
+  {
+    return a->index < b->index;
+  }
+}
+
 void
 symbol_table::enter_scope (generic_node_ptr scope)
 {
@@ -89,14 +98,14 @@ symbol_table::print () const
   puts ("symbol table:");
   foreach (scope_map::const_reference scope, scopes)
     {
-      printf ("scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
+      printf ("  scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
       foreach (node_map const &type, scope.second)
         if (!type.empty ())
           {
-            printf ("  type %s\n", symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
+            printf ("    type %s\n", symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
             foreach (node_map::const_reference sym, type)
               {
-                printf ("    sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index);
+                printf ("      sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index);
               }
           }
     }

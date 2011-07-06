@@ -2,6 +2,7 @@ makepp_SOURCES +=		\
 	audit.cc		\
 	concat_sources.cc	\
 	concat_vars.cc		\
+	default_destdir.cc	\
 	inference.cc		\
 	insert_syms.cc		\
 	instantiate_rules.cc	\

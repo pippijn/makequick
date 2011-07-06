@@ -4,8 +4,6 @@
 
 #include <algorithm>
 
-#define VALID_XML 0
-
 namespace
 {
   struct xml
@@ -40,38 +38,38 @@ xmlname (char const *p)
   return s;
 }
 
+#define CYAN "\e[0;36m"
+#define GREEN "\e[0;32m"
+#define WHITE "\e[1;37m"
+#define YELLOW "\e[0;33m"
+#define R "\e[0m"
+
 void
 xml::visit (token &n)
 {
-#if VALID_XML
-  std::string const name = xmlname (tokname (n.tok));
-  printf ("%*s<t:%s><![CDATA[%s]]></t:%s>\n", indent, "", name.c_str (), n.string.c_str (), name.c_str ());
-#else
-  printf ("%*s%s[%d:%d-%d:%d]: \"%s\"\n", indent, "", tokname (n.tok),
-          n.loc.first_line, n.loc.first_column,
-          n.loc.last_line, n.loc.last_column,
-          n.string.c_str ());
-#endif
+  printf ("%*s%s", indent, "", tokname (n.tok));
+  if (n.loc.first_line)
+    printf ("["YELLOW"%d:%d"R"-"YELLOW"%d:%d"R"]",
+            n.loc.first_line, n.loc.first_column,
+            n.loc.last_line, n.loc.last_column);
+  printf (": "WHITE"\"%s\""R"\n", n.string.c_str ());
 }
 
 void 
 xml::visit (generic_node &n)
 {
-#if VALID_XML
-  printf ("%*s<n:%s>\n", indent, "", node_type_name[n.type]);
-#else
-  printf ("%*s<%s s='%d:%d' e='%d:%d'>\n", indent, "", node_type_name[n.type],
-          n.loc.first_line, n.loc.first_column,
-          n.loc.last_line, n.loc.last_column);
-#endif
+  printf ("%*s<"CYAN"%s"R, indent, "", node_type_name[n.type]);
+  if (n.loc.first_line)
+    printf (" s='"YELLOW"%d:%d"R"' e='"YELLOW"%d:%d"R"'",
+            n.loc.first_line, n.loc.first_column,
+            n.loc.last_line, n.loc.last_column);
+  else
+    printf (" "GREEN"generated='true'"R);
+  printf (">\n");
   indent += 2;
   foreach (node_ptr const &p, n.list)
     if (p)
       p->accept (*this);
   indent -= 2;
-#if VALID_XML
-  printf ("%*s</n:%s>\n", indent, "", node_type_name[n.type]);
-#else
-  printf ("%*s</%s>\n", indent, "", node_type_name[n.type]);
-#endif
+  printf ("%*s</"CYAN"%s"R">\n", indent, "", node_type_name[n.type]);
 }
