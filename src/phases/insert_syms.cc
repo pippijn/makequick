@@ -43,8 +43,8 @@ namespace
 void
 insert_syms::visit (t_vardecl &n)
 {
-  std::string const &name = n[0]->as<token> ().string;
-  generic_node *sym = &n[1]->as<generic_node> ();
+  std::string const &name = n.var ()->as<token> ().string;
+  generic_node_ptr sym = &n.body ()->as<t_vardecl_body> ();
   if (!symtab.insert (T_VARIABLE, name, sym))
     errors.add<semantic_error> (&n, "variable " + C::quoted (name) + " already defined in this scope");
 }

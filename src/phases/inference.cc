@@ -70,7 +70,7 @@ namespace
     }
   };
 
-  static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars");
+  static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars", "multirule");
 }
 
 
@@ -155,12 +155,12 @@ void
 inference::visit (t_rule &n)
 {
   state = S_TARGET;
-  n[0]->as<generic_node> ()[0]->accept (*this);
+  n.target ()->as<t_filenames> ()[0]->accept (*this);
   state = S_PREREQ;
-  n[1]->as<generic_node> ()[0]->accept (*this);
+  n.prereq ()->as<t_filenames> ()[0]->accept (*this);
   state = S_NONE;
 
-  engine.add_rule (target, prereq, n[2]);
+  engine.add_rule (target, prereq, n.code ());
   target.clear ();
   prereq.clear ();
 }

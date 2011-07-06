@@ -41,7 +41,7 @@ yylex.cc: $(CURDIR)/yylex.ll
 	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h} 2>&1`"	\
 		|| (echo "Updating ${@:.cc=.h}" && mv /tmp/${@:.cc=.h} ${@:.cc=.h})
 
-%.h: include/gen/%.pl
+%.h: include/gen/%.pl include/gen/nodes.pm
 	$(AM_V_GEN)perl $< > $@
 
 rule_init.h: $(CURDIR)/yyparse.yy

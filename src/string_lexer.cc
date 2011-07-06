@@ -1,5 +1,4 @@
-#include "lexer.h"
-#include "lexer/pimpl.h"
+#include "string_lexer.h"
 #include "yystate.h"
 
 #include <cassert>

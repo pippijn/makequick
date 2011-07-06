@@ -1,6 +1,7 @@
 include algorithm/Rules.am
 include annotations/Rules.am
 include boost/Rules.am
+include gen/Rules.am
 include lexer/Rules.am
 include stdafx/Rules.am
 include util/Rules.am
@@ -10,6 +11,7 @@ EXTRA_DIST +=			\
 	annotation_map.h	\
 	colours.h		\
 	exception.h		\
+	file_lexer.h		\
 	foreach.h		\
 	lexer.h			\
 	local.h			\
@@ -17,14 +19,12 @@ EXTRA_DIST +=			\
 	node_ptr.h		\
 	object_pool.h		\
 	parser.h		\
+	parseutil.h		\
 	phase.h			\
 	phases.h		\
 	sighandler.h		\
-	stdafx.h		\
+	string_lexer.h		\
 	timing.h		\
 	visitor.h		\
 	y.tab.h			\
 	ylcode.h
-
-stdafx.h: include/stdafx/stdafx.h
-	@cp $< $@

@@ -1,7 +1,16 @@
 %{
 #include "parser.h"
-#include "yystate.h"
 #define YYSTYPE YYSTYPE
+%}
+
+%union {
+  nodes::node *node;
+  nodes::node_list *list;
+  tokens::token *token;
+}
+
+%{
+#include "yystate.h"
 
 union YYSTYPE;
 struct YYLTYPE;
@@ -11,6 +20,9 @@ yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
   return self->lex.next (yylval, yylloc);
 }
 
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+ * If N is 0, then set CURRENT to the empty location which ends
+ * the previous symbol: RHS[0] (always defined).  */
 #define YYLLOC_DEFAULT(Current, Rhs, N)					\
     do {								\
       (Current) = YYRHSLOC (Rhs, 1);					\
@@ -30,10 +42,7 @@ yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
 	}								\
     } while (YYID (0))
 
-/* YY_LOCATION_PRINT -- Print the location on the stream.
-   This macro was not mandated originally: define only if we know
-   we won't break user code: when these are the locations we know.  */
-
+/* YY_LOCATION_PRINT -- Print the location on the stream. */
 #define YY_LOCATION_PRINT(File, Loc)			\
     fprintf (File, "%d.%d-%d.%d",			\
 	     (Loc).first_line, (Loc).first_column,	\
@@ -41,12 +50,6 @@ yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
 
 using namespace nodes;
 %}
-
-%union {
-  nodes::node *node;
-  nodes::node_list *list;
-  tokens::token *token;
-}
 
 %define api.pure
 %locations
@@ -145,8 +148,8 @@ using namespace nodes;
 %type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
 %type<list> define arg_enable arg_enable_options arg_enable_choices
 %type<list> arg_enable_choice arg_enable_content project project_members project_member
-%type<list> code_frag variable variable_content section section_members
-%type<node> filename_part section_member target_member
+%type<list> variable variable_content section section_members
+%type<node> filename_part section_member target_member code_frag
 %type<token> identifier filename_token link_item flag_keyword string.opt identifier.opt ac_checks
 %type<token> arg_default check_library_notfound.opt
 
@@ -649,7 +652,7 @@ filename_token
 
 code_frag
 	: TK_CODE
-		{ $$ = make_node<n_code> (@$, $1); }
+		{ $$ = $1; }
 	| "$" variable
 		{ $$ = $2; delete $1; }
 	;

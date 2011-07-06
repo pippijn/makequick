@@ -1,0 +1,6 @@
+EXTRA_DIST +=		\
+	nodes.pm	\
+	node_fwd.pl	\
+	node_t.pl	\
+	visitor_cc.pl	\
+	visitor_t.pl

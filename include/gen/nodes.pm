@@ -9,7 +9,6 @@
    check_headers => ['names'],
    check_library => ['lib', 'sym', 'hdr', 'notfound', 'desc'],
    check_sizeof => ['type'],
-   code => ['code'],
    define => ['id', 'string'],
    destination => ['dir'],
    document => ['decls'],

@@ -105,6 +105,13 @@ namespace nodes
   node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2, node_ptr const &v3, node_ptr const &v4);
 
 #include "node_t.h"
+
+  template<typename T>
+  boost::intrusive_ptr<T>
+  as (node_ptr const &n)
+  {
+    return &n->as<T> ();
+  }
 }
 
 namespace tokens

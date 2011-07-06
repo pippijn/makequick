@@ -1,2 +1,2 @@
 EXTRA_DIST +=		\
-	filesystem_fwd.h
+	filesystem_fwd.hpp

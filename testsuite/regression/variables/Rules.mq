@@ -3,7 +3,8 @@ program foo {
 		foo.c
 	}
 
-	FOO = a b c
+	FOO = a
+		b c
 	BAR = a
 
 	$(BAR){$(FOO)}.o: a{$(FOO)}.c ;

@@ -43,24 +43,28 @@ namespace
     {
     }
 
+#if 0
     ~resolve_vars ()
     {
       if (!std::uncaught_exception ())
         exit (0);
     }
+#endif
   };
 
-  static phase<resolve_vars> thisphase ("resolve_vars", "insert_syms");
+  static phase<resolve_vars> thisphase ("resolve_vars", "insert_syms", "concat_vars");
 }
 
 
 void
 resolve_vars::visit (t_variable_content &n)
 {
-  if (!n[1])
+  if (!n.member ())
     {
-      sym = symtab.lookup (T_VARIABLE, n[0]->as<token> ().string);
+      sym = symtab.lookup (T_VARIABLE, n.name ()->as<token> ().string);
+#if 0
       phases::run ("xml", sym);
+#endif
     }
   visitor::visit (n);
 }
@@ -85,12 +89,14 @@ resolve_vars::visit (t_filename &n)
         {
           n.list.erase (n.list.begin () + i, n.list.begin () + i + 1);
           node_ptr parsed = parse_string (extract_string (sym), r_filename, state == S_MULTIFILE);
-          sym = &parsed->as<generic_node> ();
+          sym = &parsed->as<t_filename> ();
           n.list.insert (n.list.begin () + i, sym->list.begin (), sym->list.end ());
           sym = 0;
         }
     }
+#if 0
   phases::run ("xml", &n);
+#endif
 }
 
 

@@ -1,4 +1,5 @@
 EXTRA_DIST +=			\
 	error_log.h		\
 	file_list.h		\
-	rule_info.h
+	rule_info.h		\
+	symbol_table.h

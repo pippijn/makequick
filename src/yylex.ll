@@ -52,7 +52,7 @@ FNSTART	([./*%{?]|"**"|"%%")
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
 /* Rule start */
 MULTI	"{"[^}\n\r]+"}"
-RLSTART	((({FNSTART}|{MULTI})({NWS}|{MULTI}))+|{ID})":"
+RLSTART	(({FNSTART}|{MULTI})({NWS}|{MULTI})+|{ID})":"
 /* Numbers */
 DIGIT	[0-9]
 INTEGER	{DIGIT}+

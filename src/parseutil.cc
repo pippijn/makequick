@@ -1,6 +1,9 @@
 #include "parseutil.h"
 #include "parser.h"
 
+#include "file_lexer.h"
+#include "string_lexer.h"
+
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/algorithm/transform.hpp>
 
