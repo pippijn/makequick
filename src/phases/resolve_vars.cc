@@ -4,6 +4,7 @@
 #include "annotations/symbol_table.h"
 #include "colours.h"
 #include "foreach.h"
+#include "util/extract_string.h"
 
 using annotations::error_log;
 using annotations::symbol_table;
@@ -13,134 +14,107 @@ namespace
   struct resolve_vars
     : visitor
   {
-#include "node_visit.h"
-    virtual void visit (generic_node &n);
+    virtual void visit (t_variable_content &n);
+    virtual void visit (t_variable &n);
+    virtual void visit (t_filename &n);
+    virtual void visit (t_program &n);
+    virtual void visit (t_document &n);
+    virtual void visit (token &n);
 
     bool in_sources;
     error_log &errors;
     symbol_table &symtab;
     generic_node_ptr sym;
 
+    enum parse_state
+    {
+      S_NONE,
+      S_FILENAME,
+      S_MULTIFILE
+    };
+
+    parse_state state;
+
     resolve_vars (annotation_map &annots)
       : in_sources (false)
       , errors (annots.get ("errors"))
       , symtab (annots.get ("symtab"))
+      , state (S_NONE)
     {
     }
 
     ~resolve_vars ()
     {
+      if (!std::uncaught_exception ())
+        exit (0);
     }
   };
 
   static phase<resolve_vars> thisphase ("resolve_vars", "insert_syms");
 }
 
-bool resolve_vars::visit_ac_check (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_arg_enable_choice (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_arg_enable_choices (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_arg_enable (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_alignof (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_cflags (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_functions (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_headers (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_library (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_check_sizeof (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_code (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_define (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_description (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_destination (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_error (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_exclude (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_extra_dist (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_filenames (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_flags (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_identifiers (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_if (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_inheritance (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_library (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_link_body (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_link (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_nodist_sources (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_project_member (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_project_members (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_project (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_rule_line (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_rule_lines (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_rule (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_rules (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_section_members (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_section (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_sources_members (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_sources (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_sourcesref (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_target_definition (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_target_members (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_template (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_tool_flags (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_toplevel_declaration (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_toplevel_declarations (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_vardecl_body (nodes::generic_node &n) { return true; }
-bool resolve_vars::visit_vardecl (nodes::generic_node &n) { return true; }
 
-
-bool
-resolve_vars::visit_variable_content (nodes::generic_node &n)
+void
+resolve_vars::visit (t_variable_content &n)
 {
   if (!n[1])
     {
       sym = symtab.lookup (T_VARIABLE, n[0]->as<token> ().string);
-      //phases::run ("xml", sym);
+      phases::run ("xml", sym);
     }
-  return true;
+  visitor::visit (n);
 }
 
-bool
-resolve_vars::visit_variable (nodes::generic_node &n)
+void
+resolve_vars::visit (t_variable &n)
 {
-  return true;
+  visitor::visit (n);
 }
 
 
-bool
-resolve_vars::visit_filename (nodes::generic_node &n)
+void
+resolve_vars::visit (t_filename &n)
 {
-  foreach (node_ptr &p, n.list)
+  local (state) = S_FILENAME;
+  for (size_t i = 0; i < n.size (); i++)
     {
+      node_ptr &p = n[i];
       p->accept (*this);
+
       if (sym)
         {
-          p = sym->list[0]->as<generic_node> ()[0];
+          n.list.erase (n.list.begin () + i, n.list.begin () + i + 1);
+          node_ptr parsed = parse_string (extract_string (sym), r_filename, state == S_MULTIFILE);
+          sym = &parsed->as<generic_node> ();
+          n.list.insert (n.list.begin () + i, sym->list.begin (), sym->list.end ());
           sym = 0;
         }
     }
-  return false;
+  phases::run ("xml", &n);
 }
 
 
-bool
-resolve_vars::visit_program (nodes::generic_node &n)
+void
+resolve_vars::visit (t_program &n)
 {
   symtab.enter_scope (&n);
   resume_list ();
   symtab.leave_scope ();
-  return false;
 }
 
-bool
-resolve_vars::visit_document (nodes::generic_node &n)
+void
+resolve_vars::visit (t_document &n)
 {
   symtab.enter_scope (&n);
   resume_list ();
   symtab.leave_scope ();
-  return false;
 }
 
 void 
-resolve_vars::visit (generic_node &n)
+resolve_vars::visit (token &n)
 {
-  bool resume = false;
-#include "node_switch.h"
-  if (resume)
-    resume_list ();
+  if (state == S_FILENAME && n.tok == TK_FN_LBRACE)
+    state = S_MULTIFILE;
+  if (state == S_MULTIFILE && n.tok == TK_FN_RBRACE)
+    state = S_FILENAME;
 }

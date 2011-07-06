@@ -58,7 +58,7 @@ GNU Make.
 =head3 Flexibility
 
 Make++ is, by design, much less flexible than automake and autoconf. It is also
-much more strict. It gives the user some additional tools the author has been
+much stricter. It gives the user some additional tools the author has been
 missing in the GNU build system.
 
 Source files are looked for in the entire source tree. Files are not explicitly

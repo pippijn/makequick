@@ -19,8 +19,8 @@ namespace
   struct resolve_wildcards
     : visitor
   {
-#include "node_visit.h"
-    virtual void visit (generic_node &n);
+    void visit (t_filename &n);
+    void visit (t_sources &n);
 
     bool in_sources;
     annotations::file_list const &files;
@@ -40,60 +40,10 @@ namespace
   //static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 }
 
-bool resolve_wildcards::visit_ac_check (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_arg_enable_choice (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_arg_enable_choices (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_arg_enable (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_alignof (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_cflags (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_functions (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_headers (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_library (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_check_sizeof (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_code (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_define (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_description (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_destination (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_document (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_error (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_exclude (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_extra_dist (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_filenames (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_flags (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_identifiers (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_if (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_inheritance (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_library (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_link_body (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_link (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_nodist_sources (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_program (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_project_member (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_project_members (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_project (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_rule_line (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_rule_lines (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_rule (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_rules (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_section_members (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_section (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_sources_members (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_sourcesref (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_target_definition (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_target_members (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_template (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_tool_flags (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_toplevel_declaration (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_toplevel_declarations (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_vardecl_body (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_vardecl (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_variable_content (nodes::generic_node &n) { return true; }
-bool resolve_wildcards::visit_variable (nodes::generic_node &n) { return true; }
 
 
-
-bool
-resolve_wildcards::visit_filename (nodes::generic_node &n)
+void
+resolve_wildcards::visit (t_filename &n)
 {
   if (in_sources)
     {
@@ -105,7 +55,6 @@ resolve_wildcards::visit_filename (nodes::generic_node &n)
       else
         source_files.push_back (n.list.front ()->as<token> ().string);
     }
-  return false;
 }
 
 
@@ -173,8 +122,8 @@ struct regex_matcher
   annotations::error_log &errors;
 };
 
-bool
-resolve_wildcards::visit_sources (nodes::generic_node &n)
+void
+resolve_wildcards::visit (t_sources &n)
 {
   if (!wildcards.empty ())
     throw std::runtime_error ("found wildcards somewhere outside sources");
@@ -213,16 +162,4 @@ resolve_wildcards::visit_sources (nodes::generic_node &n)
 
   create_file_list (source_files, n.list, n.loc);
   source_files.clear ();
-
-  return false;
-}
-
-
-void 
-resolve_wildcards::visit (generic_node &n)
-{
-  bool resume = false;
-#include "node_switch.h"
-  if (resume)
-    resume_list ();
 }
