@@ -7,13 +7,12 @@
 #include "foreach.h"
 #include "lexer.h"
 #include "parser.h"
+#include "parseutil.h"
 #include "phases.h"
 #include "sighandler.h"
 #include "timing.h"
 
 #include <boost/bind.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/algorithm/transform.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -80,26 +79,6 @@ struct base_sort
   size_t const offset;
 };
 
-static bool
-is_rule_file (fs::path const &file)
-{
-  return file.extension () == ".mq";
-}
-
-static node_ptr
-parse (std::vector<fs::path> const &files)
-{
-  using namespace boost::adaptors;
-  using namespace boost::phoenix;
-  using namespace boost::phoenix::arg_names;
-  std::vector<fs::path const *> rule_files;
-  boost::transform (files | filtered (is_rule_file), std::back_inserter (rule_files), &arg1);
-  lexer lex (rule_files);
-  parser parse (lex);
-
-  return parse ();
-}
-
 int
 main (int argc, char *argv[])
 try
@@ -155,19 +134,7 @@ try
   return EXIT_SUCCESS;
 #endif
 
-#if PARSER_BENCH
-  for (int i = 0; i < 20; i++)
-    {
-      lexer lex (files);
-      parser parse (lex);
-      parse ();
-      if (should_terminate)
-        return EXIT_FAILURE;
-    }
-  return EXIT_SUCCESS;
-#endif
-
-  if (node_ptr doc = parse (files))
+  if (node_ptr doc = parse_files (files))
     {
       using namespace annotations;
 

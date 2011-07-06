@@ -1,6 +1,5 @@
 #include "util/create_file_list.h"
 
-#include "node_type.h"
 #include "ylcode.h"
 
 void

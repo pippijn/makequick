@@ -4,12 +4,16 @@ makepp_SOURCES =		\
 	annotation_map.cc	\
 	colours.cc		\
 	exception.cc		\
+	file_lexer.cc		\
 	lexer.cc		\
 	main.cc			\
 	node.cc			\
 	parser.cc		\
+	parseutil.cc		\
 	phases.cc		\
 	sighandler.cc		\
+	string_lexer.cc		\
+	visitor.cc		\
 	yylex.ll		\
 	yyparse.yy
 
@@ -20,7 +24,7 @@ include annotations/Rules.am
 include phases/Rules.am
 include util/Rules.am
 
-GENFILES = yystate.h node_type.h node_switch.h node_visit.h
+GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h visitor_t.h node_fwd.h visitor_cc.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
 EXTRA_DIST += yylex.h
 CLEANFILES += $(GENFILES) $(nodist_makepp_SOURCES)
@@ -37,11 +41,25 @@ yylex.cc: $(CURDIR)/yylex.ll
 	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h} 2>&1`"	\
 		|| (echo "Updating ${@:.cc=.h}" && mv /tmp/${@:.cc=.h} ${@:.cc=.h})
 
+%.h: include/gen/%.pl
+	$(AM_V_GEN)perl $< > $@
+
+rule_init.h: $(CURDIR)/yyparse.yy
+	@echo 'enum rule_init {' > $@
+	$(AM_V_GEN)\
+	L=`grep -o '^[a-z_]\+$$' $<`;	\
+	for i in $$L; do		\
+		echo "  r_$$i,"		\
+			>> $@;		\
+	done
+	@echo '  RULE_INITS' >> $@
+	@echo '};' >> $@
+
 node_type.h: $(CURDIR)/yyparse.yy
 	@echo 'namespace nodes { enum node_type {' > $@
 	$(AM_V_GEN)\
-	L=`grep -o 'new generic_node (n_\w*' $<	\
-		| sed -e 's/.*(n_//'		\
+	L=`grep -o 'make_node<n_\w*' $<	\
+		| sed -e 's/.*<n_//'		\
 		| sort -u`;			\
 	for i in $$L; do			\
 		echo "  n_$$i,"			\

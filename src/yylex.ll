@@ -126,7 +126,6 @@ INTEGER	{DIGIT}+
 	"**"				{ Return (TK_FN_STARSTAR); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
-	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 <MULTIFILE>{
 	{WS}+				{ }
@@ -154,11 +153,14 @@ INTEGER	{DIGIT}+
 	^\t{2}				{ Return (TK_WHITESPACE); }
 	^\t{1}"}"			{ POP (); BACKTRACK (1); Return (TK_WHITESPACE); }
 	[^\n\t$]+			{ Return (TK_CODE); }
+}
+
+<FILENAME,MULTIFILE,RULE_LINE>{
 	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 
 <VAR_INIT>{
-	[@*<^+]				{ POP (); Return (TK_SHORTVAR); }
+	[@*<^+$]			{ POP (); Return (TK_SHORTVAR); }
 	{INTEGER}			{ POP (); Return (TK_INTEGER); }
 	"("				{ BEGIN (VAR_RBODY); Return (TK_LBRACK); }
 	"["				{ BEGIN (VAR_SQBODY); Return (TK_LSQBRACK); }

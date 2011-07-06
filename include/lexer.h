@@ -13,15 +13,18 @@
 
 struct lexer
 {
-  lexer (std::vector<fs::path const *> const &files);
+  lexer ();
   ~lexer ();
 
-  bool close_file ();
+  int INIT (int init, bool alternative);
+  void init (int init, bool alternative);
 
   int lex (YYSTYPE *yylval, YYLTYPE *yylloc);
   int next (YYSTYPE *yylval, YYLTYPE *yylloc);
-  int wrap ();
   void lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int leng);
+
+  virtual int wrap () = 0;
+  virtual fs::path const *current_file () const = 0;
 
   static char const *STRSTATE (int state);
   static char const *strstate (int state);
@@ -31,10 +34,36 @@ struct lexer
 
 
   void *yyscanner;
-  YYLTYPE *loc;
 
   struct pimpl;
   std::auto_ptr<pimpl> const impl;
+};
 
-  lex_timer T;
+struct file_lexer
+  : lexer
+{
+  typedef std::vector<fs::path const *> file_vec;
+
+  file_lexer (file_vec const &files);
+  ~file_lexer ();
+
+  bool close_file ();
+
+  virtual int wrap ();
+  virtual fs::path const *current_file () const;
+
+  file_vec::const_iterator it;
+  file_vec::const_iterator et;
+};
+
+struct string_lexer
+  : lexer
+{
+  string_lexer (std::string const &s);
+  ~string_lexer ();
+
+  virtual int wrap ();
+  virtual fs::path const *current_file () const;
+
+  std::string str;
 };

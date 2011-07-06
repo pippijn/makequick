@@ -6,8 +6,9 @@ namespace nodes
 {
   struct visitor
   {
-    virtual void visit (tokens::token &n) { }
+#include "visitor_t.h"
 
-    virtual void visit (generic_node &n) { }
+    virtual void visit (tokens::token &n);
+    virtual void visit (generic_node &n);
   };
 }

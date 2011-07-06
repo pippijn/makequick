@@ -1,7 +1,6 @@
 %{
 #include "parser.h"
 #include "yystate.h"
-#include "node_type.h"
 #define YYSTYPE YYSTYPE
 
 union YYSTYPE;
@@ -135,17 +134,19 @@ using namespace nodes;
 %token<token> TK_STRING			"string literal"
 %token<token> TK_SHORTVAR		"short variable name"
 
+%token R_FILENAME
+
 %type<list> sources target_definition
-%type<list> program library template target_member target_members toplevel_declarations toplevel_declaration
+%type<list> program library template target_members toplevel_declarations toplevel_declaration
 %type<list> filename filenames.0 filenames.1 sources_member sources_members extra_dist nodist_sources
 %type<list> rules rule rule_lines rule_line link link_body vardecl vardecl_body
-%type<list> description inheritance.opt inheritance if.opt if destination.opt destination
+%type<list> inheritance.opt inheritance if.opt if destination.opt destination
 %type<list> tool_flags flags identifiers
 %type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
 %type<list> define arg_enable arg_enable_options arg_enable_choices
 %type<list> arg_enable_choice arg_enable_content project project_members project_member
-%type<list> code_frag variable variable_content section section_members section_member
-%type<node> filename_part
+%type<list> code_frag variable variable_content section section_members
+%type<node> filename_part section_member target_member
 %type<token> identifier filename_token link_item flag_keyword string.opt identifier.opt ac_checks
 %type<token> arg_default check_library_notfound.opt
 
@@ -159,29 +160,26 @@ using namespace nodes;
  ****************************************************************************/
 document
 	: toplevel_declarations
-		{ self->doc = new generic_node (n_document, @$, $1); }
+		{ self->doc = make_node<n_document> (@$, $1); }
+	| R_FILENAME filename
+		{ self->doc = $2; }
 	;
 
 toplevel_declarations
 	: toplevel_declaration
-		{ $$ = new generic_node (n_toplevel_declarations, @$, $1); }
+		{ $$ = make_node<n_toplevel_declarations> (@$, $1); }
 	| toplevel_declarations toplevel_declaration
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 toplevel_declaration
 	: project
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| program
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| library
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| template
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| extra_dist
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $1); }
 	| "global" "{" rules "}"
-		{ $$ = new generic_node (n_toplevel_declaration, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = $3; delete $1; delete $2; delete $4; }
 	;
 
 
@@ -192,53 +190,61 @@ toplevel_declaration
  ****************************************************************************/
 project
 	: "project" TK_STRING "{" project_members "}"
-		{ $$ = new generic_node (n_project, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_project> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 project_members
 	: project_member
-		{ $$ = new generic_node (n_project_members, @$, $1); }
+		{ $$ = make_node<n_project_members> (@$, $1); }
 	| project_members project_member
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 project_member
 	: "version:" TK_STRING
-		{ $$ = new generic_node (n_project_member, @$, $2); delete $1; }
+		{ $$ = make_node<n_project_version> (@$, $2); delete $1; }
 	| "contact:" TK_STRING
-		{ $$ = new generic_node (n_project_member, @$, $2); delete $1; }
+		{ $$ = make_node<n_project_contact> (@$, $2); delete $1; }
 	| "config_header:" filename TK_WHITESPACE
-		{ $$ = new generic_node (n_project_member, @$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_project_header> (@$, $2); delete $1; delete $3; }
 	| section
 	;
 
 section
 	: "section" string.opt "{" section_members "}"
-		{ $$ = new generic_node (n_section, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_section> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 section_members
 	: section_member
-		{ $$ = new generic_node (n_section_members, @$, $1); }
+		{ $$ = make_node<n_section_members> (@$, $1); }
 	| section_members section_member
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 section_member
 	: ac_checks
-		{ $$ = new generic_node (n_ac_check, @$, $1); }
+		{ $$ = make_node<n_ac_check> (@$, $1); }
 	| arg_enable
+		{ $$ = $1; }
 	| check_alignof
+		{ $$ = $1; }
 	| check_cflags
+		{ $$ = $1; }
 	| check_functions
+		{ $$ = $1; }
 	| check_headers
+		{ $$ = $1; }
 	| check_library
+		{ $$ = $1; }
 	| check_sizeof
+		{ $$ = $1; }
 	| "error" TK_STRING
-		{ $$ = new generic_node (n_error, @$, $2); delete $1; }
+		{ $$ = make_node<n_error> (@$, $2); delete $1; }
 	| define
+		{ $$ = $1; }
 	| TK_STRING
-		{ $$ = new generic_node (n_description, @$, $1); }
+		{ $$ = $1; }
 	;
 
 ac_checks
@@ -258,7 +264,7 @@ arg_enable
 	    TK_STRING
 	    arg_enable_content
 	  "}"
-		{ $$ = new generic_node (n_arg_enable, @$, $2, $4, $6, $7); delete $1; delete $3; delete $5; delete $8; }
+		{ $$ = make_node<n_arg_enable> (@$, $2, $4, $6, $7); delete $1; delete $3; delete $5; delete $8; }
 	;
 
 arg_default
@@ -279,34 +285,34 @@ arg_enable_options
 
 arg_enable_choices
 	: arg_enable_choice
-		{ $$ = new generic_node (n_arg_enable_choices, @$, $1); }
+		{ $$ = make_node<n_arg_enable_choices> (@$, $1); }
 	| arg_enable_choices arg_enable_choice
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 arg_enable_choice
 	: identifier "=>" "{" section_members "}"
-		{ $$ = new generic_node (n_arg_enable_choice, @$, $1, $4); delete $2; delete $3; delete $5; }
+		{ $$ = make_node<n_arg_enable_choice> (@$, $1, $4); delete $2; delete $3; delete $5; }
 	;
 
 check_alignof
 	: "alignof" "{" TK_STRING "}"
-		{ $$ = new generic_node (n_check_alignof, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_alignof> (@$, $3); delete $1; delete $2; delete $4; }
 	;
 
 check_cflags
 	: "cflags" identifier.opt flags_begin flags flags_end
-		{ $$ = new generic_node (n_check_cflags, @$, $2, $4); delete $1; }
+		{ $$ = make_node<n_check_cflags> (@$, $2, $4); delete $1; }
 	;
 
 check_functions
 	: "functions" "{" identifiers "}"
-		{ $$ = new generic_node (n_check_functions, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_functions> (@$, $3); delete $1; delete $2; delete $4; }
 	;
 
 check_headers
 	: "headers" "{" filenames.1 TK_WHITESPACE "}"
-		{ $$ = new generic_node (n_check_headers, @$, $3); delete $1; delete $2; delete $4; delete $5; }
+		{ $$ = make_node<n_check_headers> (@$, $3); delete $1; delete $2; delete $4; delete $5; }
 	;
 
 check_library
@@ -316,7 +322,7 @@ check_library
 	    check_library_notfound.opt
 	    string.opt
 	  "}"
-		{ $$ = new generic_node (n_check_library, @$, $2, $5, $7, $9, $10); delete $1; delete $3; delete $4; delete $6; delete $8; delete $11; }
+		{ $$ = make_node<n_check_library> (@$, $2, $5, $7, $9, $10); delete $1; delete $3; delete $4; delete $6; delete $8; delete $11; }
 	;
 
 check_library_notfound.opt
@@ -327,12 +333,12 @@ check_library_notfound.opt
 
 check_sizeof
 	: "sizeof" "{" TK_STRING "}"
-		{ $$ = new generic_node (n_check_sizeof, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_sizeof> (@$, $3); delete $1; delete $2; delete $4; }
 	;
 
 define
 	: "define" identifier "{" TK_STRING "}"
-		{ $$ = new generic_node (n_define, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_define> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 
@@ -343,22 +349,22 @@ define
  ****************************************************************************/
 program
 	: "program" target_definition
-		{ $$ = new generic_node (n_program, @$, $2); delete $1; }
+		{ $$ = make_node<n_program> (@$, $2); delete $1; }
 	;
 
 library
 	: "library" target_definition
-		{ $$ = new generic_node (n_library, @$, $2); delete $1; }
+		{ $$ = make_node<n_library> (@$, $2); delete $1; }
 	;
 
 template
 	: "template" target_definition
-		{ $$ = new generic_node (n_template, @$, $2); delete $1; }
+		{ $$ = make_node<n_template> (@$, $2); delete $1; }
 	;
 
 target_definition
 	: identifier if.opt inheritance.opt destination.opt "{" target_members "}"
-		{ $$ = new generic_node (n_target_definition, @$, $1, $2, $3, $4, $6); delete $5; delete $7; }
+		{ $$ = make_node<n_target_definition> (@$, $1, $2, $3, $4, $6); delete $5; delete $7; }
 	;
 
 inheritance.opt
@@ -368,7 +374,7 @@ inheritance.opt
 
 inheritance
 	: ":" identifier
-		{ $$ = new generic_node (n_inheritance, @$, $2); delete $1; }
+		{ $$ = make_node<n_inheritance> (@$, $2); delete $1; }
 	;
 
 destination.opt
@@ -378,30 +384,25 @@ destination.opt
 
 destination
 	: "->" identifier
-		{ $$ = new generic_node (n_destination, @$, $2); delete $1; }
+		{ $$ = make_node<n_destination> (@$, $2); delete $1; }
 	;
 
 target_members
 	: target_member
-		{ $$ = new generic_node (n_target_members, @$, $1); }
+		{ $$ = make_node<n_target_members> (@$, $1); }
 	| target_members target_member
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 target_member
-	: sources
-	| description
-	| nodist_sources
-	| extra_dist
-	| rule
-	| link
-	| vardecl
-	| tool_flags
-	;
-
-description
-	: TK_STRING
-		{ $$ = new generic_node (n_description, @$, $1); }
+	: sources		{ $$ = $1; }
+	| TK_STRING		{ $$ = $1; }
+	| nodist_sources	{ $$ = $1; }
+	| extra_dist		{ $$ = $1; }
+	| rule			{ $$ = $1; }
+	| link			{ $$ = $1; }
+	| vardecl		{ $$ = $1; }
+	| tool_flags		{ $$ = $1; }
 	;
 
 /****************************************************************************
@@ -411,22 +412,22 @@ description
  ****************************************************************************/
 sources
 	: "sources" if.opt "{" sources_members "}"
-		{ $$ = new generic_node (n_sources, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_sources> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 nodist_sources
 	: "nodist_sources" if.opt "{" sources_members "}"
-		{ $$ = new generic_node (n_nodist_sources, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_nodist_sources> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 extra_dist
 	: "extra_dist" if.opt "{" sources_members "}"
-		{ $$ = new generic_node (n_extra_dist, @$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_extra_dist> (@$, $2, $4); delete $1; delete $3; delete $5; }
 	;
 
 sources_members
 	: sources_member
-		{ $$ = new generic_node (n_sources_members, @$, $1); }
+		{ $$ = make_node<n_sources_members> (@$, $1); }
 	| sources_members sources_member
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
@@ -435,9 +436,9 @@ sources_member
 	: filename TK_WHITESPACE
 		{ $$ = $1; delete $2; }
 	| "sources" "(" identifier ")"
-		{ $$ = new generic_node (n_sourcesref, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_sourcesref> (@$, $3); delete $1; delete $2; delete $4; }
 	| "exclude" "{" sources_members "}"
-		{ $$ = new generic_node (n_exclude, @$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_exclude> (@$, $3); delete $1; delete $2; delete $4; }
 	;
 
 /****************************************************************************
@@ -447,7 +448,7 @@ sources_member
  ****************************************************************************/
 tool_flags
 	: flag_keyword if.opt flags_begin flags flags_end
-		{ $$ = new generic_node (n_tool_flags, @$, $1, $2, $4); }
+		{ $$ = make_node<n_tool_flags> (@$, $1, $2, $4); }
 	;
 
 flag_keyword
@@ -465,7 +466,7 @@ flags_end
 
 flags
 	:
-		{ $$ = new generic_node (n_flags, @$); }
+		{ $$ = make_node<n_flags> (@$); }
 	| flags TK_FLAG
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
@@ -477,16 +478,16 @@ flags
  ****************************************************************************/
 rules
 	: rule
-		{ $$ = new generic_node (n_rules, @$, $1); }
+		{ $$ = make_node<n_rules> (@$, $1); }
 	| rules rule
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 rule
 	: filenames.1 ":" filenames.0 rule_begin rule_lines rule_end
-		{ $$ = new generic_node (n_rule, @$, $1, $3, $5); delete $2; }
+		{ $$ = make_node<n_rule> (@$, $1, $3, $5); delete $2; }
 	| filenames.1 ":" filenames.0 ";"
-		{ $$ = new generic_node (n_rule, @$, $1, $3,  0); delete $2; delete $4; }
+		{ $$ = make_node<n_rule> (@$, $1, $3,  0); delete $2; delete $4; }
 	;
 
 rule_begin
@@ -499,28 +500,28 @@ rule_end
 
 rule_lines
 	: rule_line TK_WHITESPACE
-		{ $$ = new generic_node (n_rule_lines, @$, $1); delete $2; }
+		{ $$ = make_node<n_rule_lines> (@$, $1); delete $2; }
 	| rule_lines rule_line TK_WHITESPACE
 		{ ($$ = $1)->add ($2)->loc = @$; delete $3; }
 	;
 
 rule_line
 	: code_frag
-		{ $$ = new generic_node (n_rule_line, @$, $1); }
+		{ $$ = make_node<n_rule_line> (@$, $1); }
 	| rule_line code_frag
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 filenames.0
 	:
-		{ $$ = new generic_node (n_filenames, @$); }
+		{ $$ = make_node<n_filenames> (@$); }
 	| filenames.0 filename TK_WHITESPACE
 		{ ($$ = $1)->add ($2)->loc = @$; $$->loc.file = $2->loc.file; delete $3; }
 	;
 
 filenames.1
 	: filename
-		{ $$ = new generic_node (n_filenames, @$, $1); }
+		{ $$ = make_node<n_filenames> (@$, $1); }
 	| filenames.1 TK_WHITESPACE filename
 		{ ($$ = $1)->add ($3)->loc = @$; delete $2; }
 	;
@@ -532,7 +533,7 @@ filenames.1
  ****************************************************************************/
 link
 	: "link" if.opt link_begin link_body link_end
-		{ $$ = new generic_node (n_link, @$, $2, $4); delete $1; }
+		{ $$ = make_node<n_link> (@$, $2, $4); delete $1; }
 	;
 
 link_begin
@@ -545,7 +546,7 @@ link_end
 
 link_body
 	: link_item
-		{ $$ = new generic_node (n_link_body, @$, $1); }
+		{ $$ = make_node<n_link_body> (@$, $1); }
 	| link_body link_item
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
@@ -562,7 +563,7 @@ link_item
  ****************************************************************************/
 vardecl
 	: identifier vardecl_begin vardecl_body TK_WHITESPACE
-		{ $$ = new generic_node (n_vardecl, @$, $1, $3); self->lex.pop_state (); delete $4; }
+		{ $$ = make_node<n_vardecl> (@$, $1, $3); self->lex.pop_state (); delete $4; }
 	;
 
 vardecl_begin
@@ -572,7 +573,7 @@ vardecl_begin
 
 vardecl_body
 	: code_frag
-		{ $$ = new generic_node (n_vardecl_body, @$, $1); }
+		{ $$ = make_node<n_vardecl_body> (@$, $1); }
 	| vardecl_body code_frag
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
@@ -589,7 +590,7 @@ if.opt
 
 if
 	: "if" identifier
-		{ $$ = new generic_node (n_if, @$, $2); delete $1; }
+		{ $$ = make_node<n_if> (@$, $2); delete $1; }
 	;
 
 /****************************************************************************
@@ -613,14 +614,14 @@ identifier
 
 identifiers
 	: identifier
-		{ $$ = new generic_node (n_identifiers, @$, $1); }
+		{ $$ = make_node<n_identifiers> (@$, $1); }
 	| identifiers identifier
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 filename
 	: filename_part
-		{ $$ = new generic_node (n_filename, @$, $1); }
+		{ $$ = make_node<n_filename> (@$, $1); }
 	| filename filename_part
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
@@ -648,29 +649,29 @@ filename_token
 
 code_frag
 	: TK_CODE
-		{ $$ = new generic_node (n_code, @$, $1); }
+		{ $$ = make_node<n_code> (@$, $1); }
 	| "$" variable
 		{ $$ = $2; delete $1; }
 	;
 
 variable
 	: TK_SHORTVAR
-		{ $$ = new generic_node (n_variable, @$, $1); }
+		{ $$ = make_node<n_variable> (@$, $1); }
 	| TK_INTEGER
-		{ $$ = new generic_node (n_variable, @$, $1); }
+		{ $$ = make_node<n_variable> (@$, $1); }
 	| "(" variable_content ")"
-		{ $$ = new generic_node (n_variable, @$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_variable> (@$, $2); delete $1; delete $3; }
 	| "[" identifier "]"
-		{ $$ = new generic_node (n_variable, @$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_variable> (@$, $2); delete $1; delete $3; }
 	;
 
 variable_content
 	: identifier
-		{ $$ = new generic_node (n_variable_content, @$, $1,  0,  0); }
+		{ $$ = make_node<n_variable_content> (@$, $1,  0,  0); }
 	| identifier "." identifier
-		{ $$ = new generic_node (n_variable_content, @$, $1, $3,  0); delete $2; }
+		{ $$ = make_node<n_variable_content> (@$, $1, $3,  0); delete $2; }
 	| identifier "." identifier ":" identifier
-		{ $$ = new generic_node (n_variable_content, @$, $1, $3, $5); delete $2; delete $4; }
+		{ $$ = make_node<n_variable_content> (@$, $1, $3, $5); delete $2; delete $4; }
 	;
 
 %%

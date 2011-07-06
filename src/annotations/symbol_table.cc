@@ -2,7 +2,6 @@
 
 #include "phases.h"
 #include "node.h"
-#include "node_type.h"
 
 using annotations::symbol_table;
 using nodes::generic_node_ptr;
@@ -83,8 +82,7 @@ symbol_table::print () const
   puts ("symbol table:");
   BOOST_FOREACH (scope_map::const_reference scope, scopes)
     {
-      printf ("scope for %s[%d]: ", node_type_name[scope.first->type], scope.first->index);
-      phases::run ("name", scope.first);
+      printf ("scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
       BOOST_FOREACH (node_map const &type, scope.second)
         if (!type.empty ())
           {

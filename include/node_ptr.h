@@ -26,6 +26,7 @@ namespace nodes
 
   NODE (node_list);
   NODE (generic_node);
+#include "node_fwd.h"
 }
 
 namespace tokens

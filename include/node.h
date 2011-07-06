@@ -1,5 +1,6 @@
 #pragma once
 
+#include "node_type.h"
 #include "visitor.h"
 
 #include <string>
@@ -55,8 +56,6 @@ namespace nodes
   struct generic_node
     : node_list
   {
-    virtual void accept (visitor &v) { v.visit (*this); }
-
     generic_node (int type, location const &loc) : node_list (loc), type (type) { }
     generic_node (int type, location const &loc, node_ptr n1) : node_list (loc), type (type) {
       add (n1);
@@ -86,6 +85,26 @@ namespace nodes
 
     int const type;
   };
+
+  template<int Type>
+  node_list *make_node (location const &loc);
+
+  template<int Type>
+  node_list *make_node (location const &loc, node_ptr const &v0);
+
+  template<int Type>
+  node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1);
+
+  template<int Type>
+  node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2);
+
+  template<int Type>
+  node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2, node_ptr const &v3);
+
+  template<int Type>
+  node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2, node_ptr const &v3, node_ptr const &v4);
+
+#include "node_t.h"
 }
 
 namespace tokens
