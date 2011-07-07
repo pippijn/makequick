@@ -13,7 +13,7 @@
 
 struct lexer
 {
-  lexer ();
+  lexer (char const *name);
   ~lexer ();
 
   int INIT (int init, bool alternative);

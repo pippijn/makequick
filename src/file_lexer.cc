@@ -9,7 +9,8 @@
 #include <boost/filesystem/path.hpp>
 
 file_lexer::file_lexer (file_vec const &files)
-  : it (files.begin ())
+  : lexer ("parsing")
+  , it (files.begin ())
   , et (files.end ())
 {
   if (wrap ())

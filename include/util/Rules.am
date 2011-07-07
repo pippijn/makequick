@@ -2,5 +2,8 @@ EXTRA_DIST +=			\
 	create_file_list.h	\
 	extract_string.h	\
 	inference_engine.h	\
+	local.h			\
 	regex_escape.h		\
+	resume.h		\
+	symbol_visitor.h	\
 	timer.h

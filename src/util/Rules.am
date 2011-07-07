@@ -3,4 +3,5 @@ makepp_SOURCES +=		\
 	extract_string.cc	\
 	inference_engine.cc	\
 	regex_escape.cc		\
+	symbol_visitor.cc	\
 	timer.cc

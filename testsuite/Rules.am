@@ -1,1 +1,2 @@
+include regression/Rules.am
 include unit/Rules.am

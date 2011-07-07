@@ -53,8 +53,8 @@ lexer::strstate (int state)
     }
 }
 
-lexer::lexer ()
-  : impl (new pimpl ())
+lexer::lexer (char const *name)
+  : impl (new pimpl (name))
 {
   yylex_init (&yyscanner);
   yyset_extra (this, yyscanner);

@@ -48,7 +48,7 @@ struct inference
   ~inference ()
   {
     engine.infer ();
-#if 1
+#if 0
     engine.print ();
     if (!std::uncaught_exception ())
       throw "inference test";
@@ -100,6 +100,7 @@ static inference_engine::prerequisite
 make_prereq (node_vec const &list)
 {
   bool is_re = false;
+  bool in_multi = false;
   std::string pr;
   foreach (node_ptr const &n, list)
     {
@@ -111,18 +112,36 @@ make_prereq (node_vec const &list)
             pr += regex_escape (t.string);
           else
             pr += t.string;
+          if (in_multi)
+            pr += "|";
           break;
         case TK_FN_PERCENT:
+          assert (!in_multi);
           if (!is_re)
             pr = regex_escape (pr);
           pr += "(.+)";
           is_re = true;
           break;
         case TK_FN_PERPERCENT:
+          assert (!in_multi);
           if (!is_re)
             pr = regex_escape (pr);
           pr += ".*?([^/]+)";
           is_re = true;
+          break;
+        case TK_FN_LBRACE:
+          assert (!in_multi);
+          if (!is_re)
+            pr = regex_escape (pr);
+          pr += "(?:";
+          is_re = true;
+          in_multi = true;
+          break;
+        case TK_FN_RBRACE:
+          assert (in_multi);
+          in_multi = false;
+          pr.resize (pr.size () - 1);
+          pr += ")";
           break;
         default:
           throw tokname (t.tok);

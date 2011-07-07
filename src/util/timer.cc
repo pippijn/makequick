@@ -45,22 +45,28 @@ timer::~timer ()
 }
 
 
-lex_timer::lex_timer ()
-  : timer ("parsing")
+lex_timer::lex_timer (char const *name)
+  : timer (name)
   , prev (now ())
 {
 }
 
 lex_timer::~lex_timer ()
 {
-  std::sort (times.begin (), times.end ());
+  sort (times.begin (), times.end ());
   if (times.empty ())
     return;
   times.pop_back ();
 
-  double average = std::accumulate (times.begin (), times.end (), 0.0) / times.size ();
+  double average = accumulate (times.begin (),
+                               times.end (),
+                               0.0) / times.size ();
 
-  printf ("%%%% lex: %lu tokens - avg: %.3gsec (%.1f tokens/sec)\n", times.size (), average, 1 / average);
+  printf ("%%%% lex: %lu token%s - avg: %.3gsec (%.1f tokens/sec)\n",
+          times.size (),
+          times.size () == 1 ? "" : "s",
+          average,
+          1 / average);
 }
 
 void

@@ -10,6 +10,7 @@
 #include "sighandler.h"
 
 #include <cstdio>
+#include <typeinfo>
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -129,6 +130,12 @@ try
 
   if (node_ptr doc = parse_files (files))
     {
+      //nodes::s11n_format const format = nodes::s11n_binary;
+      nodes::s11n_format const format = nodes::s11n_text;
+      //nodes::s11n_format const format = nodes::s11n_xml;
+      node::store ("nodes", doc, format);
+      doc = node::load ("nodes", format);
+
       using namespace annotations;
 
       annotation_map annots;
@@ -158,7 +165,7 @@ try
 }
 catch (std::exception const &e)
 {
-  printf ("\e[1;31m%%%% runtime error\e[0m: %s\n", e.what ());
+  printf ("\e[1;31m%%%% runtime error (T=%s)\e[0m: %s\n", typeid (e).name (), e.what ());
   return EXIT_FAILURE;
 }
 catch (int i)

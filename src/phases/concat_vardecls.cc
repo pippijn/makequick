@@ -2,17 +2,17 @@
 
 #include "foreach.h"
 
-struct concat_vars
+struct concat_vardecls
   : visitor
 {
   void visit (t_vardecl_body &n);
 
-  concat_vars (annotation_map &annots)
+  concat_vardecls (annotation_map &annots)
   {
   }
 };
 
-static phase<concat_vars> thisphase ("concat_vars");
+static phase<concat_vardecls> thisphase ("concat_vardecls", "audit");
 
 
 static bool
@@ -32,7 +32,7 @@ commit (std::string &fn, node_vec &list, location &loc)
 }
 
 void
-concat_vars::visit (t_vardecl_body &n)
+concat_vardecls::visit (t_vardecl_body &n)
 {
   node_vec list;
   swap (list, n.list);

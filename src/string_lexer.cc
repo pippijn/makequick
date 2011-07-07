@@ -11,7 +11,8 @@
 static fs::path const string_file = "<string>";
 
 string_lexer::string_lexer (std::string const &s)
-  : str (boost::trim_copy (s))
+  : lexer ("string parsing")
+  , str (boost::trim_copy (s))
 {
   yy_scan_bytes (str.data (), str.length (), yyscanner);
   yyset_lineno (1, yyscanner);

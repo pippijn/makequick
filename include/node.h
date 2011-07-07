@@ -20,6 +20,13 @@ struct location
 
 namespace nodes
 {
+  enum s11n_format
+  {
+    s11n_binary,
+    s11n_text,
+    s11n_xml
+  };
+
   struct node
   {
     virtual void accept (visitor &v) = 0;
@@ -33,6 +40,9 @@ namespace nodes
 
     template<typename T> T &as () { return dynamic_cast<T &> (*this); }
     template<typename T> T *is () { return dynamic_cast<T *> ( this); }
+
+    static void store (char const *file, node_ptr const &n, s11n_format format = s11n_text);
+    static node_ptr load (char const *file, s11n_format format = s11n_text);
 
     int refcnt;
     int index;
@@ -86,7 +96,7 @@ namespace nodes
       add (n5);
     }
 
-    int const type;
+    int type;
   };
 
   template<int Type>
@@ -126,6 +136,11 @@ namespace tokens
     : node
   {
     virtual void accept (visitor &v) { v.visit (*this); }
+    token ()
+      : node (location::generated)
+      , string (mutable_string)
+    {
+    }
     token (location const &loc, int tok, char const *text, int leng)
       : node (loc)
       , tok (tok)
@@ -141,7 +156,7 @@ namespace tokens
     {
     }
 
-    int const tok;
+    int tok;
     std::string mutable_string;
     std::string const &string;
   };

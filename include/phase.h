@@ -2,19 +2,16 @@
 
 #include "annotation_map.h"
 #include "exception.h"
-#include "local.h"
 #include "node.h"
 #include "parseutil.h"
 #include "phase.h"
 #include "phases.h"
 #include "rule_init.h"
 #include "sighandler.h"
+#include "util/local.h"
+#include "util/resume.h"
 #include "visitor.h"
 #include "ylcode.h"
-
-#define resume(member)          n.member ()->accept (*this)
-#define resume_if(member)       if (n.member ()) resume (member ())
-#define resume_list()           for (std::vector<node_ptr>::iterator it = n.list.begin (), et = n.list.end (); it != et; ++it) if (*it) (*it)->accept (*this)
 
 using namespace nodes;
 using namespace tokens;

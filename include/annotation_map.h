@@ -28,6 +28,10 @@ struct annotation_map
 
   dynamic_caster get (std::string const &name);
 
+  template<typename T>
+  T &get (std::string const &name)
+  { return get (name); }
+
   bool has (std::string const &name);
 
   void store (std::string const &name, annotation *annot);

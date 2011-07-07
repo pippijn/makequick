@@ -4,24 +4,21 @@
 #include "annotations/symbol_table.h"
 #include "colours.h"
 #include "foreach.h"
+#include "util/symbol_visitor.h"
 #include "util/extract_string.h"
 
 using annotations::error_log;
-using annotations::symbol_table;
 
 struct resolve_vars
-  : visitor
+  : symbol_visitor
 {
   virtual void visit (t_variable_content &n);
   virtual void visit (t_variable &n);
   virtual void visit (t_filename &n);
-  virtual void visit (t_program &n);
-  virtual void visit (t_document &n);
   virtual void visit (token &n);
 
   bool in_sources;
   error_log &errors;
-  symbol_table &symtab;
   generic_node_ptr sym;
 
   enum parse_state
@@ -34,9 +31,9 @@ struct resolve_vars
   parse_state state;
 
   resolve_vars (annotation_map &annots)
-    : in_sources (false)
+    : symbol_visitor (annots.get<symbol_table> ("symtab"))
+    , in_sources (false)
     , errors (annots.get ("errors"))
-    , symtab (annots.get ("symtab"))
     , state (S_NONE)
   {
   }
@@ -94,23 +91,6 @@ resolve_vars::visit (t_filename &n)
 #if 0
   phases::run ("xml", &n);
 #endif
-}
-
-
-void
-resolve_vars::visit (t_program &n)
-{
-  symtab.enter_scope (&n);
-  resume_list ();
-  symtab.leave_scope ();
-}
-
-void
-resolve_vars::visit (t_document &n)
-{
-  symtab.enter_scope (&n);
-  resume_list ();
-  symtab.leave_scope ();
 }
 
 void 

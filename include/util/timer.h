@@ -18,7 +18,7 @@ struct lex_timer
 {
   typedef std::vector<timeval> timervec;
 
-  lex_timer ();
+  lex_timer (char const *name);
   ~lex_timer ();
 
   void next ();

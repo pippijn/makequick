@@ -3,6 +3,7 @@
 #include "foreach.h"
 
 #include <algorithm>
+#include <typeinfo>
 
 struct multirule
   : visitor
@@ -10,6 +11,9 @@ struct multirule
   void visit (t_filename &n);
   void visit (t_rule &n);
   void visit (t_rules &n);
+  void visit (t_target_members &n);
+
+  void visit_container (generic_node &n);
 
   enum rule_state
   {
@@ -40,10 +44,13 @@ multirule::visit (t_filename &n)
   if (state == S_TARGET)
     {
       std::vector<token_vec> instances;
-      {
+      try {
         token_vec multifile (n.list.size ());
         transform (n.list.begin (), n.list.end (), multifile.begin (), as<token>);
         instances.push_back (multifile);
+      } catch (std::bad_cast const &e) {
+        phases::run ("xml", &n);
+        throw;
       }
 
       bool more = true;
@@ -126,10 +133,20 @@ multirule::visit (t_rule &n)
 void
 multirule::visit (t_rules &n)
 {
+  visit_container (n);
+}
+
+void
+multirule::visit (t_target_members &n)
+{
+  visit_container (n);
+}
+
+void
+multirule::visit_container (generic_node &n)
+{
   foreach (node_ptr const &p, n.list)
-    {
-      p->accept (*this);
-    }
+    p->accept (*this);
   n.list.insert (n.list.end (), rules.begin (), rules.end ());
   rules.clear ();
 }

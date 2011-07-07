@@ -2,5 +2,8 @@ EXTRA_DIST +=		\
 	nodes.pm	\
 	node_fwd.pl	\
 	node_t.pl	\
+	s11n_casts.pl	\
+	s11n_funcs.pl	\
+	s11n_types.pl	\
 	visitor_cc.pl	\
 	visitor_t.pl

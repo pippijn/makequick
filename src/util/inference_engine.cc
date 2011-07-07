@@ -264,7 +264,7 @@ inference_engine::print () const
   std::cout << "files:\n";
   foreach (fs::path const &f, info.files)
     std::cout << "  " << f << "\n";
-  std::cout << "pattern rules:\n";
+  std::cout << "rule candidates:\n";
   foreach (rule const &r, info.baserules)
     {
       r.print ();
