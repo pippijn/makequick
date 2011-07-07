@@ -475,7 +475,7 @@ SORT_BY_SCOPE_NAME     = NO
 # by doing a simple string match. By disabling STRICT_PROTO_MATCHING doxygen 
 # will still accept a match between prototype and implementation in such cases.
 
-STRICT_PROTO_MATCHING  = YES
+STRICT_PROTO_MATCHING  = NO
 
 # The GENERATE_TODOLIST tag can be used to enable (YES) or 
 # disable (NO) the todo list. This list is created by putting \todo 
@@ -1204,7 +1204,7 @@ GENERATE_LATEX         = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
 # put in front of it. If left blank `latex' will be used as the default path.
 
-LATEX_OUTPUT           = latex
+LATEX_OUTPUT           = doxygen
 
 # The LATEX_CMD_NAME tag can be used to specify the LaTeX command name to be 
 # invoked. If left blank `latex' will be used as the default command name. 
