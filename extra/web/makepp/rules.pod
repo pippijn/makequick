@@ -24,7 +24,8 @@ Other rules can then match this new file.
 
 Rules defined in a program block implicitly depend on that program and
 C<$(THIS)> expands to the program location with C<$(EXEEXT)> appended. Thus, in
-this case, C<$(THIS)> is expanded to C<$(builddir)/msgcat$(EXEEXT)>
+this case, the C<$(THIS)> variable used in rules is expanded to
+C<$(builddir)/msgcat$(EXEEXT)>
 
 =begin code MakePP
 
@@ -61,7 +62,7 @@ In the above example, the second rule is matched for all C<.y> files under
 C<src/>. All other C<.y> files are matched by the first rule.
 
 
-=head2 Line continuations
+=head2 Code continuations
 
 Rules can span multiple lines, just like L<variables>.
 

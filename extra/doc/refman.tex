@@ -1,5 +1,5 @@
-\documentclass[fontsize=12pt,paper=a4,headsepline,twoside=false]{scrbook}
-\usepackage{makeidx}
+\documentclass[a4paper,oneside]{report}
+\usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{multicol}
 \usepackage{float}
@@ -28,21 +28,27 @@
 \fi
 \usepackage[utf8]{inputenc}
 \usepackage{mathptmx}
-\usepackage[scaled=.90]{helvet}
-\usepackage{courier}
 \usepackage{sectsty}
 \usepackage[titles]{tocloft}
 \usepackage{doxygen}
 \lstset{language=C++,inputencoding=utf8,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=8,numbers=left}
-\makeindex
 \setcounter{tocdepth}{3}
-\renewcommand{\footrulewidth}{0.4pt}
 \renewcommand{\familydefault}{\sfdefault}
 \begin{document}
 \hypersetup{pageanchor=false}
-\clearemptydoublepage
 \pagenumbering{roman}
 \tableofcontents
-\clearemptydoublepage
 \pagenumbering{arabic}
 \hypersetup{pageanchor=true}
+
+\part{Project description}
+\input{web/project}
+\input{web/variables}
+\input{web/target}
+\input{web/template}
+\input{web/rules}
+
+\part{Project description}
+\input{latex/refman}
+
+\end{document}

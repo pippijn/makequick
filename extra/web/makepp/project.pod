@@ -230,7 +230,7 @@ Check whether the C++ compiler supports C++0x lambdas. Defines C<HAVE_LAMBDA> to
 =item c_late_expansion
 
 Check whether the preprocessor supports ANSI conforming late macro expansion.
-Defines C<HAVE_LATE_EXPANSION> to 1 if so.
+Defines the C preprocessor macro C<HAVE_LATE_EXPANSION> to 1 if so.
 
 =item c_stmt_exprs
 
@@ -241,12 +241,12 @@ statements within expressions.
 =item c_token_paste
 
 Checks if the preprocessor implements ANSI-style token pasting (with C<##>).
-Defines C<HAVE_ANSI_PASTE> to 1 if so.
+Defines the C preprocessor macro C<HAVE_ANSI_PASTE> to 1 if so.
 
 =item c_variadic_templates
 
-Check whether the C++ compiler supports C++0x variadic templates. Defines
-C<HAVE_VARIADIC_TEMPLATES> to 1 if so.
+Check whether the C++ compiler supports C++0x variadic templates. Defines the
+C preprocessor macro C<HAVE_VARIADIC_TEMPLATES> to 1 if so.
 
 =item c_stdint_h
 

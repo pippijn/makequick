@@ -34,13 +34,22 @@ struct inference_engine
 {
   struct engine;
 
-  struct promise
+  /** \brief A requirement for the rule to match.
+   */
+  struct prerequisite
   {
+    /** \brief Interface implemented by actual file representations.
+     */
     struct file_base
     {
       virtual void print () const = 0;
       virtual bool final () const = 0;
       virtual bool matches (fs::path const &file) const = 0;
+      /** \brief The match stem.
+       *
+       * For pattern rules, it is the matched "%", for plain files, it is the
+       * file name itself.
+       */
       virtual std::string stem (fs::path const &file) const = 0;
     };
     
@@ -69,7 +78,7 @@ struct inference_engine
     std::string const &str () const { return dynamic_cast<file_t<std::string> &> (*file).data; }
 
     template<typename T>
-    promise (T const &file)
+    prerequisite (T const &file)
       : file (new file_t<T> (file))
     {
     }
@@ -78,13 +87,13 @@ struct inference_engine
   struct rule
   {
     std::string target;
-    std::vector<promise> prereqs;
+    std::vector<prerequisite> prereqs;
     std::string stem;
     node_ptr code;
 
     void print () const;
 
-    rule (std::string const &target, std::vector<promise> const &prereqs, node_ptr const &code)
+    rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code)
       : target (target)
       , prereqs (prereqs)
       , code (code)
@@ -104,18 +113,18 @@ struct inference_engine
   void add_file (fs::path const &file);
 
   /// Add a rule to the initial rule list.
-  void add_rule (std::string const &target, std::vector<promise> const &prereqs, node_ptr const &code);
+  void add_rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code);
 
-  void add_rule (std::string const &target, promise const &dep0) { std::vector<promise> v; v.push_back (dep0); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4, promise const &dep5) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4, promise const &dep5, promise const &dep6) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4, promise const &dep5, promise const &dep6, promise const &dep7) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4, promise const &dep5, promise const &dep6, promise const &dep7, promise const &dep8) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); v.push_back (dep8); add_rule (target, v, 0); }
-  void add_rule (std::string const &target, promise const &dep0, promise const &dep1, promise const &dep2, promise const &dep3, promise const &dep4, promise const &dep5, promise const &dep6, promise const &dep7, promise const &dep8, promise const &dep9) { std::vector<promise> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); v.push_back (dep8); v.push_back (dep9); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0) { std::vector<prerequisite> v; v.push_back (dep0); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4, prerequisite const &dep5) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4, prerequisite const &dep5, prerequisite const &dep6) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4, prerequisite const &dep5, prerequisite const &dep6, prerequisite const &dep7) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4, prerequisite const &dep5, prerequisite const &dep6, prerequisite const &dep7, prerequisite const &dep8) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); v.push_back (dep8); add_rule (target, v, 0); }
+  void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1, prerequisite const &dep2, prerequisite const &dep3, prerequisite const &dep4, prerequisite const &dep5, prerequisite const &dep6, prerequisite const &dep7, prerequisite const &dep8, prerequisite const &dep9) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); v.push_back (dep2); v.push_back (dep3); v.push_back (dep4); v.push_back (dep5); v.push_back (dep6); v.push_back (dep7); v.push_back (dep8); v.push_back (dep9); add_rule (target, v, 0); }
 
   /// Run the inference algorithm on the input set.
   void infer ();

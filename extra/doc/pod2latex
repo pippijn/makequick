@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+
+use strict;
+use Pod::LaTeX;
+use base 'Pod::LaTeX';
+
+my $parser = new main;
+
+$parser->AddPreamble (0);
+$parser->AddPostamble (0);
+$parser->Head1Level (0);
+
+my ($POD, $TEX) = @ARGV or die;
+my ($BASE) = $POD =~ m|([^/]+)\.pod$|;
+
+$parser->parse_from_file ($POD, $TEX);
+
+
+sub command {
+   my $self = shift;
+   my ($command, $paragraph) = @_;
+
+   if ($command eq 'begin') {
+      if ($paragraph =~ /^latex/i) {
+         $self->{_dont_modify_any_para} = 1;
+      } elsif ($paragraph =~ /^code/i) {
+         $self->_output ("\\begin{verbatim}\n");
+         $self->{_dont_modify_any_para} = 1;
+      } else {
+         $self->SUPER::command (@_);
+      }
+   } elsif ($command eq 'end') {
+      $self->{_dont_modify_any_para} = 0;
+      if ($paragraph =~ /^code/i) {
+         $self->_output ("\\end{verbatim}\n");
+      } else {
+         $self->SUPER::command (@_);
+      }
+   } elsif ($command eq 'head1') {
+      $self->SUPER::command (@_);
+      $self->_output ("\\label{$BASE}");
+   } else {
+      $self->SUPER::command (@_);
+   }
+}
+
+sub interior_sequence {
+   my $self = shift;
+
+   my ($seq_command, $seq_argument, $pod_seq) = @_;
+
+   if ($seq_command eq 'L') {
+      my ($title, $ref) = split /\|/, $seq_argument, 2;
+      $ref //= $title;
+      if ($ref =~ /^http:/) {
+         return "\\href{$ref}{$title}"
+      }
+      return "\\emph{$title} (see chapter \\ref{$ref})"
+   } else {
+      $self->SUPER::interior_sequence (@_);
+   }
+}

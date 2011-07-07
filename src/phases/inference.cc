@@ -34,7 +34,7 @@ struct inference
   rule_state state;
 
   std::string target;
-  std::vector<inference_engine::promise> prereq;
+  std::vector<inference_engine::prerequisite> prereq;
 
   inference (annotation_map &annots)
     : info (annots.put ("rule_info", new rule_info))
@@ -65,7 +65,7 @@ struct inference
         std::transform (r.prereqs.begin (),
                         r.prereqs.end (),
                         back_inserter (ri.prereq),
-                        bind (&inference_engine::promise::str, arg1));
+                        bind (&inference_engine::prerequisite::str, arg1));
         ri.stem = r.stem;
         ri.code = r.code;
       }
@@ -96,7 +96,7 @@ make_target (node_vec const &list)
   return target;
 }
 
-static inference_engine::promise
+static inference_engine::prerequisite
 make_prereq (node_vec const &list)
 {
   bool is_re = false;
