@@ -17,6 +17,9 @@ rules.am
 Makefile.am
 Makefile.in
 
+# Clang completion
+/.clang_complete
+
 # Work in progress, not for git
 /wip
 
