@@ -1,176 +1,158 @@
+#include "node.h"
+
+#include "foreach.h"
+#include "nodes.pb.h"
+
 #include <fstream>
-#include <set>
-
-#include <boost/archive/detail/basic_iarchive.hpp>
-#include <boost/archive/detail/basic_oarchive.hpp>
-
-#include <boost/serialization/vector.hpp>
-
-#include <boost/implicit_cast.hpp>
-
-#include <boost/utility/enable_if.hpp>
 
 #include <boost/filesystem/path.hpp>
 
-#include "foreach.h"
-#include "node.h"
+#include <google/protobuf/text_format.h>
 
-using namespace nodes;
-using namespace tokens;
-
-struct s11n_files
+static struct s11n_files
 {
-  std::set<fs::path const *> files;
+  typedef std::map<std::string, fs::path const *> file_map;
+  file_map files;
 
-  void add (boost::archive::detail::basic_oarchive const &, fs::path const *file) { }
-  void add (boost::archive::detail::basic_iarchive const &, fs::path const *file)
-  { files.insert (file); }
+  fs::path const *add (std::string const &filename)
+  {
+    file_map::const_iterator found = files.find (filename);
+    if (found == files.end ())
+      found = files.insert (file_map::value_type (filename, new fs::path (filename))).first;
+    return found->second;
+  }
+
+  static void destroy (std::pair<std::string, fs::path const *> const &pair)
+  {
+    delete pair.second;
+  }
 
   ~s11n_files ()
   {
-    foreach (fs::path const *file, files)
-      delete file;
+    google::protobuf::ShutdownProtobufLibrary ();
+    for_each (files.begin (), files.end (), destroy);
   }
 } files;
 
-namespace boost
+namespace nodes
 {
-  namespace serialization
+  static void
+  store_loc (Location &sloc, location const &loc)
   {
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, fs::path &file, unsigned int version)
-    {
-      std::string native = file.native ();
-      ar & make_nvp ("native", native);
-      file = native;
-    }
-
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, location &n, unsigned int version)
-    {
-      ar & make_nvp ("file", n.file);
-      ar & make_nvp ("first_line", n.first_line);
-      ar & make_nvp ("first_column", n.first_column);
-      ar & make_nvp ("last_line", n.last_line);
-      ar & make_nvp ("last_column", n.last_column);
-
-      files.add (ar, n.file);
-    }
-
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, node &n, unsigned int version)
-    {
-      ar & make_nvp ("loc", n.loc);
-    }
-
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, token &n, unsigned int version)
-    {
-      serialize (ar, implicit_cast<node &> (n), version);
-      ar & make_nvp ("tok", n.tok);
-      ar & make_nvp ("string", n.mutable_string);
-    }
-
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, generic_node &n, unsigned int version)
-    {
-      serialize (ar, implicit_cast<node &> (n), version);
-      ar & make_nvp ("type", n.type);
-      ar & make_nvp ("list", n.list);
-    }
-
-#include "s11n_funcs.h"
-
-    template<typename Archive>
-    static void
-    serialize (Archive &ar, node_ptr &n, unsigned int version)
-    {
-      void_cast_register<token, node> ();
-      void_cast_register<generic_node, node> ();
-#include "s11n_casts.h"
-
-      ar.template register_type<token> ();
-#include "s11n_types.h"
-
-      node *p = n.get ();
-      ar & make_nvp ("px", p);
-      n.reset (p);
-    }
-  }
-}
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-
-template<s11n_format Format> struct suffix;
-template<> struct suffix<s11n_binary> { static std::string value () { return ".bin"; } };
-template<> struct suffix<s11n_text  > { static std::string value () { return ".txt"; } };
-template<> struct suffix<s11n_xml   > { static std::string value () { return ".xml"; } };
-
-template<s11n_format Format> struct iarchive;
-template<> struct iarchive<s11n_binary> { typedef boost::archive::binary_iarchive type; };
-template<> struct iarchive<s11n_text  > { typedef boost::archive::text_iarchive   type; };
-template<> struct iarchive<s11n_xml   > { typedef boost::archive::xml_iarchive    type; };
-
-template<s11n_format Format> struct oarchive;
-template<> struct oarchive<s11n_binary> { typedef boost::archive::binary_oarchive type; };
-template<> struct oarchive<s11n_text  > { typedef boost::archive::text_oarchive   type; };
-template<> struct oarchive<s11n_xml   > { typedef boost::archive::xml_oarchive    type; };
-
-template<s11n_format Format>
-struct serialiser
-{
-  static node_ptr load (char const *file)
-  {
-    node_ptr n;
-
-    std::ifstream ifs ((file + suffix<Format>::value ()).c_str ());
-    typename iarchive<Format>::type ia (ifs);
-    ia >> boost::serialization::make_nvp ("node", n);
-
-    return n;
+    sloc.set_file (loc.file->native ());
+    sloc.set_first_line (loc.first_line);
+    sloc.set_first_column (loc.first_column);
+    sloc.set_last_line (loc.last_line);
+    sloc.set_last_column (loc.last_column);
   }
 
-  static void store (char const *file, node_ptr const &n)
+  static void
+  load_loc (location &loc, Location const &sloc)
   {
-    std::ofstream ofs ((file + suffix<Format>::value ()).c_str ());
-    typename oarchive<Format>::type oa (ofs);
-    oa << boost::serialization::make_nvp ("node", n);
+    loc.file = files.add (sloc.file ());
+    loc.first_line = sloc.first_line ();
+    loc.first_column = sloc.first_column ();
+    loc.last_line = sloc.last_line ();
+    loc.last_column = sloc.last_column ();
   }
-};
 
+  void
+  node::store (std::ostream &os, node_ptr const &root, bool text)
+  {
+    compress_hash ();
+    NodeList list;
+    list.set_root (root->index + 1);
+    foreach (node *n, nodes)
+      {
+        Node &sn = *list.add_node ();
+        sn.set_index (n->index + 1);
+        store_loc (*sn.mutable_loc (), n->loc);
+        if (generic_node *p = n->is<generic_node> ())
+          {
+            GenericNode &list = *sn.mutable_node ();
+            list.set_type (p->type);
+            foreach (node_ptr const &c, p->list)
+              if (c)
+                list.add_child (c->index + 1);
+              else
+                list.add_child (0);
+          }
+        else
+          {
+            tokens::token &t = n->as<tokens::token> ();
+            Token &token = *sn.mutable_token ();
+            token.set_tok (t.tok);
+            token.set_str (t.string);
+          }
+      }
 
-node_ptr
-node::load (char const *file, s11n_format format)
-{
-  switch (format)
-    {
-    case s11n_binary: return serialiser<s11n_binary>::load (file);
-    case s11n_text  : return serialiser<s11n_text  >::load (file);
-    case s11n_xml   : return serialiser<s11n_xml   >::load (file);
-    }
-  throw format;
-}
+    if (!text)
+      list.SerializeToOstream (&os);
+    else
+      {
+        std::string str;
+        google::protobuf::TextFormat::PrintToString (list, &str);
+        os << str;
+      }
+  }
 
-void
-node::store (char const *file, node_ptr const &n, s11n_format format)
-{
-  switch (format)
-    {
-    case s11n_binary: return serialiser<s11n_binary>::store (file, n);
-    case s11n_text  : return serialiser<s11n_text  >::store (file, n);
-    case s11n_xml   : return serialiser<s11n_xml   >::store (file, n);
-    }
-  throw format;
+  node_ptr
+  node::load (std::istream &is, bool text)
+  {
+    compress_hash ();
+    assert (hash_size () == 0);
+    NodeList list;
+
+    if (!text)
+      list.ParseFromIstream (&is);
+    else
+      {
+        std::string str;
+        is.seekg (0, std::ios::end);
+        str.reserve (is.tellg ());
+        is.seekg (0, std::ios::beg);
+        str.assign (std::istreambuf_iterator<char> (is),
+                    std::istreambuf_iterator<char> ());
+        google::protobuf::TextFormat::ParseFromString (str, &list);
+      }
+
+    std::vector<node_ptr> node_ptrs;
+    foreach (Node const &sn, list.node ())
+      {
+        int const index = sn.index ();
+        node *n;
+        if (sn.has_node ())
+          {
+            GenericNode const &list = sn.node ();
+            node_list *p = make_node (node_type (list.type ()));
+            n = p;
+          }
+        else
+          {
+            Token const &token = sn.token ();
+            tokens::token *t = new tokens::token ();
+            t->tok = token.tok ();
+            t->mutable_string = token.str ();
+            n = t;
+          }
+        load_loc (n->loc, sn.loc ());
+        assert (nodes.size () == index);
+        node_ptrs.push_back (n);
+      }
+
+    // fix up references
+    foreach (Node const &sn, list.node ())
+      {
+        if (sn.has_node ())
+          {
+            generic_node &n = nodes[sn.index () - 1]->as<generic_node> ();
+            GenericNode const &list = sn.node ();
+            foreach (int c, list.child ())
+              n.add (c ? nodes[c - 1] : 0);
+          }
+      }
+
+    assert (audit_hash ());
+    return nodes[list.root () - 1];
+  }
 }

@@ -12,7 +12,6 @@ makepp_SOURCES =		\
 	parser.cc		\
 	parseutil.cc		\
 	phases.cc		\
-	protobuf.cc		\
 	serialisation.cc	\
 	sighandler.cc		\
 	string_lexer.cc		\

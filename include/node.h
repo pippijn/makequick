@@ -20,13 +20,6 @@ struct location
 
 namespace nodes
 {
-  enum s11n_format
-  {
-    s11n_binary,
-    s11n_text,
-    s11n_xml
-  };
-
   struct node
   {
     virtual void accept (visitor &v) = 0;
@@ -41,14 +34,13 @@ namespace nodes
     template<typename T> T &as () { return dynamic_cast<T &> (*this); }
     template<typename T> T *is () { return dynamic_cast<T *> ( this); }
 
-    static void store (char const *file, node_ptr const &n, s11n_format format = s11n_text);
-    static node_ptr load (char const *file, s11n_format format = s11n_text);
-
-    static void store (std::ostream &os, node_ptr const &root);
-    static node_ptr load (std::istream &is);
+    static void store (std::ostream &os, node_ptr const &root, bool text = false);
+    static node_ptr load (std::istream &is, bool text = false);
 
     int refcnt;
     int index;
+
+    static std::vector<node *> nodes;
 
     static void compress_hash ();
     static bool audit_hash ();

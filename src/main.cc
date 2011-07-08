@@ -82,54 +82,21 @@ struct base_sort
 };
 
 static void
-load_store_pb (node_ptr &doc)
+load_store (node_ptr &doc, bool text = true)
 {
   {
     timer T ("store");
     printf ("%%%% storing %lu nodes\n", node::node_count ());
     std::ofstream os ("nodes.bin");
-    node::store (os, doc->as<nodes::generic_node> ()[0]);
+    node::store (os, doc->as<nodes::generic_node> ()[0], text);
   }
   doc = 0;
   {
     timer T ("load");
     std::ifstream is ("nodes.bin");
-    doc = node::load (is);
+    doc = node::load (is, text);
     printf ("%%%% loaded %lu nodes\n", node::node_count ());
   }
-}
-
-static void
-load_store_boost (node_ptr &doc)
-{
-#if 0
-  nodes::s11n_format const format = nodes::s11n_binary;
-#elif 1
-  nodes::s11n_format const format = nodes::s11n_text;
-#elif 0
-  nodes::s11n_format const format = nodes::s11n_xml;
-#endif
-  {
-    node::compress_hash ();
-    printf ("%%%% storing %lu nodes\n", node::node_count ());
-    timer T ("store");
-    node::store ("nodes", doc, format);
-  }
-  doc = 0;
-  {
-    timer T ("load");
-    doc = node::load ("nodes", format);
-    printf ("%%%% loaded %lu nodes\n", node::node_count ());
-  }
-}
-
-static void
-load_store (node_ptr &doc)
-{
-  if (1)
-    load_store_pb (doc);
-  else
-    load_store_boost (doc);
 }
 
 int
