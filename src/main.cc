@@ -8,8 +8,10 @@
 #include "parseutil.h"
 #include "phases.h"
 #include "sighandler.h"
+#include "util/timer.h"
 
 #include <cstdio>
+#include <fstream>
 #include <typeinfo>
 
 #include <boost/bind.hpp>
@@ -79,6 +81,57 @@ struct base_sort
   size_t const offset;
 };
 
+static void
+load_store_pb (node_ptr &doc)
+{
+  {
+    timer T ("store");
+    printf ("%%%% storing %lu nodes\n", node::node_count ());
+    std::ofstream os ("nodes.bin");
+    node::store (os, doc->as<nodes::generic_node> ()[0]);
+  }
+  doc = 0;
+  {
+    timer T ("load");
+    std::ifstream is ("nodes.bin");
+    doc = node::load (is);
+    printf ("%%%% loaded %lu nodes\n", node::node_count ());
+  }
+}
+
+static void
+load_store_boost (node_ptr &doc)
+{
+#if 0
+  nodes::s11n_format const format = nodes::s11n_binary;
+#elif 1
+  nodes::s11n_format const format = nodes::s11n_text;
+#elif 0
+  nodes::s11n_format const format = nodes::s11n_xml;
+#endif
+  {
+    node::compress_hash ();
+    printf ("%%%% storing %lu nodes\n", node::node_count ());
+    timer T ("store");
+    node::store ("nodes", doc, format);
+  }
+  doc = 0;
+  {
+    timer T ("load");
+    doc = node::load ("nodes", format);
+    printf ("%%%% loaded %lu nodes\n", node::node_count ());
+  }
+}
+
+static void
+load_store (node_ptr &doc)
+{
+  if (1)
+    load_store_pb (doc);
+  else
+    load_store_boost (doc);
+}
+
 int
 main (int argc, char *argv[])
 try
@@ -130,11 +183,7 @@ try
 
   if (node_ptr doc = parse_files (files))
     {
-      //nodes::s11n_format const format = nodes::s11n_binary;
-      nodes::s11n_format const format = nodes::s11n_text;
-      //nodes::s11n_format const format = nodes::s11n_xml;
-      node::store ("nodes", doc, format);
-      doc = node::load ("nodes", format);
+      load_store (doc);
 
       using namespace annotations;
 

@@ -8,9 +8,11 @@ makepp_SOURCES =		\
 	lexer.cc		\
 	main.cc			\
 	node.cc			\
+	node_factory.cc		\
 	parser.cc		\
 	parseutil.cc		\
 	phases.cc		\
+	protobuf.cc		\
 	serialisation.cc	\
 	sighandler.cc		\
 	string_lexer.cc		\
@@ -19,16 +21,21 @@ makepp_SOURCES =		\
 	yyparse.yy
 
 nodist_makepp_SOURCES =		\
-	node_type.cc
+	node_type.cc		\
+	nodes.pb.cc
 
 include annotations/Rules.am
 include phases/Rules.am
 include util/Rules.am
 
-GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h visitor_t.h node_fwd.h visitor_cc.h s11n_types.h s11n_funcs.h s11n_casts.h
+GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h visitor_t.h node_fwd.h visitor_cc.h s11n_types.h s11n_funcs.h s11n_casts.h nodes.pb.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
 EXTRA_DIST += yylex.h
 CLEANFILES += $(GENFILES) $(nodist_makepp_SOURCES)
+
+nodes.pb.h: nodes.pb.cc
+nodes.pb.cc: include/gen/nodes.proto
+	$(AM_V_PROTO)protoc --cpp_out=$(builddir) --proto_path=$(<D) $<
 
 yystate.h: yylex.h
 	@echo 'namespace yy { enum state {' > $@

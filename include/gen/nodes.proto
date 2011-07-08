@@ -1,0 +1,29 @@
+message Location {
+	required string file = 1;
+	required int32 first_line = 2;
+	required int32 first_column = 3;
+	required int32 last_line = 4;
+	required int32 last_column = 5;
+}
+
+message GenericNode {
+	required int32 type = 1;
+	repeated int32 child = 2;
+}
+
+message Token {
+	required int32 tok = 1;
+	required string str = 2;
+}
+
+message Node {
+	required Location loc = 1;
+	required int32 index = 2;
+	optional GenericNode node = 3;
+	optional Token token = 4;
+}
+
+message NodeList {
+	required int32 root = 1;
+	repeated Node node = 2;
+}

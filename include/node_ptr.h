@@ -26,7 +26,6 @@ namespace nodes
 
   NODE (node_list);
   NODE (generic_node);
-#include "node_fwd.h"
 }
 
 namespace tokens
@@ -36,6 +35,8 @@ namespace tokens
   template<short Tok>
   token *make_token (char const *text, int leng);
 }
+
+#undef NODE
 
 template<typename T>
 boost::intrusive_ptr<T>
@@ -48,3 +49,10 @@ move (boost::intrusive_ptr<T> &p)
 
 using nodes::node;
 using nodes::node_ptr;
+
+namespace nodes
+{
+#define NODE(T) struct t_##T; typedef boost::intrusive_ptr<t_##T> t_##T##_ptr; typedef std::vector<t_##T##_ptr> t_##T##_vec;
+#include "node_fwd.h"
+#undef NODE
+}

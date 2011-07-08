@@ -47,7 +47,9 @@ timer::~timer ()
 
 lex_timer::lex_timer (char const *name)
   : timer (name)
-  , prev (now ())
+  , start (now ())
+  , prev (start)
+  , bytes (0)
 {
 }
 
@@ -61,12 +63,15 @@ lex_timer::~lex_timer ()
   double average = accumulate (times.begin (),
                                times.end (),
                                0.0) / times.size ();
+  double total = 0.0 + (prev - start);
 
-  printf ("%%%% lex: %lu token%s - avg: %.3gsec (%.1f tokens/sec)\n",
+  printf ("%%%% lex/parse: %lu token%s - avg: %.3gsec (%.1f tokens/sec) %lu bytes (%.1f MiB/sec)\n",
           times.size (),
           times.size () == 1 ? "" : "s",
           average,
-          1 / average);
+          1 / average,
+          bytes,
+          bytes / total / 1024 / 1024);
 }
 
 void

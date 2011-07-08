@@ -1,5 +1,7 @@
 #include "phase.h"
 
+#include <stdexcept>
+
 struct audit
   : visitor
 {
@@ -8,8 +10,10 @@ struct audit
   std::vector<bool> s;
 
   audit (annotation_map &annots)
-    : s (node::node_count ())
+    : s (node::hash_size ())
   {
+    if (!node::audit_hash ())
+      throw std::runtime_error ("invalid node hash");
   }
 };
 

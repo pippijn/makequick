@@ -22,6 +22,7 @@ move (std::string &s)
 
 #define BACKTRACK(N) do {		\
   yycolumn -= yyleng - N;		\
+  impl->T.bytes -= yyleng - N;		\
   yyless (N);				\
 } while (0)
 %}

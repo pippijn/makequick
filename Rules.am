@@ -14,6 +14,7 @@ AM_LDFLAGS += -lboost_filesystem-mt
 AM_LDFLAGS += -lboost_regex-mt
 AM_LDFLAGS += -lboost_system-mt
 AM_LDFLAGS += -lboost_serialization-mt
+AM_LDFLAGS += $(PROTOBUF_LIBS)
 
 #AM_CXXFLAGS += -O3
 #AM_CXXFLAGS += -march=native

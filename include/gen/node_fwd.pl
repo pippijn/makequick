@@ -11,6 +11,6 @@ my $nodes = do (__DIR__ . "/nodes.pm");
 for my $node (keys %$nodes) {
    my ($num) = $node =~ /_([01])$/;
    $node =~ s/_([01])$//;
-   print "NODE (t_$node);\n"
+   print "NODE ($node)\n"
       unless $num
 }

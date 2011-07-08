@@ -24,5 +24,7 @@ struct lex_timer
   void next ();
 
   timervec times;
+  timeval const start;
   timeval prev;
+  int bytes;
 };

@@ -140,4 +140,5 @@ lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int le
   yylloc->last_column = column;
 
   impl->loc = yylloc;
+  impl->T.bytes += leng;
 }

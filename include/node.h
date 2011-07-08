@@ -44,12 +44,16 @@ namespace nodes
     static void store (char const *file, node_ptr const &n, s11n_format format = s11n_text);
     static node_ptr load (char const *file, s11n_format format = s11n_text);
 
+    static void store (std::ostream &os, node_ptr const &root);
+    static node_ptr load (std::istream &is);
+
     int refcnt;
     int index;
 
     static void compress_hash ();
     static bool audit_hash ();
     static size_t node_count ();
+    static size_t hash_size ();
   };
 
   struct node_list
@@ -99,25 +103,27 @@ namespace nodes
     int type;
   };
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc);
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc, node_ptr const &v0);
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1);
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2);
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2, node_ptr const &v3);
 
-  template<int Type>
+  template<node_type Type>
   node_list *make_node (location const &loc, node_ptr const &v0, node_ptr const &v1, node_ptr const &v2, node_ptr const &v3, node_ptr const &v4);
 
 #include "node_t.h"
+
+  node_list *make_node (node_type type);
 
   template<typename T>
   boost::intrusive_ptr<T>
