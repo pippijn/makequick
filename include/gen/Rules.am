@@ -3,8 +3,5 @@ EXTRA_DIST +=		\
 	node_t.pl	\
 	nodes.pm	\
 	nodes.proto	\
-	s11n_casts.pl	\
-	s11n_funcs.pl	\
-	s11n_types.pl	\
 	visitor_cc.pl	\
 	visitor_t.pl

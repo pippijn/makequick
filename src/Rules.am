@@ -27,7 +27,7 @@ include annotations/Rules.am
 include phases/Rules.am
 include util/Rules.am
 
-GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h visitor_t.h node_fwd.h visitor_cc.h s11n_types.h s11n_funcs.h s11n_casts.h nodes.pb.h
+GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h visitor_t.h node_fwd.h visitor_cc.h nodes.pb.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
 EXTRA_DIST += yylex.h
 CLEANFILES += $(GENFILES) $(nodist_makepp_SOURCES)
