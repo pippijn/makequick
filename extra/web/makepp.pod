@@ -66,7 +66,7 @@ included by other files. Autoconf scripts may be included in the C<project>
 block. Additional automake rules may be included in rule files. This gives you
 all the flexibility back at the expense of the included files being essentially
 a black box to Make++, thus defeating its static analysis features. Make++
-guarantees that pure projects, i.e. without external autotools input, do not
+guarantees that pure projects, i.e. without external Autotools input, do not
 cause errors at a lower level. This can no longer be guaranteed in the presence
 of such black boxes.
 

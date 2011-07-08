@@ -18,7 +18,7 @@ The above example is a simple rule to build object files from C sources. The
 rule is instantiated for each match, so that the resulting Makefile has only
 explicit rules.
 
-Rules are matched on the graph, rather than on the filesystem. When a rule
+Rules are matched on the graph, rather than on the file system. When a rule
 matches a file in the graph, an edge from that file to the new file is created.
 Other rules can then match this new file.
 
@@ -185,7 +185,7 @@ In the above example, C<$(TARGET.link : library)> will be expanded to C<mylib1>.
 =head2 Output in $(builddir)
 
 You may want to output the resulting files directly into the C<$(builddir)>,
-instead of a subdir. For this use case, the C<%%> pattern may be used.
+instead of a subdirectory. For this use case, the C<%%> pattern may be used.
 
 =begin code MakePP
 

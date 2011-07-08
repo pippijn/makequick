@@ -166,7 +166,7 @@ way.
 =head3 cppflags
 
 If inside a target, these are target-specific C<CPPFLAGS>. If you define
-target-specific C<cppflags>, the global C<cppflags> are overridden. you may
+target-specific C<cppflags>, the global C<cppflags> are overridden. You may
 import global C<cppflags> as with link and sources.
 
 =begin code MakePP
@@ -220,4 +220,4 @@ into C<$libdir>. You can change this by using the arrow operator.
 
 =end code MakePP
 
-TODO: There is no way to define custom install dirs, for now.
+TODO: There is no way to define custom install directories, for now.
