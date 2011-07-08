@@ -52,7 +52,7 @@ file_lexer::wrap ()
 
   FILE *fh = fopen ((*it)->c_str (), "r");
   if (!fh)
-    throw std::runtime_error ("Could not open " + (*it)->string () + " for reading");
+    throw std::runtime_error ("Could not open " + (*it)->native () + " for reading");
   ++it;
 
   yyset_in (fh, yyscanner);

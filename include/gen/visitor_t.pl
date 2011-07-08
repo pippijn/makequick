@@ -9,5 +9,8 @@ use Dir::Self;
 my $nodes = do (__DIR__ . "/nodes.pm");
 
 for my $node (keys %$nodes) {
-   print "virtual void visit (t_$node &n);\n";
+   my ($num) = $node =~ /_([01])$/;
+   $node =~ s/_([01])$//;
+   print "virtual void visit (t_$node &n);\n"
+      unless $num
 }

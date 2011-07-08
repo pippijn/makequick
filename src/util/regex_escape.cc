@@ -6,16 +6,16 @@ void
 regex_escape (std::string &regex, std::string const &wc)
 {
   foreach (char c, wc)
-   switch (c)
-     {
-     case '(':
-     case ')':
-     case '.':
-       regex += '\\';
-     default:
-       regex += c;
-       break;
-     }
+    switch (c)
+      {
+      case '(':
+      case ')':
+      case '.':
+        regex += '\\';
+      default:
+        regex += c;
+        break;
+      }
 }
 
 std::string

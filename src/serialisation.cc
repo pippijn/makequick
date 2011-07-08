@@ -4,9 +4,6 @@
 #include <boost/archive/detail/basic_iarchive.hpp>
 #include <boost/archive/detail/basic_oarchive.hpp>
 
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
 
 #include <boost/implicit_cast.hpp>

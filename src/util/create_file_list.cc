@@ -25,4 +25,3 @@ create_file_list (std::vector<fs::path> const &source_files,
                  TK_FILENAME,
                  bind (&fs::path::native, arg1))));
 }
-
