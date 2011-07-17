@@ -1,4 +1,3 @@
-include algorithm/Rules.am
 include annotations/Rules.am
 include boost/Rules.am
 include gen/Rules.am

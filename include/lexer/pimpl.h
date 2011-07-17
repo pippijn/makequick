@@ -6,6 +6,7 @@ struct lexer::pimpl
   lex_timer T;
   int init;
   bool alternative;
+  tokens::token *curtok;
 
   pimpl (char const *name)
     : T (name)

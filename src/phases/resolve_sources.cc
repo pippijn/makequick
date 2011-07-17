@@ -1,6 +1,5 @@
 #include "phase.h"
 
-#include "algorithm/grep.h"
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
 #include "annotations/rule_info.h"

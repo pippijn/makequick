@@ -44,8 +44,11 @@ static std::string const
 make_message (node_ptr node, std::string const &message, std::string const &note, bool error)
 {
   std::ostringstream s;
-  s << node->loc
-    << severity (error ? ERROR : WARNING)
+  if (node)
+    s << node->loc;
+  else
+    s << "(internal): ";
+  s << severity (error ? ERROR : WARNING)
     << message;
   if (!note.empty ())
     s << "\n\t"

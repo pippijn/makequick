@@ -10,12 +10,19 @@ struct phases
 {
   static void print ();
 
-  static void run (std::string const &name, node_ptr doc, annotation_map &annots);
-  static void run (std::string const &name, node_ptr doc);
-  static void run (node_ptr doc, annotation_map &annots);
+  static void run (std::string const &name, node_ptr const &doc, annotation_map &annots);
+  static void run (std::string const &name, node_ptr const &doc);
+  static void run (node_ptr const &doc, annotation_map &annots);
 
 private:
-  virtual void run1 (node_ptr doc, annotation_map &annots) = 0;
+  virtual void run1 (node_ptr const &doc, annotation_map &annots) = 0;
+
+  typedef void phase_fn (std::string const &name, phases *phase, node_ptr const &doc, annotation_map *annots);
+
+  static void for_each_phase (phase_fn fn, node_ptr const &doc = 0, annotation_map *annots = 0);
+
+  static phase_fn run_each;
+  static phase_fn print_each;
   
   bool const autorun;
 
@@ -69,7 +76,7 @@ struct phase
     add_dependency (dep2);
   }
 
-  void run1 (node_ptr doc, annotation_map &annots)
+  void run1 (node_ptr const &doc, annotation_map &annots)
   {
     Visitor v (annots);
     this->annots = &annots;

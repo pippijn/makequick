@@ -32,6 +32,3 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 #include <boost/utility/enable_if.hpp>
-
-namespace fs = boost::filesystem3;
-#define foreach BOOST_FOREACH

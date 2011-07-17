@@ -1,0 +1,24 @@
+program foo {
+	sources {
+		main.as
+		foo.c
+	}
+}
+
+library foo {
+	sources {
+		main.c
+	}
+}
+
+global {
+	%.lo: %%.c {
+		$(CC) $< -o $@
+	}
+	%.o: %%.c {
+		$(CC) $< -o $@
+	}
+	%.c: %.as {
+		$(ALDOR) $< -o $@
+	}
+}

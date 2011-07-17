@@ -73,7 +73,6 @@ INTEGER	{DIGIT}+
 "cflags"				{ Return (KW_CFLAGS); }
 "config_header:"			{ Return (KW_CONFIG_HEADER); }
 "contact:"				{ Return (KW_CONTACT); }
-"cppflags"				{ Return (KW_CPPFLAGS); }
 "define"				{ Return (KW_DEFINE); }
 "error"					{ Return (KW_ERROR); }
 "exclude"				{ Return (KW_EXCLUDE); }
@@ -150,7 +149,7 @@ INTEGER	{DIGIT}+
 
 <RULE_LINE>{
 	\n				{ }
-	^\t{3}				{ }
+	^\t{3}				{ impl->text = "\n         "; Return (TK_CODE); }
 	^\t{2}				{ Return (TK_WHITESPACE); }
 	^\t{1}"}"			{ POP (); BACKTRACK (1); Return (TK_WHITESPACE); }
 	[^\n\t$]+			{ Return (TK_CODE); }
@@ -244,9 +243,9 @@ int
 lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
 {
   if (!this->text.empty ())
-    lval->token = new tokens::token (*lloc, Tok, move (this->text));
+    curtok = lval->token = new tokens::token (*lloc, Tok, move (this->text));
   else
-    lval->token = new tokens::token (*lloc, Tok, text, leng);
+    curtok = lval->token = new tokens::token (*lloc, Tok, text, leng);
 #if LEXER_VERBOSE
   printf ("[%d:%d-%d:%d]: <<%s>>\n",
           lloc->first_line,

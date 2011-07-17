@@ -1,6 +1,5 @@
 #include "config.h"
 
-#include "algorithm/grep.h"
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
 #include "annotation_map.h"
@@ -82,7 +81,7 @@ struct base_sort
 };
 
 static void
-load_store (node_ptr &doc, bool text = true)
+load_store (node_ptr &doc, bool text = false)
 {
   {
     timer T ("store");
@@ -99,6 +98,14 @@ load_store (node_ptr &doc, bool text = true)
   }
 }
 
+static void
+usage ()
+{
+  puts ("usage: "PACKAGE_TARNAME" [--phase...] <srcdir>");
+  puts ("  available phases:");
+  phases::print ();
+}
+
 int
 main (int argc, char *argv[])
 try
@@ -107,9 +114,7 @@ try
 
   if (!argv[0] || !strcmp (argv[0], "--help"))
     {
-      puts ("usage: "PACKAGE_TARNAME" [phases...] <srcdir>");
-      puts ("  available phases:");
-      phases::print ();
+      usage ();
       return argv[0] ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
@@ -120,10 +125,16 @@ try
     }
 
   std::vector<char const *> to_run;
-  while (!strncmp (argv[0], "--", 2))
+  while (argv[0] && !strncmp (argv[0], "--", 2))
     {
       to_run.push_back (argv[0] + 2);
       ++argv;
+    }
+
+  if (!argv[0])
+    {
+      usage ();
+      return EXIT_FAILURE;
     }
 
   fs::path const path (resolve (absolute (fs::path (argv[0]))));
@@ -158,21 +169,33 @@ try
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
       annots.put ("errors", new error_log);
 
-      if (!to_run.empty ())
-        foreach (char const *phase, to_run)
-          phases::run (phase, doc, annots);
-      else
-        {
-          phases::run (doc, annots);
-        }
-
       error_log &errors = annots.get ("errors");
+
+      try
+      {
+        if (!to_run.empty ())
+          foreach (char const *phase, to_run)
+            phases::run (phase, doc, annots);
+        else
+          {
+            phases::run (doc, annots);
+          }
+      }
+      catch (...)
+      {
+        errors.print (path, argv[0]);
+        throw;
+      }
+
       errors.print (path, argv[0]);
       if (errors.has_errors ())
         return EXIT_FAILURE;
 
       if (to_run.empty ())
-        phases::run ("xml", doc, annots);
+        {
+          phases::run ("print", doc, annots);
+          //phases::run ("xml", doc, annots);
+        }
     }
   else
     return EXIT_FAILURE;

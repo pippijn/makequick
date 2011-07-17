@@ -78,7 +78,6 @@ using namespace nodes;
 %token<token> KW_CFLAGS			"cflags"
 %token<token> KW_CONFIG_HEADER		"config_header:"
 %token<token> KW_CONTACT		"contact:"
-%token<token> KW_CPPFLAGS		"cppflags"
 %token<token> KW_DEFINE			"define"
 %token<token> KW_ERROR			"error"
 %token<token> KW_EXCLUDE		"exclude"
@@ -150,7 +149,7 @@ using namespace nodes;
 %type<list> arg_enable_choice arg_enable_content project project_members project_member
 %type<list> variable variable_content section section_members
 %type<node> filename_part section_member target_member code_frag
-%type<token> identifier filename_token link_item flag_keyword string.opt identifier.opt ac_checks
+%type<token> identifier filename_token link_item string.opt identifier.opt ac_checks
 %type<token> arg_default check_library_notfound.opt
 
 %destructor { delete $$; } <*>
@@ -450,13 +449,8 @@ sources_member
  *
  ****************************************************************************/
 tool_flags
-	: flag_keyword if.opt flags_begin flags flags_end
+	: identifier if.opt flags_begin flags flags_end
 		{ $$ = make_node<n_tool_flags> (@$, $1, $2, $4); }
-	;
-
-flag_keyword
-	: identifier
-	| "cppflags"
 	;
 
 flags_begin

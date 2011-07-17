@@ -10,5 +10,7 @@ namespace nodes
 
     virtual void visit (tokens::token &n);
     virtual void visit (generic_node &n);
+
+    bool resume (node_ptr const &n);
   };
 }

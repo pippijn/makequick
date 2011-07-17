@@ -142,3 +142,9 @@ lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int le
   impl->loc = yylloc;
   impl->T.bytes += leng;
 }
+
+tokens::token *
+lexer::curtok () const
+{
+  return impl->curtok;
+}

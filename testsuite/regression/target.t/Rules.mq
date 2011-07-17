@@ -1,0 +1,11 @@
+program foo {
+	sources {
+		main.c
+	}
+}
+
+global {
+	%.o: %%.c {
+		$(CC) $< -o $@
+	}
+}

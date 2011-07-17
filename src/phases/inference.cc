@@ -1,4 +1,3 @@
-#include <typeinfo>
 #include "phase.h"
 
 #include "annotations/file_list.h"
@@ -29,7 +28,7 @@ struct inference
   };
 
   inference_engine engine;
-  rule_info &info;
+  rule_info &rules;
 
   rule_state state;
 
@@ -37,7 +36,7 @@ struct inference
   std::vector<inference_engine::prerequisite> prereq;
 
   inference (annotation_map &annots)
-    : info (annots.put ("rule_info", new rule_info))
+    : rules (annots.put ("rule_info", new rule_info))
     , state (S_NONE)
   {
     file_list const &files = annots.get ("files");
@@ -54,13 +53,13 @@ struct inference
       throw "inference test";
 #endif
 
-    swap (info.files, engine.info.files);
+    swap (rules.files, engine.info.files);
     foreach (inference_engine::rule const &r, engine.info.rules)
       {
         using namespace boost::phoenix;
         using namespace boost::phoenix::arg_names;
-        info.rules.push_back (rule_info::rule ());
-        rule_info::rule &ri = info.rules.back ();
+        rules.rules.push_back (rule_info::rule ());
+        rule_info::rule &ri = rules.rules.back ();
         ri.target = r.target;
         std::transform (r.prereqs.begin (),
                         r.prereqs.end (),

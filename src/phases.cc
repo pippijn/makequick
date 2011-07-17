@@ -23,18 +23,23 @@ struct phases::pimpl
 };
 
 void
+phases::print_each (std::string const &name, phases *phase, node_ptr const &doc, annotation_map *annots)
+{
+  std::cout << "    " << name;
+  if (!phase->autorun)
+    std::cout << " (no autorun)";
+  std::tr1::unordered_set<std::string> const &deps = phase->self->dependencies;
+  if (!deps.empty ())
+    std::cout << ':';
+  foreach (std::string const &dep, deps)
+    std::cout << ' ' << dep;
+  std::cout << '\n';
+}
+
+void
 phases::print ()
 {
-  foreach (phase_map::value_type const &pair, map)
-    {
-      std::cout << "    " << pair.first;
-      std::tr1::unordered_set<std::string> const &deps = pair.second->self->dependencies;
-      if (!deps.empty ())
-        std::cout << ':';
-      foreach (std::string const &dep, deps)
-        std::cout << ' ' << dep;
-      std::cout << '\n';
-    }
+  for_each_phase (print_each);
 }
 
 
@@ -53,7 +58,7 @@ phases::~phases ()
 }
 
 void
-phases::run (std::string const &name, node_ptr doc, annotation_map &annots)
+phases::run (std::string const &name, node_ptr const &doc, annotation_map &annots)
 {
   phases *phase = map[name];
   if (!phase)
@@ -62,7 +67,7 @@ phases::run (std::string const &name, node_ptr doc, annotation_map &annots)
 }
 
 void
-phases::run (std::string const &name, node_ptr doc)
+phases::run (std::string const &name, node_ptr const &doc)
 {
   annotation_map annots;
   run (name, doc, annots);
@@ -84,7 +89,7 @@ struct pair_equals
 };
 
 void
-phases::run (node_ptr doc, annotation_map &annots)
+phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots)
 {
   using namespace boost;
 
@@ -106,23 +111,39 @@ phases::run (node_ptr doc, annotation_map &annots)
   std::vector<Vertex> sorted;
   topological_sort (G, back_inserter (sorted));
 
-  annotations::error_log const &errors = annots.get ("errors");
+  annotations::error_log const *errors = 0;
+  if (annots)
+    errors = &annots->get<annotations::error_log> ("errors");
   foreach (Vertex const &v, sorted)
     {
       if (should_terminate)
         return;
       if (v)
         {
-          struct phases *phase = phases[v - 1].second;
-          if (phase->autorun)
-            {
-              if (errors.has_diagnostics ())
-                return;
-              printf ("%%%% phase \"%s\"\n", phases[v - 1].first.c_str ());
-              phase->run1 (doc, annots);
-            }
+          if (errors && errors->has_diagnostics ())
+            return;
+          std::string const &name = phases[v - 1].first;
+          struct phases *phase    = phases[v - 1].second;
+          fn (name, phase, doc, annots);
         }
     }
+}
+
+void
+phases::run_each (std::string const &name, phases *phase, node_ptr const &doc, annotation_map *annots)
+{
+  assert (annots != NULL);
+  if (phase->autorun)
+    {
+      printf ("%%%% phase \"%s\"\n", name.c_str ());
+      phase->run1 (doc, *annots);
+    }
+}
+
+void
+phases::run (node_ptr const &doc, annotation_map &annots)
+{
+  for_each_phase (run_each, doc, &annots);
 }
 
 void

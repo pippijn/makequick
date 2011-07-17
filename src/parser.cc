@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include "exception.h"
+
 #include <boost/filesystem/path.hpp>
 
 parser::parser (lexer &lex)
@@ -30,5 +32,5 @@ yyerror (YYLTYPE const *llocp, parser *parser, char const *msg)
           llocp->first_line,
           llocp->first_column,
           msg);
-  exit (EXIT_FAILURE);
+  throw syntax_error (parser->lex.curtok (), msg);
 }

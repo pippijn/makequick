@@ -15,11 +15,16 @@ struct resolve_vars
   virtual void visit (t_variable_content &n);
   virtual void visit (t_variable &n);
   virtual void visit (t_filename &n);
+
+  virtual void visit (t_rule &n);
+
+  virtual void visit (generic_node &n);
   virtual void visit (token &n);
 
   bool in_sources;
   error_log &errors;
   generic_node_ptr sym;
+  generic_node_ptr root;
 
   enum parse_state
   {
@@ -54,12 +59,7 @@ void
 resolve_vars::visit (t_variable_content &n)
 {
   if (!n.member ())
-    {
-      sym = symtab.lookup (T_VARIABLE, n.name ()->as<token> ().string);
-#if 0
-      phases::run ("xml", sym);
-#endif
-    }
+    sym = symtab.lookup (T_VARIABLE, n.name ()->as<token> ().string);
   visitor::visit (n);
 }
 
@@ -81,16 +81,31 @@ resolve_vars::visit (t_filename &n)
 
       if (sym)
         {
-          n.list.erase (n.list.begin () + i, n.list.begin () + i + 1);
+          n.list.erase  (n.list.begin () + i, n.list.begin () + i + 1);
+
           node_ptr parsed = parse_string (extract_string (sym), r_filename, state == S_MULTIFILE);
-          sym = &parsed->as<t_filename> ();
-          n.list.insert (n.list.begin () + i, sym->list.begin (), sym->list.end ());
+          t_filename_ptr new_filename = &parsed->as<t_filename> ();
           sym = 0;
+
+          n.list.insert (n.list.begin () + i, new_filename->list.begin (), new_filename->list.end ());
         }
     }
-#if 0
-  phases::run ("xml", &n);
-#endif
+}
+
+void
+resolve_vars::visit (t_rule &n)
+{
+  visitor::visit (n);
+  sym = 0;
+}
+
+
+void 
+resolve_vars::visit (generic_node &n)
+{
+  if (n.type == n_toplevel_declarations)
+    root = &n;
+  visitor::visit (n);
 }
 
 void 

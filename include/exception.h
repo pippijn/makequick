@@ -21,11 +21,20 @@ struct semantic_error
   bool const error;
 };
 
+struct syntax_error
+  : semantic_error
+{
+  syntax_error (node_ptr node, std::string const &message, std::string const &note = "")
+    : semantic_error (node, message, note)
+  {
+  }
+};
+
 struct warning
   : semantic_error
 {
-  warning (node_ptr node, std::string const &message)
-    : semantic_error (node, message, false)
+  warning (node_ptr node, std::string const &message, std::string const &note = "")
+    : semantic_error (node, message, note, false)
   {
   }
 };

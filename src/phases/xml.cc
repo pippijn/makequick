@@ -68,6 +68,8 @@ xml::visit (generic_node &n)
   foreach (node_ptr const &p, n.list)
     if (p)
       p->accept (*this);
+    else
+      printf ("%*s<"CYAN"%s"R"/>\n", indent, "", "nil");
   indent -= 2;
   printf ("%*s</"CYAN"%s"R">\n", indent, "", node_type_name[n.type]);
 }

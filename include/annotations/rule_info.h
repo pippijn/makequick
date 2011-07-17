@@ -1,6 +1,7 @@
 #pragma once
 
 #include "annotation.h"
+#include "node_ptr.h"
 
 #include <string>
 #include <vector>
@@ -19,6 +20,8 @@ namespace annotations
       std::string stem;
       node_ptr code;
     };
+
+    rule const *find (std::string const &target) const;
 
     std::vector<fs::path> files;
     std::vector<rule> rules;

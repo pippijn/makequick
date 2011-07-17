@@ -1,6 +1,5 @@
 #include "phase.h"
 
-#include "algorithm/grep.h"
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
 #include "colours.h"
@@ -38,6 +37,19 @@ struct resolve_wildcards
 //static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 
 
+//Copy_if was dropped from the standard library by accident.
+template<typename In, typename Out, typename Pred>
+Out
+copy_if (In first, In last, Out res, Pred Pr)
+{
+  while (first != last)
+    {
+      if (Pr (*first))
+        *res++ = *first;
+      ++first;
+    }
+  return res;
+}
 
 void
 resolve_wildcards::visit (t_filename &n)
@@ -150,9 +162,9 @@ resolve_wildcards::visit (t_sources &n)
       wildcards.clear ();
       regex += ")";
 
-      grep (files.begin, files.end,
-            back_inserter (source_files),
-            regex_matcher (boost::regex (regex), source_files, &n, errors));
+      copy_if (files.begin, files.end,
+               back_inserter (source_files),
+               regex_matcher (boost::regex (regex), source_files, &n, errors));
     }
 
   n.list.clear ();

@@ -31,7 +31,7 @@ program datagen -> noinst {
 	# now reading).
 	# E.g. in this case, it would be $(srcdir)/src/tools/zacc
 	cppflags {
-		cppflags ()
+		cppflags()
 		-I$(SRCDIR)
 		-D_GNU_SOURCE
 	}
