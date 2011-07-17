@@ -1,17 +1,17 @@
-=head1 Make++
+=head1 Autocomb
 
-Make++ is a make-inspired build system that compiles to GNU Autotools.
+C<Autocomb> is a make-inspired build system that compiles to GNU Autotools.
 
 L<Git repository|http://xinutec.org/git/devel/makepp.git/>
 
 This is the future development of L<Autoproj|autoproj>. While Autoproj is a
-working piece of software, C<Make++> is nowhere, yet. At the moment, there are
+working piece of software, C<C<Autocomb>> is nowhere, yet. At the moment, there are
 only ideas, but not much code. The ideas are also very much in flux, so don't
 expect much stability.
 
 =head2 Introduction
 
-Make++ compiles a purely declarative build definition to POSIX-compliant and
+C<Autocomb> compiles a purely declarative build definition to POSIX-compliant and
 thus fairly portable L<automake|http://www.gnu.org/software/automake/> input. It
 solves a few problems with automake, such as the fact that libraries must appear
 in topological order with respect to internal dependencies. This is still a
@@ -22,7 +22,7 @@ during installation:
    liba_la_LIBADD = libb.la
 
 C<lib_LTLIBRARIES> must list the libraries in topological order, so that a
-definition as C<libb.la liba.la> would work. Make++ solves this problem by
+definition as C<libb.la liba.la> would work. C<Autocomb> solves this problem by
 topologically sorting the libraries and emitting a properly sorted
 C<lib_LTLIBRARIES>.
 
@@ -42,22 +42,22 @@ Yet another issue is the lack of wildcards. While wildcards have several
 disadvantages, they also have many advantages and it is the author's opinion
 that a good programmer should not suffer, because bad programmers might abuse a
 feature. The same holds for build systems. Advanced features should not be
-withheld from advanced users. Make++ supports but discourages the use of
+withheld from advanced users. C<Autocomb> supports but discourages the use of
 wildcards.
 
 =head3 Autotools integration
 
-Make++ input is translated to one or more C<Makefile.am>s and a single
+C<Autocomb> input is translated to one or more C<Makefile.am>s and a single
 C<configure.ac>. The unification of automake and autoconf was done, because a
 lot of knowledge from automake input has to be duplicated in the autoconf input.
 Things such as which libraries to check for at configure time so that they may
 be linked against in the Makefile or submodule dependencies are present in both
-formats. Make++ attempts to unify these formats in a new format based on QML and
+formats. C<Autocomb> attempts to unify these formats in a new format based on QML and
 GNU Make.
 
 =head3 Flexibility
 
-Make++ is, by design, much less flexible than automake and autoconf. It is also
+C<Autocomb> is, by design, much less flexible than automake and autoconf. It is also
 much stricter. It gives the user some additional tools the author has been
 missing in the GNU build system.
 
@@ -65,14 +65,14 @@ Source files are looked for in the entire source tree. Files are not explicitly
 included by other files. Autoconf scripts may be included in the C<project>
 block. Additional automake rules may be included in rule files. This gives you
 all the flexibility back at the expense of the included files being essentially
-a black box to Make++, thus defeating its static analysis features. Make++
+a black box to C<Autocomb>, thus defeating its static analysis features. C<Autocomb>
 guarantees that pure projects, i.e. without external Autotools input, do not
 cause errors at a lower level. This can no longer be guaranteed in the presence
 of such black boxes.
 
 =head3 Unsupported features
 
-Make++ does not plan on supporting percentages, because the author does not
+C<Autocomb> does not plan on supporting percentages, because the author does not
 believe in those. C<cmake> is a build system that supports such comfort.
 
 =head2 Documentation
