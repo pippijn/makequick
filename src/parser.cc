@@ -36,9 +36,6 @@ yyerror (YYLTYPE const *llocp, parser *parser, char const *msg)
           llocp->first_column,
           msg);
 #endif
-  tokens::token *tok = parser->lex.curtok ();
-  if (tok->tok == TK_ERROR)
-    parser->errors.add<syntax_error> (tok, "invalid character: '" + tok->string + "'");
-  else
-    parser->errors.add<syntax_error> (tok, msg);
+  tokens::token_ptr tok = new tokens::token (*llocp, TK_ERROR, "invalid character");
+  parser->errors.add<syntax_error> (tok, msg);
 }

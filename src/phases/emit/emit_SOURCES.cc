@@ -46,9 +46,9 @@ emit_SOURCES::visit (t_filename &n)
 void
 emit_SOURCES::visit (t_sources_members &n)
 {
-  generic_node_ptr THIS = symtab.lookup (T_VARIABLE, "THIS");
-  assert (THIS);
-  generic_node &name = THIS->as<generic_node> ();
+  generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
+  assert (TARGET);
+  generic_node &name = TARGET->as<generic_node> ();
   printf ("%s_SOURCES =", canonical (name[0]->as<token> ().string.c_str (), state).c_str ());
   visitor::visit (n);
   printf ("\n");

@@ -8,8 +8,8 @@
 struct semantic_error
   : std::exception
 {
-  semantic_error (node_ptr node, std::string const &message, bool error = true);
-  semantic_error (node_ptr node, std::string const &message, std::string const &note, bool error = true);
+  semantic_error (node_ptr const &node, std::string const &message, bool error = true);
+  semantic_error (node_ptr const &node, std::string const &message, std::string const &note, bool error = true);
 
   ~semantic_error () throw ()
   {
@@ -24,7 +24,7 @@ struct semantic_error
 struct syntax_error
   : semantic_error
 {
-  syntax_error (node_ptr node, std::string const &message, std::string const &note = "")
+  syntax_error (node_ptr const &node, std::string const &message, std::string const &note = "")
     : semantic_error (node, message, note)
   {
   }
@@ -33,7 +33,7 @@ struct syntax_error
 struct warning
   : semantic_error
 {
-  warning (node_ptr node, std::string const &message, std::string const &note = "")
+  warning (node_ptr const &node, std::string const &message, std::string const &note = "")
     : semantic_error (node, message, note, false)
   {
   }

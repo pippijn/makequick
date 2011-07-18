@@ -245,9 +245,9 @@ int
 lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
 {
   if (!this->text.empty ())
-    curtok = lval->token = new tokens::token (*lloc, Tok, move (this->text));
+    lval->token = new tokens::token (*lloc, Tok, move (this->text));
   else
-    curtok = lval->token = new tokens::token (*lloc, Tok, text, leng);
+    lval->token = new tokens::token (*lloc, Tok, text, leng);
 #if LEXER_VERBOSE
   printf ("[%d:%d-%d:%d]: <<%s>>\n",
           lloc->first_line,

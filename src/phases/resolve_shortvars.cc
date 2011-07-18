@@ -36,7 +36,7 @@ struct resolve_shortvars
   {
   }
 
-#if 1
+#if 0
   ~resolve_shortvars ()
   {
     if (!std::uncaught_exception ())
@@ -65,8 +65,16 @@ identity (fs::path const &file)
   return file.native ();
 }
 
+static std::string
+add_builddir (std::string const &file, std::string const &orig, bool builddir)
+{
+  if (!builddir)
+    return "`test -f '" + orig + "' || echo '$(srcdir)/'`" + file;
+  return "$(builddir)/" + file;
+}
+
 static t_filename_ptr
-modify (node_ptr const &n, char modifier)
+modify (node_ptr const &n, char modifier, bool builddir)
 {
   t_filename const &fn = n->as<t_filename> ();
   assert (fn.size () == 1);
@@ -78,12 +86,14 @@ modify (node_ptr const &n, char modifier)
         ? dirname
         : modifier == 0
           ? identity
-          : 0;
+          : NULL;
+  assert (pred != NULL);
 
+  std::string const &orig = fn[0]->as<token> ().string;
   return new t_filename (fn.loc,
            new token (fn[0]->loc,
-             TK_FILENAME,
-             pred (fn[0]->as<token> ().string)));
+             TK_CODE,
+             add_builddir (pred (orig), orig, builddir)));
 }
 
 void
@@ -102,6 +112,7 @@ resolve_shortvars::visit (t_variable &n)
         {
           char const *name = tok->string.c_str ();
 
+          bool builddir = false;
           char modifier = 0;
           if (name[0] == '(')
             {
@@ -112,6 +123,7 @@ resolve_shortvars::visit (t_variable &n)
             {
             case '@':
               replacement = target;
+              builddir = true;
               break;
             case '<':
               if (prereq->size () == 0)
@@ -123,7 +135,7 @@ resolve_shortvars::visit (t_variable &n)
               break;
             }
           if (replacement)
-            replacement = modify (replacement, modifier);
+            replacement = modify (replacement, modifier, builddir);
         }
       else if (tok->tok == TK_INTEGER)
         {
@@ -164,5 +176,5 @@ resolve_shortvars::visit (t_rule &n)
   prereq = 0;
   target = 0;
 
-  phases::run ("print", &n);
+  //phases::run ("print", &n);
 }

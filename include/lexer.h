@@ -32,7 +32,7 @@ struct lexer
   void push_state (int state);
   void pop_state ();
 
-  tokens::token *curtok () const;
+  tokens::token const *curtok () const;
 
   void *yyscanner;
 

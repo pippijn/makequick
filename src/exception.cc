@@ -41,7 +41,7 @@ operator << (std::ostream &os, location const &loc)
 
 
 static std::string const
-make_message (node_ptr node, std::string const &message, std::string const &note, bool error)
+make_message (node_ptr const &node, std::string const &message, std::string const &note, bool error)
 {
   std::ostringstream s;
   if (node)
@@ -58,13 +58,13 @@ make_message (node_ptr node, std::string const &message, std::string const &note
   return s.str ();
 }
 
-semantic_error::semantic_error (node_ptr node, std::string const &message, bool error)
+semantic_error::semantic_error (node_ptr const &node, std::string const &message, bool error)
   : message (make_message (node, message, std::string (), error))
   , error (error)
 {
 }
 
-semantic_error::semantic_error (node_ptr node, std::string const &message, std::string const &note, bool error)
+semantic_error::semantic_error (node_ptr const &node, std::string const &message, std::string const &note, bool error)
   : message (make_message (node, message, note, error))
   , error (error)
 {

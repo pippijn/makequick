@@ -136,7 +136,7 @@ using namespace nodes;
 %token<token> TK_STRING			"string literal"
 %token<token> TK_SHORTVAR		"short variable name"
 
-%token TK_ERROR				"error token"
+%token<token> TK_ERROR			"invalid character"
 
 %token R_FILENAME
 

@@ -1,2 +1,3 @@
 makepp_SOURCES +=		\
-	emit_SOURCES.cc
+	emit_SOURCES.cc		\
+	emit_rules.cc

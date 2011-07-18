@@ -69,8 +69,8 @@ insert_syms::visit (t_target_definition &n)
       errors.add<semantic_error> (&n, "target definition " + C::quoted (name) + " already exists");
       return;
     }
-  if (!symtab.insert (T_VARIABLE, "THIS", &n))
-    throw std::runtime_error ("unable to add $(THIS) variable");
+  if (!symtab.insert (T_VARIABLE, "TARGET", &n))
+    throw std::runtime_error ("unable to add $(TARGET) variable");
 
   symbol_visitor::visit (n);
 }
