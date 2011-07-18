@@ -65,7 +65,5 @@ void
 emit_SOURCES::visit (token &n)
 {
   if (in_filename)
-    {
-      printf ("\t\\\n\t%s", n.string.c_str ());
-    }
+    printf ("\t\\\n\t%s", n.string.c_str ());
 }
