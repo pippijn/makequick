@@ -23,6 +23,7 @@ namespace nodes
   struct node
   {
     virtual void accept (visitor &v) = 0;
+    virtual node_ptr clone () const = 0;
     node (location const &loc);
     virtual ~node ();
 
@@ -51,6 +52,8 @@ namespace nodes
   struct node_list
     : node
   {
+    static void clone_list (node_vec const &orig, node_vec &clone);
+
     node_list *add (node_ptr n) { list.push_back (n); return this; }
     size_t size () const { return list.size (); }
     node_ptr       &operator [] (size_t index)       { return list.at (index); }
@@ -66,25 +69,34 @@ namespace nodes
     : node_list
   {
     generic_node (int type, location const &loc) : node_list (loc), type (type) { }
-    generic_node (int type, location const &loc, node_ptr n1) : node_list (loc), type (type) {
+
+    int type;
+  };
+
+  template<typename Derived>
+  struct generic_node_t
+    : generic_node
+  {
+    generic_node_t (int type, location const &loc) : generic_node (type, loc) { }
+    generic_node_t (int type, location const &loc, node_ptr n1) : generic_node (type, loc) {
       add (n1);
     }
-    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2) : node_list (loc), type (type) {
+    generic_node_t (int type, location const &loc, node_ptr n1, node_ptr n2) : generic_node (type, loc) {
       add (n1);
       add (n2);
     }
-    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3) : node_list (loc), type (type) {
+    generic_node_t (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3) : generic_node (type, loc) {
       add (n1);
       add (n2);
       add (n3);
     }
-    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4) : node_list (loc), type (type) {
+    generic_node_t (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4) : generic_node (type, loc) {
       add (n1);
       add (n2);
       add (n3);
       add (n4);
     }
-    generic_node (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4, node_ptr n5) : node_list (loc), type (type) {
+    generic_node_t (int type, location const &loc, node_ptr n1, node_ptr n2, node_ptr n3, node_ptr n4, node_ptr n5) : generic_node (type, loc) {
       add (n1);
       add (n2);
       add (n3);
@@ -92,8 +104,15 @@ namespace nodes
       add (n5);
     }
 
-    int type;
+    virtual node_ptr clone () const
+    {
+      boost::intrusive_ptr<Derived> clone = new Derived;
+      clone->loc = loc;
+      clone_list (list, clone->list);
+      return clone;
+    }
   };
+
 
   template<node_type Type>
   node_list *make_node (location const &loc);
@@ -134,6 +153,7 @@ namespace tokens
     : node
   {
     virtual void accept (visitor &v) { v.visit (*this); }
+    virtual node_ptr clone () const { return new token (loc, tok, string); }
     token ()
       : node (location::generated)
       , string (mutable_string)

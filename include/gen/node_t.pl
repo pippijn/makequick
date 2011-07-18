@@ -34,17 +34,17 @@ for my $node (keys %$nodes) {
 
    print <<EOF unless $num;
 struct t_$node
-  : generic_node
+  : generic_node_t<t_$node>
 {
   virtual void accept (visitor &v) { v.visit (*this); }
 
   t_$node ()
-    : generic_node (n_$node, location::generated)
+    : generic_node_t (n_$node, location::generated)
   {
   }
 
   t_$node (location const &loc$params)
-    : generic_node (n_$node, loc$args)
+    : generic_node_t (n_$node, loc$args)
   {
   }$accessors
 };

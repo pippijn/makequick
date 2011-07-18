@@ -68,15 +68,19 @@ make_prereq (std::vector<std::string> const &files)
 void
 instantiate_rules::instantiate (rule_info::rule const &r)
 {
-  node_ptr target = (new t_filenames (location::generated))->add (
-                       new t_filename (location::generated,
-                         new token (location::generated,
-                           TK_FILENAME, r.target)));
-  node_ptr prereq = make_prereq (r.prereq);
+  // if r.code is NULL, this is an import rule
+  if (r.code)
+    {
+      node_ptr target = (new t_filenames (location::generated))->add (
+                           new t_filename (location::generated,
+                             new token (location::generated,
+                               TK_FILENAME, r.target)));
+      node_ptr prereq = make_prereq (r.prereq);
 
-  t_rule_ptr rule = new t_rule (location::generated, target, prereq, r.code);
+      t_rule_ptr rule = new t_rule (location::generated, target, prereq, r.code->clone ());
 
-  members->add (rule);
+      members->add (rule);
+    }
 }
 
 

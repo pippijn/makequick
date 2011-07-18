@@ -1,5 +1,6 @@
 #include "node.h"
 
+#include "foreach.h"
 #include "object_pool.h"
 
 #include <cstdio>
@@ -101,5 +102,17 @@ namespace nodes
   node::hash_size ()
   {
     return nodes.size ();
+  }
+
+
+  void
+  node_list::clone_list (node_vec const &orig, node_vec &clone)
+  {
+    clone.reserve (orig.size ());
+    foreach (node_ptr const &n, orig)
+      if (n)
+        clone.push_back (n->clone ());
+      else
+        clone.push_back (0);
   }
 }

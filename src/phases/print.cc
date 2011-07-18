@@ -265,10 +265,15 @@ print::visit (t_rule &n)
   resume (n.target ());
   printf (": ");
   resume (n.prereq ()) && printf (" ");
+  if (n.code ())
+    {
+      printf ("{\n");
+      resume (n.code ());
+      printf ("   }\n");
+    }
+  else
+    printf (";\n");
   in_rule = false;
-  printf ("{\n");
-  resume (n.code ());
-  printf ("   }\n");
 }
 
 void

@@ -52,7 +52,7 @@ struct resolve_vars
 #endif
 };
 
-static phase<resolve_vars> thisphase ("resolve_vars", "insert_syms", "concat_vars");
+static phase<resolve_vars> thisphase ("resolve_vars", "insert_syms", "concat_vardecls");
 
 
 void
