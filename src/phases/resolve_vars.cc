@@ -83,7 +83,7 @@ resolve_vars::visit (t_filename &n)
         {
           n.list.erase  (n.list.begin () + i, n.list.begin () + i + 1);
 
-          node_ptr parsed = parse_string (extract_string (sym), r_filename, state == S_MULTIFILE);
+          node_ptr parsed = parse_string (extract_string (sym), errors, r_filename, state == S_MULTIFILE);
           t_filename_ptr new_filename = &parsed->as<t_filename> ();
           sym = 0;
 

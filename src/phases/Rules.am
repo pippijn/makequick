@@ -3,6 +3,7 @@ makepp_SOURCES +=		\
 	concat_sources.cc	\
 	concat_vardecls.cc	\
 	default_destdir.cc	\
+	emit.cc			\
 	infer_target_objects.cc	\
 	inference.cc		\
 	insert_syms.cc		\
@@ -14,3 +15,5 @@ makepp_SOURCES +=		\
 	resolve_vars.cc		\
 	resolve_wildcards.cc	\
 	xml.cc
+
+include emit/Rules.am

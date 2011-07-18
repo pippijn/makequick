@@ -159,15 +159,16 @@ try
   return EXIT_SUCCESS;
 #endif
 
-  if (node_ptr doc = parse_files (files))
+  using namespace annotations;
+  std::auto_ptr<error_log> errors (new error_log);
+
+  if (node_ptr doc = parse_files (files, *errors))
     {
       load_store (doc);
 
-      using namespace annotations;
-
       annotation_map annots;
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
-      annots.put ("errors", new error_log);
+      annots.put ("errors", errors.release ());
 
       error_log &errors = annots.get ("errors");
 
@@ -198,7 +199,10 @@ try
         }
     }
   else
-    return EXIT_FAILURE;
+    {
+      errors->print (path, argv[0]);
+      return EXIT_FAILURE;
+    }
 
   return should_terminate;
 }

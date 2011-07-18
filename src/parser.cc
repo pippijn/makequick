@@ -1,11 +1,13 @@
 #include "parser.h"
 
+#include "annotations/error_log.h"
 #include "exception.h"
 
 #include <boost/filesystem/path.hpp>
 
-parser::parser (lexer &lex)
+parser::parser (lexer &lex, annotations::error_log &errors)
   : lex (lex)
+  , errors (errors)
   , doc (0)
 {
 }
@@ -27,10 +29,16 @@ parser::operator () ()
 void
 yyerror (YYLTYPE const *llocp, parser *parser, char const *msg)
 {
+#if 0
   printf ("%s:%d:%d: error: \"%s\"\n",
           llocp->file ? llocp->file->c_str () : "<unknown>",
           llocp->first_line,
           llocp->first_column,
           msg);
-  throw syntax_error (parser->lex.curtok (), msg);
+#endif
+  tokens::token *tok = parser->lex.curtok ();
+  if (tok->tok == TK_ERROR)
+    parser->errors.add<syntax_error> (tok, "invalid character: '" + tok->string + "'");
+  else
+    parser->errors.add<syntax_error> (tok, msg);
 }

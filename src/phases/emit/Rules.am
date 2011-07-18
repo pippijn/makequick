@@ -1,0 +1,2 @@
+makepp_SOURCES +=		\
+	emit_SOURCES.cc

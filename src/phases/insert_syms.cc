@@ -63,7 +63,14 @@ insert_syms::visit (t_target_definition &n)
     default:
       throw std::runtime_error ("invalid state in target_definition");
     }
-  symtab.insert (type, n.name ()->as<token> ().string, &n);
+  std::string const &name = n.name ()->as<token> ().string;
+  if (!symtab.insert (type, name, &n))
+    {
+      errors.add<semantic_error> (&n, "target definition " + C::quoted (name) + " already exists");
+      return;
+    }
+  if (!symtab.insert (T_VARIABLE, "THIS", &n))
+    throw std::runtime_error ("unable to add $(THIS) variable");
 
   symbol_visitor::visit (n);
 }

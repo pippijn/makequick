@@ -11,7 +11,7 @@ struct symbol_visitor
   void visit (nodes::t_program &n);
   void visit (nodes::t_library &n);
   void visit (nodes::t_template &n);
-  void visit (nodes::t_document &n);
+  void visit (nodes::t_toplevel_declarations &n);
 
   symbol_table &symtab;
 

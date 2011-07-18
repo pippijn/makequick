@@ -22,14 +22,15 @@ namespace annotations
   {
     typedef nodes::generic_node_ptr generic_node_ptr;
 
-    void enter_scope (nodes::generic_node_ptr scope);
+    void enter_scope (nodes::generic_node_ptr const &scope);
     void leave_scope ();
 
-    bool insert (symbol_type type, std::string const &name, nodes::generic_node_ptr id);
-    generic_node_ptr lookup (symbol_type type, std::string const &name);
+    bool insert (symbol_type type, std::string const &name, nodes::generic_node_ptr const &id);
+    generic_node_ptr lookup (symbol_type type, std::string const &name) const;
 
     void clear () { assert (stack.empty ()); scopes.clear (); }
     void print () const;
+    void print_stack () const;
 
 
     typedef std::map<std::string, generic_node_ptr> node_map;

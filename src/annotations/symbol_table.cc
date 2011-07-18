@@ -20,7 +20,7 @@ namespace nodes
 }
 
 void
-symbol_table::enter_scope (generic_node_ptr scope)
+symbol_table::enter_scope (generic_node_ptr const &scope)
 {
 #if 0
   puts ("enter_scope");
@@ -46,8 +46,10 @@ get_scope (symbol_table::type_map &map, symbol_type type)
 }
 
 bool
-symbol_table::insert (symbol_type type, std::string const &name, generic_node_ptr id)
+symbol_table::insert (symbol_type type, std::string const &name, generic_node_ptr const &id)
 {
+  assert (id);
+
   if (stack.empty ())
     return false;
 
@@ -64,16 +66,25 @@ symbol_table::insert (symbol_type type, std::string const &name, generic_node_pt
 }
 
 generic_node_ptr
-symbol_table::lookup (symbol_type type, std::string const &name)
+symbol_table::lookup (symbol_type type, std::string const &name) const
 {
-  generic_node_ptr resolved;
+  assert (!stack.empty ());
+
   size_t scope = stack.size ();
 #if 0
   printf ("lookup: %d scopes for %s\n", scope, name.c_str ());
 #endif
-  while (!resolved && scope)
-    resolved = get_scope (*stack[--scope], type)[name];
-  return resolved;
+
+  do
+    {
+      node_map const &map = get_scope (*stack[--scope], type);
+      node_map::const_iterator found = map.find (name);
+      if (found != map.end ())
+        return found->second;
+    }
+  while (scope);
+
+  return 0;
 }
 
 static char const *
@@ -90,23 +101,46 @@ symbol_type_name (size_t type)
   throw std::runtime_error ("invalid symbol type");
 }
 
+using nodes::node_type_name;
+
+static void
+print (symbol_table::node_map const &type, char const *type_name)
+{
+  if (!type.empty ())
+    {
+      printf ("    type %s\n", type_name);
+      foreach (symbol_table::node_map::value_type const &sym, type)
+        {
+          printf ("      sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index);
+        }
+    }
+}
+
+static void
+print (symbol_table::scope_map::value_type const &scope)
+{
+  printf ("  scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
+  foreach (symbol_table::node_map const &type, scope.second)
+    print (type, symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
+}
+
 void
 symbol_table::print () const
 {
-  using nodes::node_type_name;
-
   puts ("symbol table:");
-  foreach (scope_map::const_reference scope, scopes)
+  foreach (scope_map::value_type const &scope, scopes)
+    ::print (scope);
+}
+
+void
+symbol_table::print_stack () const
+{
+  int indent = 0;
+  foreach (symbol_table::type_map const *s, stack)
     {
-      printf ("  scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index);
-      foreach (node_map const &type, scope.second)
-        if (!type.empty ())
-          {
-            printf ("    type %s\n", symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
-            foreach (node_map::const_reference sym, type)
-              {
-                printf ("      sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index);
-              }
-          }
+      foreach (scope_map::value_type const &scope, scopes)
+        if (&scope.second == s)
+          printf ("%*s%s\n", indent * 2, "", node_type_name[scope.first->type]);
+      indent++;
     }
 }

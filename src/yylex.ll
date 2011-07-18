@@ -161,6 +161,8 @@ INTEGER	{DIGIT}+
 
 <VAR_INIT>{
 	[@*<^+$]			{ POP (); Return (TK_SHORTVAR); }
+	"("[@<*]D")"			{ POP (); Return (TK_SHORTVAR); }
+	"("[@<*]F")"			{ POP (); Return (TK_SHORTVAR); }
 	{INTEGER}			{ POP (); Return (TK_INTEGER); }
 	"("				{ BEGIN (VAR_RBODY); Return (TK_LBRACK); }
 	"["				{ BEGIN (VAR_SQBODY); Return (TK_LSQBRACK); }
@@ -202,7 +204,7 @@ INTEGER	{DIGIT}+
 
 <*>"#".*				{ }
 
-<*>(.|\n)				{ printf (">>> in state %s\n", STRSTATE (state ())); yyerror (yylloc, 0, yytext); }
+<*>(.|\n)				{ Return (TK_ERROR); }
 %%
 
 #define SELF static_cast<lexer *> (yyget_extra (yyscanner))

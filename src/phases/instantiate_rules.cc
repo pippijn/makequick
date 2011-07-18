@@ -54,6 +54,42 @@ struct instantiate_rules
 
 static phase<instantiate_rules> thisphase ("instantiate_rules", "infer_target_objects", "inference");
 
+struct resolve_stem
+  : visitor
+{
+  token_ptr stem;
+  bool replace;
+
+  explicit resolve_stem (std::string const &stem)
+    : stem (new token (location::generated, TK_FILENAME, stem))
+    , replace (false)
+  {
+  }
+
+  node_ptr const &operator () (node_ptr const &p) { p->accept (*this); return p; }
+
+  virtual void visit (t_variable &n)
+  {
+    if (token *tok = n.content ()->is<token> ())
+      if (tok->tok == TK_SHORTVAR && tok->string[0] == '*')
+        replace = true;
+  }
+
+  virtual void visit (t_rule_line &n)
+  {
+    foreach (node_ptr &p, n.list)
+      {
+        resume (p);
+        if (replace)
+          {
+            phases::run ("print", p);
+            p = stem;
+            replace = false;
+          }
+      }
+  }
+};
+
 static node_ptr
 make_prereq (std::vector<std::string> const &files)
 {
@@ -77,7 +113,8 @@ instantiate_rules::instantiate (rule_info::rule const &r)
                                TK_FILENAME, r.target)));
       node_ptr prereq = make_prereq (r.prereq);
 
-      t_rule_ptr rule = new t_rule (location::generated, target, prereq, r.code->clone ());
+      t_rule_ptr rule = new t_rule (location::generated, target, prereq,
+                                    resolve_stem (r.stem) (r.code->clone ()));
 
       members->add (rule);
     }
@@ -89,7 +126,9 @@ static std::string const &native (std::string const &path) { return path;       
 
 template<typename PrereqT>
 void
-instantiate_rules::instantiate (t_target_definition &n, std::vector<PrereqT> const &targets, bool accept_existing)
+instantiate_rules::instantiate (t_target_definition &n,
+                                std::vector<PrereqT> const &targets,
+                                bool accept_existing)
 {
   foreach (PrereqT const &obj, targets)
     {
@@ -106,7 +145,8 @@ instantiate_rules::instantiate (t_target_definition &n, std::vector<PrereqT> con
       if (!r)
         {
           if (!accept_existing)
-            errors.add<semantic_error> (&n, "found file " + C::filename (obj) + " in source directory without rule to rebuild it");
+            errors.add<semantic_error> (&n, "found file " + C::filename (obj)
+                                          + " in source directory without rule to rebuild it");
           continue;
         }
 
@@ -143,7 +183,6 @@ instantiate_rules::visit (t_library &n)
 {
   local (target) = T_LIBRARY;
   visitor::visit (n);
-  //phases::run ("print", &n);
 }
 
 void
@@ -151,5 +190,4 @@ instantiate_rules::visit (t_program &n)
 {
   local (target) = T_PROGRAM;
   visitor::visit (n);
-  //phases::run ("print", &n);
 }
