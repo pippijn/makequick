@@ -51,7 +51,7 @@ emit_SOURCES::visit (t_sources_members &n)
   generic_node &name = TARGET->as<generic_node> ();
   printf ("%s_SOURCES =", canonical (name[0]->as<token> ().string.c_str (), state).c_str ());
   visitor::visit (n);
-  printf ("\n");
+  printf ("\n\n");
 }
 
 void
