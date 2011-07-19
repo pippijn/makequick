@@ -115,4 +115,28 @@ namespace nodes
       else
         clone.push_back (0);
   }
+
+  node_list *
+  node_list::add (node_ptr n)
+  {
+#if 0
+    if (!n)
+      asm ("int $3");
+#endif
+    list.push_back (n);
+    return this;
+  }
+
+  size_t
+  node_list::size () const
+  {
+    return list.size ();
+  }
+
+  node_ptr       &node_list::operator [] (size_t index)       { return list.at (index); }
+  node_ptr const &node_list::operator [] (size_t index) const { return list.at (index); }
+
+  node_list::node_list (location const &loc) : node (loc) { }
+
+#include "node_cc.h"
 }

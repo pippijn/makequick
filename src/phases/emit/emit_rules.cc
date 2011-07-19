@@ -8,7 +8,10 @@
 struct emit_rules
   : visitor
 {
-  virtual void visit (t_variable &n);
+  virtual void visit (t_shortvar &n);
+  virtual void visit (t_intvar &n);
+  virtual void visit (t_roundvar &n);
+  virtual void visit (t_squarevar &n);
   virtual void visit (t_rule_line &n);
   virtual void visit (t_rule &n);
 
@@ -26,7 +29,25 @@ static phase<emit_rules> thisphase ("emit_rules", noauto);
 
 
 void
-emit_rules::visit (t_variable &n)
+emit_rules::visit (t_shortvar &n)
+{
+  phases::run ("print", &n);
+}
+
+void
+emit_rules::visit (t_intvar &n)
+{
+  phases::run ("print", &n);
+}
+
+void
+emit_rules::visit (t_squarevar &n)
+{
+  phases::run ("print", &n);
+}
+
+void
+emit_rules::visit (t_roundvar &n)
 {
   phases::run ("print", &n);
 }

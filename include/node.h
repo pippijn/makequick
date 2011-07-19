@@ -54,12 +54,12 @@ namespace nodes
   {
     static void clone_list (node_vec const &orig, node_vec &clone);
 
-    node_list *add (node_ptr n) { list.push_back (n); return this; }
-    size_t size () const { return list.size (); }
-    node_ptr       &operator [] (size_t index)       { return list.at (index); }
-    node_ptr const &operator [] (size_t index) const { return list.at (index); }
+    node_list *add (node_ptr n);
+    size_t size () const;
+    node_ptr       &operator [] (size_t index);
+    node_ptr const &operator [] (size_t index) const;
 
-    node_list (location const &loc) : node (loc) { }
+    node_list (location const &loc);
 
     node_vec list;
   };

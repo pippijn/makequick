@@ -14,6 +14,7 @@ makepp_SOURCES +=		\
 	resolve_sources.cc	\
 	resolve_vars.cc		\
 	resolve_wildcards.cc	\
+	squarevars.cc		\
 	xml.cc
 
 include emit/Rules.am

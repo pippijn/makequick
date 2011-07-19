@@ -1,4 +1,5 @@
 EXTRA_DIST +=		\
+	node_cc.pl	\
 	node_fwd.pl	\
 	node_t.pl	\
 	nodes.pm	\

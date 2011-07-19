@@ -38,15 +38,8 @@ struct t_$node
 {
   virtual void accept (visitor &v) { v.visit (*this); }
 
-  t_$node ()
-    : generic_node_t (n_$node, location::generated)
-  {
-  }
-
-  t_$node (location const &loc$params)
-    : generic_node_t (n_$node, loc$args)
-  {
-  }$accessors
+  t_$node ();
+  t_$node (location const &loc$params);$accessors
 };
 
 EOF

@@ -13,7 +13,6 @@ struct resolve_vars
   : symbol_visitor
 {
   virtual void visit (t_variable_content &n);
-  virtual void visit (t_variable &n);
   virtual void visit (t_filename &n);
 
   virtual void visit (t_rule &n);
@@ -60,12 +59,6 @@ resolve_vars::visit (t_variable_content &n)
 {
   if (!n.member ())
     sym = symtab.lookup (T_VARIABLE, n.name ()->as<token> ().string);
-  visitor::visit (n);
-}
-
-void
-resolve_vars::visit (t_variable &n)
-{
   visitor::visit (n);
 }
 

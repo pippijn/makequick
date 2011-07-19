@@ -68,11 +68,10 @@ struct resolve_stem
 
   node_ptr const &operator () (node_ptr const &p) { p->accept (*this); return p; }
 
-  virtual void visit (t_variable &n)
+  virtual void visit (t_shortvar &n)
   {
-    if (token *tok = n.content ()->is<token> ())
-      if (tok->tok == TK_SHORTVAR && tok->string[0] == '*')
-        replace = true;
+    if (n.var ()->as<token> ().string[0] == '*')
+      replace = true;
   }
 
   virtual void visit (t_rule_line &n)

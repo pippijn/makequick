@@ -201,20 +201,33 @@ print::visit (t_target_definition &n)
 }
 
 void
-print::visit (t_variable &n)
+print::visit (t_shortvar &n)
 {
   printf ("$");
-  if (token *id = n.content ()->is<token> ())
-    if (id->tok == TK_IDENTIFIER)
-      {
-        printf ("[");
-        visitor::visit (n);
-        printf ("]");
-      }
-    else
-      visitor::visit (n);
-  else
-    visitor::visit (n);
+  visitor::visit (n);
+}
+
+void
+print::visit (t_intvar &n)
+{
+  printf ("$");
+  visitor::visit (n);
+}
+
+void
+print::visit (t_roundvar &n)
+{
+  printf ("$");
+  visitor::visit (n);
+}
+
+void
+print::visit (t_squarevar &n)
+{
+  printf ("$");
+  printf ("[");
+  visitor::visit (n);
+  printf ("]");
 }
 
 void

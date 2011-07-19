@@ -11,7 +11,8 @@ using annotations::error_log;
 struct resolve_shortvars
   : visitor
 {
-  virtual void visit (t_variable &n);
+  virtual void visit (t_shortvar &n);
+  virtual void visit (t_intvar &n);
 
   virtual void visit (t_rule_line &n);
   virtual void visit (t_rule &n);
@@ -97,57 +98,56 @@ modify (node_ptr const &n, char modifier, bool builddir)
 }
 
 void
-resolve_shortvars::visit (t_variable &n)
+resolve_shortvars::visit (t_shortvar &n)
 {
-  if (token *tok = n.content ()->is<token> ())
+  assert (target);
+  assert (prereq);
+
+  token &tok = n.var ()->as<token> ();
+
+  // uninstantiated rule:
+  if (target->size () > 1)
+    return;
+
+  char const *name = tok.string.c_str ();
+
+  bool builddir = false;
+  char modifier = 0;
+  if (name[0] == '(')
     {
-      assert (target);
-      assert (prereq);
-
-      // uninstantiated rule:
-      if (target->size () > 1)
-        return;
-
-      if (tok->tok == TK_SHORTVAR)
-        {
-          char const *name = tok->string.c_str ();
-
-          bool builddir = false;
-          char modifier = 0;
-          if (name[0] == '(')
-            {
-              modifier = name[2];
-              name++;
-            }
-          switch (name[0])
-            {
-            case '@':
-              replacement = target;
-              builddir = true;
-              break;
-            case '<':
-              if (prereq->size () == 0)
-                {
-                  errors.add<semantic_error> (&n, "no prerequisites found to resolve $<");
-                  return;
-                }
-              replacement = prereq->list[0];
-              break;
-            }
-          if (replacement)
-            replacement = modify (replacement, modifier, builddir);
-        }
-      else if (tok->tok == TK_INTEGER)
-        {
-          long var = strtol (tok->string.c_str (), 0, 10);
-          if (prereq->size () < var)
-            {
-              errors.add<semantic_error> (&n, "prerequisite index out of bounds: $" + tok->string);
-              return;
-            }
-          replacement = prereq->list[var - 1];
-        }
+      modifier = name[2];
+      name++;
     }
+  switch (name[0])
+    {
+    case '@':
+      replacement = target;
+      builddir = true;
+      break;
+    case '<':
+      if (prereq->size () == 0)
+        {
+          errors.add<semantic_error> (&n, "no prerequisites found to resolve $<");
+          return;
+        }
+      replacement = prereq->list[0];
+      break;
+    }
+  if (replacement)
+    replacement = modify (replacement, modifier, builddir);
+}
+
+void
+resolve_shortvars::visit (t_intvar &n)
+{
+  token &tok = n.num ()->as<token> ();
+  long var = strtol (tok.string.c_str (), 0, 10);
+  if (prereq->size () < var)
+    {
+      errors.add<semantic_error> (&n, "prerequisite index out of bounds: $" + tok.string);
+      return;
+    }
+  replacement = prereq->list[var - 1];
 }
 
 

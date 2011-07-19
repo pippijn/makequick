@@ -249,11 +249,12 @@ lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, 
   else
     lval->token = new tokens::token (*lloc, Tok, text, leng);
 #if LEXER_VERBOSE
-  printf ("[%d:%d-%d:%d]: <<%s>>\n",
+  printf ("[%d:%d-%d:%d]: %s <<%s>>\n",
           lloc->first_line,
           lloc->first_column,
           lloc->last_line,
           lloc->last_column,
+	  tokname (Tok),
           text);
 #endif
   return Tok;

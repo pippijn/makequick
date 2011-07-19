@@ -96,6 +96,8 @@ resolve_sources::visit (t_filename &n)
     }
 }
 
+void operator + (t_sources &, t_sources &) { }
+
 
 void
 resolve_sources::visit (t_sources &n)
@@ -103,4 +105,5 @@ resolve_sources::visit (t_sources &n)
   in_sources = true;
   resume_list ();
   in_sources = false;
+  n + n;
 }

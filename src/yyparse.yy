@@ -56,7 +56,7 @@ using namespace nodes;
 %debug
 %error-verbose
 %token-table
-%glr-parser
+/*%glr-parser*/
 
 %parse-param	{ parser *self }
 %lex-param	{ parser *self }
@@ -655,13 +655,13 @@ code_frag
 
 variable
 	: TK_SHORTVAR
-		{ $$ = make_node<n_variable> (@$, $1); }
+		{ $$ = make_node<n_shortvar> (@$, $1); }
 	| TK_INTEGER
-		{ $$ = make_node<n_variable> (@$, $1); }
+		{ $$ = make_node<n_intvar> (@$, $1); }
 	| "(" variable_content ")"
-		{ $$ = make_node<n_variable> (@$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_roundvar> (@$, $2); delete $1; delete $3; }
 	| "[" identifier "]"
-		{ $$ = make_node<n_variable> (@$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_squarevar> (@$, $2); delete $1; delete $3; }
 	;
 
 variable_content

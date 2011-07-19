@@ -48,6 +48,9 @@
    toplevel_declarations => ['+'],
    vardecl => ['var', 'body'],
    vardecl_body => ['+'],
-   variable => ['content'],
+   shortvar => ['var'],
+   intvar => ['num'],
+   roundvar => ['content'],
+   squarevar => ['name'],
    variable_content => ['name', 'member', 'filter'],
 }
