@@ -2,9 +2,6 @@ program foo {
 	sources {
 		foo.c
 	}
-	link {
-		foo
-	}
 }
 
 global {

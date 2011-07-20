@@ -2,6 +2,9 @@
 
 #include "foreach.h"
 #include "nodes.pb.h"
+#if 0
+#include "phases.h"
+#endif
 
 #include <fstream>
 
@@ -116,7 +119,7 @@ namespace nodes
         google::protobuf::TextFormat::ParseFromString (str, &list);
       }
 
-    std::vector<node_ptr> node_ptrs;
+    node_vec node_ptrs;
     foreach (Node const &sn, list.node ())
       {
         int const index = sn.index ();
@@ -138,6 +141,7 @@ namespace nodes
         load_loc (n->loc, sn.loc ());
         assert (nodes.size () == index);
         node_ptrs.push_back (n);
+        assert (node_ptrs.size () == index);
       }
 
     // fix up references
@@ -152,7 +156,18 @@ namespace nodes
           }
       }
 
+    node_ptr const &root = node_ptrs[list.root () - 1];
+#if 0
+    foreach (node_ptr const &n, node_ptrs)
+      if (&n != &root && n->refcnt == 1)
+        {
+          printf ("discarding node:\n---\n");
+          phases::run ("xml", n);
+          printf ("\n---\n");
+        }
+#endif
+
     assert (audit_hash ());
-    return nodes[list.root () - 1];
+    return root;
   }
 }

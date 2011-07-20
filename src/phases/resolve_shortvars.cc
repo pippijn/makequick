@@ -103,7 +103,7 @@ resolve_shortvars::visit (t_shortvar &n)
   assert (target);
   assert (prereq);
 
-  token &tok = n.var ()->as<token> ();
+  token const &tok = n.var ()->as<token> ();
 
   // uninstantiated rule:
   if (target->size () > 1)

@@ -83,11 +83,12 @@ struct base_sort
 static void
 load_store (node_ptr &doc, bool text = false)
 {
+  node::compress_hash ();
   {
     timer T ("store");
     printf ("%%%% storing %lu nodes\n", node::node_count ());
     std::ofstream os ("nodes.bin");
-    node::store (os, doc->as<nodes::generic_node> ()[0], text);
+    node::store (os, doc, text);
   }
   doc = 0;
   {
@@ -164,7 +165,7 @@ try
 
   if (node_ptr doc = parse_files (files, *errors))
     {
-      load_store (doc);
+      //load_store (doc);
 
       annotation_map annots;
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
