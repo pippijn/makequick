@@ -1,6 +1,7 @@
 #include "phase.h"
 
 #include "foreach.h"
+#include "util/make_filename.h"
 
 #include <algorithm>
 #include <typeinfo>
@@ -88,14 +89,6 @@ multirule::visit (t_filename &n)
         }
       this->instances.insert (this->instances.end (), instances.begin (), instances.end ());
     }
-}
-
-static t_filename_ptr
-make_filename (location const &loc, token_vec const &instance)
-{
-  t_filename_ptr fn = new t_filename (loc, 0);
-  fn->list.assign (instance.begin (), instance.end ());
-  return fn;
 }
 
 void

@@ -29,6 +29,7 @@ struct insert_syms
   ~insert_syms ()
   {
     symtab.print ();
+    throw 0;
   }
 #endif
 };
@@ -64,7 +65,12 @@ insert_syms::visit (t_target_definition &n)
       throw std::runtime_error ("invalid state in target_definition");
     }
   std::string const &name = n.name ()->as<token> ().string;
-  if (!symtab.insert (type, name, &n))
+
+  generic_node_ptr scope = symtab.leave_scope ();
+  bool success = symtab.insert (type, name, &n);
+  symtab.enter_scope (scope);
+
+  if (!success)
     {
       errors.add<semantic_error> (&n, "target definition " + C::quoted (name) + " already exists");
       return;

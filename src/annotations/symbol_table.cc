@@ -26,15 +26,19 @@ symbol_table::enter_scope (generic_node_ptr const &scope)
   puts ("enter_scope");
 #endif
   stack.push_back (&scopes[scope]);
+  current_scope = scope;
 }
 
-void
+generic_node_ptr
 symbol_table::leave_scope ()
 {
 #if 0
   puts ("leave_scope");
 #endif
   stack.pop_back ();
+  generic_node_ptr scope = current_scope;
+  current_scope = 0;
+  return scope;
 }
 
 static symbol_table::node_map &

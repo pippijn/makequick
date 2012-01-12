@@ -3,6 +3,7 @@ makepp_SOURCES +=		\
 	concat_sources.cc	\
 	concat_vardecls.cc	\
 	default_destdir.cc	\
+	default_prereq.cc	\
 	emit.cc			\
 	infer_target_objects.cc	\
 	inference.cc		\
@@ -10,8 +11,10 @@ makepp_SOURCES +=		\
 	instantiate_rules.cc	\
 	multirule.cc		\
 	print.cc		\
+	print.h			\
 	resolve_shortvars.cc	\
 	resolve_sources.cc	\
+	resolve_tools.cc	\
 	resolve_vars.cc		\
 	resolve_wildcards.cc	\
 	squarevars.cc		\

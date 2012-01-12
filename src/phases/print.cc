@@ -261,7 +261,11 @@ print::visit (t_rule &n)
   fprintf (fh, "   ");
   resume (n.target ());
   fprintf (fh, ": ");
-  resume (n.prereq ()) && fprintf (fh, " ");
+  {
+    in_prereq = true;
+    resume (n.prereq ());
+    in_prereq = false;
+  }
   if (n.code ())
     {
       fprintf (fh, "{\n");
@@ -385,6 +389,8 @@ print::visit (t_filename &n)
   visitor::visit (n);
   if (!in_rule)
     fprintf (fh, "\n");
+  if (in_prereq)
+    fprintf (fh, " ");
 }
 
 void

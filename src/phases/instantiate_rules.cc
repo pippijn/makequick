@@ -52,7 +52,7 @@ struct instantiate_rules
 #endif
 };
 
-static phase<instantiate_rules> thisphase ("instantiate_rules", "infer_target_objects", "inference", "resolve_wildcards");
+static phase<instantiate_rules> thisphase ("instantiate_rules", "infer_target_objects", "inference", "resolve_wildcards", "default_prereq");
 
 struct resolve_stem
   : visitor

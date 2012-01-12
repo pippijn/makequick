@@ -23,7 +23,7 @@ namespace annotations
     typedef nodes::generic_node_ptr generic_node_ptr;
 
     void enter_scope (nodes::generic_node_ptr const &scope);
-    void leave_scope ();
+    nodes::generic_node_ptr leave_scope ();
 
     bool insert (symbol_type type, std::string const &name, nodes::generic_node_ptr const &id);
     generic_node_ptr lookup (symbol_type type, std::string const &name) const;
@@ -39,5 +39,6 @@ namespace annotations
 
     std::vector<type_map *> stack;
     scope_map scopes;
+    nodes::generic_node_ptr current_scope;
   };
 }

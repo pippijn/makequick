@@ -76,6 +76,15 @@ struct phase
     add_dependency (dep2);
   }
 
+  phase (char const *name, char const *dep0, char const *dep1, char const *dep2, char const *dep3)
+    : phases (name, true)
+  {
+    add_dependency (dep0);
+    add_dependency (dep1);
+    add_dependency (dep2);
+    add_dependency (dep3);
+  }
+
   void run1 (node_ptr const &doc, annotation_map &annots)
   {
     Visitor v (annots);
