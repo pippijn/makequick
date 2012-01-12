@@ -39,7 +39,7 @@ move (std::string &s)
 
 %x VAR_INIT VAR_RBODY VAR_SQBODY
 %x RULE_INIT RULE_CODE RULE_LINE
-%x FILENAME MULTIFILE SOURCES LINK VARDECL FLAGS
+%x FILENAME RULE_FILENAME MULTIFILE SOURCES LINK VARDECL FLAGS
 
 /* Whitespace */
 SPACE	[ \t\v]
@@ -97,9 +97,9 @@ INTEGER	{DIGIT}+
 
 <INITIAL>{
 	{WS}+				{ }
-	{NWS}+{FNSTART}			{ PUSH (FILENAME); BACKTRACK (0); }
+	/*{NWS}+{FNSTART}			{ PUSH (FILENAME); BACKTRACK (0); }*/
+	/*{FNSTART}{NWS}			{ PUSH (FILENAME); BACKTRACK (0); }*/
 	{NWS}+{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
-	{FNSTART}{NWS}			{ PUSH (FILENAME); BACKTRACK (0); }
 	{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
 	{ID}				{ Return (TK_IDENTIFIER); }
 	"("				{ Return (TK_LBRACK); }
@@ -115,7 +115,12 @@ INTEGER	{DIGIT}+
 }
 
 <FILENAME>{
+	{WS}+				{ Return (TK_WHITESPACE); }
+}
+<RULE_FILENAME>{
 	{WS}+				{ POP (); Return (TK_WHITESPACE); }
+}
+<FILENAME,RULE_FILENAME>{
 	{FN}+				{ Return (TK_FILENAME); }
 	"."				{ Return (TK_FN_DOT); }
 	"%"				{ Return (TK_FN_PERCENT); }
@@ -126,6 +131,7 @@ INTEGER	{DIGIT}+
 	"**"				{ Return (TK_FN_STARSTAR); }
 	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
 	":"				{ POP (); BACKTRACK (0); }
+	"}"				{ Return (TK_RBRACE); }
 }
 <MULTIFILE>{
 	{WS}+				{ }
@@ -138,7 +144,7 @@ INTEGER	{DIGIT}+
 	":"				{ Return (TK_COLON); }
 	";"				{ POP (); Return (TK_SEMICOLON); }
 	"{"				{ POP (); BACKTRACK (0); }
-	{NWS}				{ PUSH (FILENAME); BACKTRACK (0); }
+	{NWS}				{ PUSH (RULE_FILENAME); BACKTRACK (0); }
 }
 
 <RULE_CODE>{
@@ -155,7 +161,7 @@ INTEGER	{DIGIT}+
 	[^\n\t$]+			{ Return (TK_CODE); }
 }
 
-<FILENAME,MULTIFILE,RULE_LINE>{
+<FILENAME,RULE_FILENAME,MULTIFILE,RULE_LINE>{
 	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
 }
 

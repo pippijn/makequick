@@ -142,8 +142,8 @@ using namespace nodes;
 
 %type<list> sources target_definition
 %type<list> program library template target_members toplevel_declarations toplevel_declaration
-%type<list> filename filenames.0 filenames.1 sources_member sources_members extra_dist nodist_sources
-%type<list> rules rule rule_lines rule_line link link_body vardecl vardecl_body
+%type<list> filename filenames.0 filenames.1 sources_member sources_members sources_braces extra_dist
+%type<list> rules rule rule_lines rule_line link link_body vardecl vardecl_body nodist_sources
 %type<list> inheritance.opt inheritance if.opt if destination.opt destination
 %type<list> tool_flags flags identifiers
 %type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
@@ -415,18 +415,31 @@ target_member
  *
  ****************************************************************************/
 sources
-	: "sources" if.opt "{" sources_members "}"
-		{ $$ = make_node<n_sources> (@$, $2, $4); delete $1; delete $3; delete $5; }
+	: "sources" if.opt sources_braces
+		{ $$ = make_node<n_sources> (@$, $2, $3); delete $1; }
 	;
 
 nodist_sources
-	: "nodist_sources" if.opt "{" sources_members "}"
-		{ $$ = make_node<n_nodist_sources> (@$, $2, $4); delete $1; delete $3; delete $5; }
+	: "nodist_sources" if.opt sources_braces
+		{ $$ = make_node<n_nodist_sources> (@$, $2, $3); delete $1; }
 	;
 
 extra_dist
-	: "extra_dist" if.opt "{" sources_members "}"
-		{ $$ = make_node<n_extra_dist> (@$, $2, $4); delete $1; delete $3; delete $5; }
+	: "extra_dist" if.opt sources_braces
+		{ $$ = make_node<n_extra_dist> (@$, $2, $3); delete $1; }
+	;
+
+sources_braces
+	: sources_begin sources_members TK_WHITESPACE sources_end
+		{ $$ = $2; delete $3; }
+	;
+
+sources_begin
+	: "{" { self->lex.push_state (yy::FILENAME); delete $1; }
+	;
+
+sources_end
+	: "}" { self->lex.pop_state (); delete $1; }
 	;
 
 sources_members
@@ -437,8 +450,8 @@ sources_members
 	;
 
 sources_member
-	: filename TK_WHITESPACE
-		{ $$ = $1; delete $2; }
+	: TK_WHITESPACE filename
+		{ $$ = $2; delete $1; }
 	| "sources" "(" identifier ")"
 		{ $$ = make_node<n_sourcesref> (@$, $3); delete $1; delete $2; delete $4; }
 	| "exclude" "{" sources_members "}"
