@@ -17,7 +17,7 @@ struct resolve_wildcards
   : visitor
 {
   void visit (t_filename &n);
-  void visit (t_sources &n);
+  void visit (t_sources_members &n);
 
   bool in_sources;
   annotations::file_list const &files;
@@ -34,7 +34,7 @@ struct resolve_wildcards
   }
 };
 
-//static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
+static phase<resolve_wildcards> thisphase ("resolve_wildcards", "resolve_sources");
 
 
 //Copy_if was dropped from the standard library by accident.
@@ -132,7 +132,7 @@ struct regex_matcher
 };
 
 void
-resolve_wildcards::visit (t_sources &n)
+resolve_wildcards::visit (t_sources_members &n)
 {
   if (!wildcards.empty ())
     throw std::runtime_error ("found wildcards somewhere outside sources");
@@ -141,7 +141,7 @@ resolve_wildcards::visit (t_sources &n)
   resume_list ();
   in_sources = false;
 
-  //printf ("%lu wildcards\n", wildcards.size ());
+  //printf ("%lu wildcards, %lu source files\n", wildcards.size (), source_files.size ());
 
   if (!wildcards.empty ())
     {

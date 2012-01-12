@@ -15,6 +15,7 @@ struct resolve_vars
   virtual void visit (t_variable_content &n);
   virtual void visit (t_filename &n);
 
+  virtual void visit (t_rule_line &n);
   virtual void visit (t_rule &n);
 
   virtual void visit (generic_node &n);
@@ -22,14 +23,15 @@ struct resolve_vars
 
   bool in_sources;
   error_log &errors;
-  generic_node_ptr sym;
+  node_ptr sym;
   generic_node_ptr root;
 
   enum parse_state
   {
     S_NONE,
     S_FILENAME,
-    S_MULTIFILE
+    S_MULTIFILE,
+    S_RULE_LINE
   };
 
   parse_state state;
@@ -58,7 +60,17 @@ void
 resolve_vars::visit (t_variable_content &n)
 {
   if (!n.member ())
-    sym = symtab.lookup (T_VARIABLE, n.name ()->as<token> ().string);
+    {
+      std::string const &name = n.name ()->as<token> ().string;
+      if (name == "THIS")
+        {
+          generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
+          std::string const &tname = TARGET->as<generic_node> ()[0]->as<token> ().string;
+          sym = new token (n.loc, TK_CODE, "$(builddir)/" + tname + "$(EXEEXT)");
+        }
+      else
+        sym = symtab.lookup (T_VARIABLE, name);
+    }
   visitor::visit (n);
 }
 
@@ -81,6 +93,23 @@ resolve_vars::visit (t_filename &n)
           sym = 0;
 
           n.list.insert (n.list.begin () + i, new_filename->list.begin (), new_filename->list.end ());
+        }
+    }
+}
+
+void
+resolve_vars::visit (t_rule_line &n)
+{
+  local (state) = S_RULE_LINE;
+  for (size_t i = 0; i < n.size (); i++)
+    {
+      node_ptr &p = n[i];
+      p->accept (*this);
+
+      if (sym)
+        {
+          p = sym;
+          sym = 0;
         }
     }
 }

@@ -13,6 +13,7 @@ struct infer_target_objects
 {
   virtual void visit (t_filename &n);
   virtual void visit (t_sources &n);
+  virtual void visit (t_nodist_sources &n);
 
   virtual void visit (t_target_definition &n);
   virtual void visit (t_library &n);
@@ -75,6 +76,13 @@ infer_target_objects::visit (t_filename &n)
 
 void
 infer_target_objects::visit (t_sources &n)
+{
+  local (state) = S_SOURCES;
+  visitor::visit (n);
+}
+
+void
+infer_target_objects::visit (t_nodist_sources &n)
 {
   local (state) = S_SOURCES;
   visitor::visit (n);

@@ -8,4 +8,8 @@ program foo {
 	BAR = a
 
 	$(BAR){$(FOO)}.o: a{$(FOO)}.c ;
+
+	%.o: %.c {
+		cc $< -o $@
+	}
 }

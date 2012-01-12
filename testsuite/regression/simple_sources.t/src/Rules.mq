@@ -1,6 +1,12 @@
 program datagen {
 	sources {
-		main.c
+		main.y
 		foo.c
 	}
+
+	%.c: %.y {
+		$(YACC) -o $@ $[YFLAGS] $<
+	}
+
+	%.o: %%.c ;
 }

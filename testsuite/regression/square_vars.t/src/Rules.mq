@@ -1,4 +1,4 @@
-program foo {
+program myprog {
 	sources {
 		foo.c
 	}

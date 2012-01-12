@@ -21,7 +21,7 @@ struct default_destdir
 
   static t_destination_ptr make_dest (char const *dir)
   {
-    return new t_destination (location::generated, new token (location::generated, TK_IDENTIFIER, "bin"));
+    return new t_destination (location::generated, new token (location::generated, TK_IDENTIFIER, dir));
   }
 
   default_destdir (annotation_map &annots)

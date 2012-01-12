@@ -20,24 +20,37 @@ struct inference
   void visit (t_filename &n);
   void visit (t_rule &n);
 
+  void visit (t_target_definition &n);
+  void visit (t_program &n);
+  void visit (t_library &n);
+
   enum rule_state
   {
-    S_NONE,
-    S_TARGET,
-    S_PREREQ
+    SR_NONE,
+    SR_TARGET,
+    SR_PREREQ
+  };
+
+  enum target_state
+  {
+    ST_NONE,
+    ST_PROGRAM,
+    ST_LIBRARY
   };
 
   inference_engine engine;
   rule_info &rules;
 
-  rule_state state;
+  rule_state rstate;
+  target_state tstate;
 
   std::string target;
   std::vector<inference_engine::prerequisite> prereq;
 
   inference (annotation_map &annots)
     : rules (annots.put ("rule_info", new rule_info))
-    , state (S_NONE)
+    , rstate (SR_NONE)
+    , tstate (ST_NONE)
   {
     file_list const &files = annots.get ("files");
     foreach (fs::path const &f, boost::make_iterator_range (files.begin, files.end))
@@ -157,14 +170,14 @@ make_prereq (node_vec const &list)
 void
 inference::visit (t_filename &n)
 {
-  switch (state)
+  switch (rstate)
     {
-    case S_NONE:
+    case SR_NONE:
       break;
-    case S_TARGET:
+    case SR_TARGET:
       target = make_target (n.list);
       break;
-    case S_PREREQ:
+    case SR_PREREQ:
       prereq.push_back (make_prereq (n.list));
       break;
     }
@@ -173,13 +186,35 @@ inference::visit (t_filename &n)
 void
 inference::visit (t_rule &n)
 {
-  state = S_TARGET;
+  rstate = SR_TARGET;
   n.target ()->accept (*this);
-  state = S_PREREQ;
+  rstate = SR_PREREQ;
   n.prereq ()->accept (*this);
-  state = S_NONE;
+  rstate = SR_NONE;
 
   engine.add_rule (target, prereq, n.code ());
   target.clear ();
   prereq.clear ();
+}
+
+
+void
+inference::visit (t_target_definition &n)
+{
+  engine.add_file (n.name ()->as<token> ().string);
+  visitor::visit (n);
+}
+
+void
+inference::visit (t_program &n)
+{
+  tstate = ST_PROGRAM;
+  visitor::visit (n);
+}
+
+void
+inference::visit (t_library &n)
+{
+  tstate = ST_LIBRARY;
+  visitor::visit (n);
 }

@@ -1,5 +1,6 @@
 #include "phase.h"
 
+#include "annotations/output_file.h"
 #include "colours.h"
 #include "foreach.h"
 #include "util/symbol_visitor.h"
@@ -18,22 +19,58 @@ struct emit_SOURCES
     throw std::invalid_argument ("invalid state in target " + C::quoted (name));
   }
 
+  virtual void visit (t_sources &n);
+  virtual void visit (t_nodist_sources &n);
+  virtual void visit (t_extra_dist &n);
+
   virtual void visit (t_filename &n);
   virtual void visit (t_sources_members &n);
   virtual void visit (t_rule &n);
 
   virtual void visit (token &n);
 
+  enum source_state
+  {
+    SS_NONE,
+    SS_SOURCES,
+    SS_NODIST_SOURCES,
+    SS_EXTRA_DIST,
+  } sstate;
+
   bool in_filename;
+  annotations::output_file const &out;
 
   emit_SOURCES (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
+    , sstate (SS_NONE)
     , in_filename (false)
+    , out (annots.get ("output"))
   {
   }
 };
 
 static phase<emit_SOURCES> thisphase ("emit_SOURCES", noauto);
+
+void
+emit_SOURCES::visit (t_sources &n)
+{
+  local (sstate) = SS_SOURCES;
+  visitor::visit (n);
+}
+
+void
+emit_SOURCES::visit (t_nodist_sources &n)
+{
+  local (sstate) = SS_NODIST_SOURCES;
+  visitor::visit (n);
+}
+
+void
+emit_SOURCES::visit (t_extra_dist &n)
+{
+  local (sstate) = SS_EXTRA_DIST;
+  visitor::visit (n);
+}
 
 
 void
@@ -46,12 +83,21 @@ emit_SOURCES::visit (t_filename &n)
 void
 emit_SOURCES::visit (t_sources_members &n)
 {
-  generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
-  assert (TARGET);
-  generic_node &name = TARGET->as<generic_node> ();
-  printf ("%s_SOURCES =", canonical (name[0]->as<token> ().string.c_str (), state).c_str ());
+  if (sstate != SS_EXTRA_DIST)
+    {
+      generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
+      assert (TARGET);
+      generic_node &name = TARGET->as<generic_node> ();
+      fprintf (out.Makefile, "%s%s_SOURCES =",
+               sstate == SS_NODIST_SOURCES ? "nodist_" : "",
+               canonical (name[0]->as<token> ().string, state).c_str ());
+    }
+  else
+    {
+      fprintf (out.Makefile, "EXTRA_DIST +=");
+    }
   visitor::visit (n);
-  printf ("\n\n");
+  fprintf (out.Makefile, "\n\n");
 }
 
 void
@@ -65,5 +111,5 @@ void
 emit_SOURCES::visit (token &n)
 {
   if (in_filename)
-    printf ("\t\\\n\t%s", n.string.c_str ());
+    fprintf (out.Makefile, "\t\\\n\t%s", n.string.c_str ());
 }

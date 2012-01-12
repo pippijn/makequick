@@ -1,0 +1,11 @@
+bin_PROGRAMS +=	\
+	datagen
+
+
+datagen_SOURCES =	\
+	src/main.y	\
+	foo.c
+
+src/main.c: src/main.y 
+	$(YACC) -o $(builddir)/src/main.c $(datagen_YFLAGS) $(AM_YFLAGS) $(YFLAGS) `test -f 'src/main.y' || echo '$(srcdir)/'`src/main.y
+

@@ -4,23 +4,7 @@
 
 #include <algorithm>
 
-struct print
-  : visitor
-{
-#include "visitor_t.h"
-
-  template<typename NodeT>
-  void file_list (NodeT &n, char const *name);
-
-  virtual void visit (token &n);
-
-  bool in_rule;
-
-  print (annotation_map &annots)
-    : in_rule (false)
-  {
-  }
-};
+#include "print.h"
 
 static phase<print> thisphase ("print", noauto);
 
@@ -33,46 +17,46 @@ print::visit (t_filenames &n)
 void
 print::visit (t_variable_content &n)
 {
-  printf ("(");
+  fprintf (fh, "(");
   resume (n.name ());
   if (n.member ())
-    printf (".") && resume (n.member ());
+    fprintf (fh, ".") && resume (n.member ());
   if (n.filter ())
-    printf (" : ") && resume (n.filter ());
-  printf (")");
+    fprintf (fh, " : ") && resume (n.filter ());
+  fprintf (fh, ")");
 }
 
 void
 print::visit (t_destination &n)
 {
-  printf ("-> ");
+  fprintf (fh, "-> ");
   visitor::visit (n);
 }
 
 void
 print::visit (t_document &n)
 {
-  puts (__PRETTY_FUNCTION__);
+  //puts (__PRETTY_FUNCTION__);
 }
 
 void
 print::visit (t_program &n)
 {
-  printf ("program ");
+  fprintf (fh, "program ");
   visitor::visit (n);
 }
 
 void
 print::visit (t_inheritance &n)
 {
-  printf (": ");
+  fprintf (fh, ": ");
   visitor::visit (n);
 }
 
 void
 print::visit (t_if &n)
 {
-  printf ("if ");
+  fprintf (fh, "if ");
   visitor::visit (n);
 }
 
@@ -85,9 +69,9 @@ print::visit (t_identifiers &n)
 void
 print::visit (t_rule_line &n)
 {
-  printf ("      ");
+  fprintf (fh, "      ");
   visitor::visit (n);
-  printf ("\n");
+  fprintf (fh, "\n");
 }
 
 void
@@ -125,9 +109,9 @@ print::visit (t_link_body &n)
 {
   foreach (node_ptr const &p, n.list)
     {
-      printf ("      ");
+      fprintf (fh, "      ");
       resume (p);
-      printf ("\n");
+      fprintf (fh, "\n");
     }
 }
 
@@ -141,11 +125,11 @@ template<typename NodeT>
 void
 print::file_list (NodeT &n, char const *name)
 {
-  printf ("   %s ", name);
-  resume (n[0]) && printf (" ");
-  printf ("{\n");
+  fprintf (fh, "   %s ", name);
+  resume (n[0]) && fprintf (fh, " ");
+  fprintf (fh, "{\n");
   visitor::visit (n);
-  printf ("   }\n");
+  fprintf (fh, "   }\n");
 }
 
 void
@@ -169,11 +153,11 @@ print::visit (t_nodist_sources &n)
 void
 print::visit (t_vardecl &n)
 {
-  printf ("   ");
+  fprintf (fh, "   ");
   resume (n.var ());
-  printf (" =");
+  fprintf (fh, " =");
   resume (n.body ());
-  printf ("\n");
+  fprintf (fh, "\n");
 }
 
 void
@@ -191,43 +175,43 @@ print::visit (t_check_cflags &n)
 void
 print::visit (t_target_definition &n)
 {
-  resume (n.name ()) && printf (" ");
-  resume (n.cond ()) && printf (" ");
-  resume (n.derive ()) && printf (" ");
-  resume (n.dest ()) && printf (" ");
-  printf ("{\n");
+  resume (n.name ()) && fprintf (fh, " ");
+  resume (n.cond ()) && fprintf (fh, " ");
+  resume (n.derive ()) && fprintf (fh, " ");
+  resume (n.dest ()) && fprintf (fh, " ");
+  fprintf (fh, "{\n");
   resume (n.body ());
-  printf ("}\n");
+  fprintf (fh, "}\n");
 }
 
 void
 print::visit (t_shortvar &n)
 {
-  printf ("$");
+  fprintf (fh, "$");
   visitor::visit (n);
 }
 
 void
 print::visit (t_intvar &n)
 {
-  printf ("$");
+  fprintf (fh, "$");
   visitor::visit (n);
 }
 
 void
 print::visit (t_roundvar &n)
 {
-  printf ("$");
+  fprintf (fh, "$");
   visitor::visit (n);
 }
 
 void
 print::visit (t_squarevar &n)
 {
-  printf ("$");
-  printf ("[");
+  fprintf (fh, "$");
+  fprintf (fh, "[");
   visitor::visit (n);
-  printf ("]");
+  fprintf (fh, "]");
 }
 
 void
@@ -260,7 +244,7 @@ print::visit (t_vardecl_body &n)
   foreach (node_ptr const &p, n.list)
     {
       resume (p);
-      printf (" ");
+      fprintf (fh, " ");
     }
 }
 
@@ -274,34 +258,34 @@ void
 print::visit (t_rule &n)
 {
   in_rule = true;
-  printf ("   ");
+  fprintf (fh, "   ");
   resume (n.target ());
-  printf (": ");
-  resume (n.prereq ()) && printf (" ");
+  fprintf (fh, ": ");
+  resume (n.prereq ()) && fprintf (fh, " ");
   if (n.code ())
     {
-      printf ("{\n");
+      fprintf (fh, "{\n");
       resume (n.code ());
-      printf ("   }\n");
+      fprintf (fh, "   }\n");
     }
   else
-    printf (";\n");
+    fprintf (fh, ";\n");
   in_rule = false;
 }
 
 void
 print::visit (t_library &n)
 {
-  printf ("library ");
+  fprintf (fh, "library ");
   visitor::visit (n);
 }
 
 void
 print::visit (t_rules &n)
 {
-  printf ("global {\n");
+  fprintf (fh, "global {\n");
   visitor::visit (n);
-  printf ("}\n");
+  fprintf (fh, "}\n");
 }
 
 void
@@ -313,9 +297,9 @@ print::visit (t_arg_enable_choice &n)
 void
 print::visit (t_sourcesref &n)
 {
-  printf ("      sources (");
+  fprintf (fh, "      sources (");
   visitor::visit (n);
-  printf (")\n");
+  fprintf (fh, ")\n");
 }
 
 void
@@ -333,23 +317,23 @@ print::visit (t_check_alignof &n)
 void
 print::visit (t_link &n)
 {
-  printf ("   link ");
+  fprintf (fh, "   link ");
   resume (n.cond ());
-  printf ("{\n");
+  fprintf (fh, "{\n");
   resume (n.items ());
-  printf ("   }\n");
+  fprintf (fh, "   }\n");
 }
 
 void
 print::visit (t_tool_flags &n)
 {
-  printf ("   ");
+  fprintf (fh, "   ");
   resume (n.keyword ());
-  printf (" ");
+  fprintf (fh, " ");
   resume (n.cond ());
-  printf ("{\n");
+  fprintf (fh, "{\n");
   resume (n.flags ());
-  printf ("   }\n");
+  fprintf (fh, "   }\n");
 }
 
 void
@@ -363,9 +347,9 @@ print::visit (t_flags &n)
 {
   foreach (node_ptr const &p, n.list)
     {
-      printf ("      ");
+      fprintf (fh, "      ");
       resume (p);
-      printf ("\n");
+      fprintf (fh, "\n");
     }
 }
 
@@ -397,10 +381,10 @@ void
 print::visit (t_filename &n)
 {
   if (!in_rule)
-    printf ("      ");
+    fprintf (fh, "      ");
   visitor::visit (n);
   if (!in_rule)
-    printf ("\n");
+    fprintf (fh, "\n");
 }
 
 void
@@ -430,5 +414,5 @@ print::visit (t_exclude &n)
 void
 print::visit (token &n)
 {
-  printf ("%s", n.string.c_str ());
+  fprintf (fh, "%s", n.string.c_str ());
 }

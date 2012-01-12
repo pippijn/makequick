@@ -54,11 +54,27 @@ squarevars::visit (t_squarevar &n)
   std::string const &tname = target[0]->as<token> ().string;
   std::string const &vname = n.name ()->as<token> ().string;
 
-  replacement.push_back (make_var (n.loc, tname + "_" + vname));
-  replacement.push_back (make_space (n.loc));
   replacement.push_back (make_var (n.loc, "AM_" + vname));
   replacement.push_back (make_space (n.loc));
   replacement.push_back (make_var (n.loc, vname));
+  replacement.push_back (make_space (n.loc));
+
+  std::string name = tname + "_" + vname;
+  // TODO: get this information
+#if 0
+  struct is_library_visitor
+    : visitor
+  {
+    bool result;
+    is_library_visitor () : result (false) { }
+    void visit (t_library &) { result = true; }
+    bool operator () (generic_node_ptr p) { p->accept (*this); return result; }
+  } is_library;
+
+  if (is_library (TARGET))
+    name = "lib" + name + "_la";
+#endif
+  replacement.push_back (make_var (n.loc, name));
 }
 
 void

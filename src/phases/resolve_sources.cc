@@ -26,7 +26,15 @@ struct resolve_sources
   : visitor
 {
   void visit (t_filename &n);
-  void visit (t_sources &n);
+  void visit (t_sources_members &n);
+#if 0
+  void visit (t_toplevel_declarations &n)
+  {
+    visitor::visit (n);
+    annotation_map annots;
+    phases::run ("print", &n, annots);
+  }
+#endif
 
   bool in_sources;
   annotations::file_list const &files;
@@ -96,14 +104,11 @@ resolve_sources::visit (t_filename &n)
     }
 }
 
-void operator + (t_sources &, t_sources &) { }
-
 
 void
-resolve_sources::visit (t_sources &n)
+resolve_sources::visit (t_sources_members &n)
 {
   in_sources = true;
   resume_list ();
   in_sources = false;
-  n + n;
 }

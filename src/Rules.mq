@@ -1,0 +1,36 @@
+program makepp {
+	sources {
+		annotation_map.cc
+		colours.cc
+		exception.cc
+		file_lexer.cc
+		lexer.cc
+		main.cc
+		node.cc
+		node_factory.cc
+		parser.cc
+		parseutil.cc
+		phases.cc
+		serialisation.cc
+		sighandler.cc
+		string_lexer.cc
+		visitor.cc
+		yylex.ll
+		yyparse.yy
+
+		#annotations/*.cc
+		#phases/*.cc
+		#util/*.cc
+	}
+
+	nodist_sources {
+		node_type.cc
+		nodes.pb.cc
+	}
+}
+
+global {
+	%.o: %%.cc ;
+	%.cc: %.ll ;
+	%.cc: %.yy ;
+}

@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include "annotations/output_file.h"
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
 #include "annotation_map.h"
@@ -53,7 +54,7 @@ resolve (fs::path const &p)
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)
 {
-  if (is_directory (path))
+  if (is_directory (path) && path.filename () != "_build")
     for_each (fs::directory_iterator (path),
               fs::directory_iterator (),
               boost::bind (collect, _1, boost::ref (files)));
@@ -169,6 +170,7 @@ try
 
       annotation_map annots;
       annots.put ("files", new file_list (path, files.begin (), files.end ()));
+      annots.put ("output", new output_file ((path / ".project" / "makepp.am").c_str (), "configure.out"));
       annots.put ("errors", errors.release ());
 
       error_log &errors = annots.get ("errors");
@@ -179,9 +181,7 @@ try
           foreach (char const *phase, to_run)
             phases::run (phase, doc, annots);
         else
-          {
-            phases::run (doc, annots);
-          }
+          phases::run (doc, annots);
       }
       catch (...)
       {
