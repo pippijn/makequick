@@ -125,6 +125,7 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
           std::string const &name = phases[v - 1].first;
           struct phases *phase    = phases[v - 1].second;
           fn (name, phase, doc, annots);
+          run ("audit", doc, *annots);
         }
     }
 }

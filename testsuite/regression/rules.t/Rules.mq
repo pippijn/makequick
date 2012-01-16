@@ -1,4 +1,9 @@
 program datagen {
+
+	sources {
+		foo.c
+	}
+
 	# simple direct rule
 	include/bar.c: src/bar.data {
 		./datagen -bar -c $< $@

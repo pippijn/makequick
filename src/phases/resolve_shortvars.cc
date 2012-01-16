@@ -3,13 +3,14 @@
 #include "annotations/error_log.h"
 #include "colours.h"
 #include "foreach.h"
+#include "util/symbol_visitor.h"
 
 #include <boost/filesystem/path.hpp>
 
 using annotations::error_log;
 
 struct resolve_shortvars
-  : visitor
+  : symbol_visitor
 {
   virtual void visit (t_shortvar &n);
   virtual void visit (t_intvar &n);
@@ -32,7 +33,8 @@ struct resolve_shortvars
   t_filenames_ptr prereq;
 
   resolve_shortvars (annotation_map &annots)
-    : errors (annots.get ("errors"))
+    : symbol_visitor (annots.get<symbol_table> ("symtab"))
+    , errors (annots.get ("errors"))
     , state (S_NONE)
   {
   }
@@ -142,6 +144,15 @@ resolve_shortvars::visit (t_intvar &n)
 {
   token &tok = n.num ()->as<token> ();
   long var = strtol (tok.string.c_str (), 0, 10);
+
+  if (var == 0)
+    {
+      generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
+      std::string const &tname = TARGET->as<generic_node> ()[0]->as<token> ().string;
+      replacement = new token (n.loc, TK_CODE, "$(builddir)/" + tname + "$(EXEEXT)");
+      return;
+    }
+
   if (prereq->size () < var)
     {
       errors.add<semantic_error> (&n, "prerequisite index out of bounds: $" + tok.string);
