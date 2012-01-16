@@ -37,9 +37,9 @@ struct resolve_sources
 #endif
 
   bool in_sources;
-  annotations::file_list const &files;
-  annotations::rule_info const &rule_info;
-  annotations::error_log &errors;
+  file_list const &files;
+  struct rule_info const &rule_info;
+  error_log &errors;
 
   resolve_sources (annotation_map &annots)
     : in_sources (false)
@@ -64,18 +64,17 @@ static phase<resolve_sources> thisphase ("resolve_sources", "inference");
 
 
 static bool
-try_resolve (annotations::file_list const &files,
+try_resolve (file_list const &files,
              std::vector<fs::path> const &buildable,
              std::string &file, fs::path const &dir)
 {
   fs::path const &path = dir / file;
-  fs::path const &relpath = files.rel (path);
 #if 0
-  std::cout << "looking for " << files.rel (path) << "\n";
+  std::cout << "looking for " << path << "\n";
 #endif
-  if (exists (path) || std::binary_search (buildable.begin (), buildable.end (), relpath))
+  if (exists (path) || std::binary_search (buildable.begin (), buildable.end (), path))
     {
-      file = relpath.native ();
+      file = path.native ();
       return true;
     }
 

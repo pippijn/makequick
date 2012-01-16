@@ -4,10 +4,8 @@
 
 #include <boost/filesystem_fwd.hpp>
 
-namespace annotations
-{
-  struct error_log;
-}
+struct file_list;
+struct error_log;
 
-node_ptr parse_files (std::vector<fs::path> const &files, annotations::error_log &errors, int init = 0, bool alternative = false);
-node_ptr parse_string (std::string const &s, annotations::error_log &errors, int init = 0, bool alternative = false);
+node_ptr parse_files (file_list const &files, error_log &errors, int init = 0, bool alternative = false);
+node_ptr parse_string (std::string const &s, error_log &errors, int init = 0, bool alternative = false);

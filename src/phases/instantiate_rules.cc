@@ -8,10 +8,6 @@
 
 #include <boost/filesystem/path.hpp>
 
-using annotations::error_log;
-using annotations::rule_info;
-using annotations::target_objects;
-
 struct instantiate_rules
   : visitor
 {

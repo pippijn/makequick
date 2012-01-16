@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <stdexcept>
 
-using annotations::symbol_table;
 using nodes::generic_node_ptr;
 
 namespace nodes

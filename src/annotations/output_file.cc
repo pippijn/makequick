@@ -2,8 +2,6 @@
 
 #include <cassert>
 
-using annotations::output_file;
-
 output_file::output_file (char const *mname, char const *cname)
   : Makefile (fopen (mname, "w"))
   , configure (fopen (cname, "w"))

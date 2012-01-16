@@ -5,8 +5,6 @@
 struct symbol_visitor
   : nodes::visitor
 {
-  typedef annotations::symbol_table symbol_table;
-
   void visit (nodes::t_target_definition &n);
   void visit (nodes::t_program &n);
   void visit (nodes::t_library &n);

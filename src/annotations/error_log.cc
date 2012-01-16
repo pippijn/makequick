@@ -8,8 +8,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-using annotations::error_log;
-
 struct error_log::pimpl
 {
   typedef boost::ptr_vector<semantic_error> error_vec;

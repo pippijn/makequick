@@ -123,7 +123,7 @@ lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int le
   if (column == 0)
     column = 1;
 
-  yylloc->file = current_file ();
+  yylloc->file = &current_file ();
   yylloc->first_line = lineno;
   yylloc->first_column = column;
 

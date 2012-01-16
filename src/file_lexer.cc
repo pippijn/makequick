@@ -1,4 +1,5 @@
 #include "file_lexer.h"
+#include "annotations/file_list.h"
 #include "lexer/pimpl.h"
 #include "yystate.h"
 
@@ -8,10 +9,10 @@
 
 #include <boost/filesystem/path.hpp>
 
-file_lexer::file_lexer (file_vec const &files)
+file_lexer::file_lexer (file_list const &files)
   : lexer ("parsing")
-  , it (files.begin ())
-  , et (files.end ())
+  , files (files)
+  , cur (files.begin)
 {
   if (wrap ())
     throw std::invalid_argument ("no source files found");
@@ -34,6 +35,13 @@ file_lexer::close_file ()
   return false;
 }
 
+static bool
+is_rule_file (fs::path const &file)
+{
+  std::cout << file << "\n";
+  return file.extension () == ".mq";
+}
+
 int
 file_lexer::wrap ()
 {
@@ -47,20 +55,23 @@ file_lexer::wrap ()
   if (close_file ())
     yyset_lineno (1, yyscanner);
 
-  if (it == et)
+  while (!is_rule_file (*cur))
+    ++cur;
+
+  if (cur == files.end)
     return 1;
 
-  FILE *fh = fopen ((*it)->c_str (), "r");
+  FILE *fh = fopen (files.absolute (*cur).c_str (), "r");
   if (!fh)
-    throw std::runtime_error ("Could not open " + (*it)->native () + " for reading");
-  ++it;
+    throw std::runtime_error ("Could not open " + cur->native () + " for reading");
+  ++cur;
 
   yyset_in (fh, yyscanner);
   return 0;
 }
 
-fs::path const *
+fs::path const &
 file_lexer::current_file () const
 {
-  return it[-1];
+  return cur[-1];
 }

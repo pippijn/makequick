@@ -2,8 +2,6 @@
 
 #include "foreach.h"
 
-using annotations::rule_info;
-
 rule_info::rule const *
 rule_info::find (std::string const &target) const
 {

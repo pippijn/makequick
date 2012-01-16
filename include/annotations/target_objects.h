@@ -8,15 +8,12 @@
 
 #include <boost/filesystem_fwd.hpp>
 
-namespace annotations
+struct target_objects
+  : annotation
 {
-  struct target_objects
-    : annotation
-  {
-    typedef std::map<std::string, std::vector<fs::path> > target_map;
+  typedef std::map<std::string, std::vector<fs::path> > target_map;
 
-    void print () const;
+  void print () const;
 
-    target_map targets;
-  };
-}
+  target_map targets;
+};

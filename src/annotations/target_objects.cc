@@ -6,8 +6,6 @@
 
 #include <boost/filesystem/path.hpp>
 
-using annotations::target_objects;
-
 void
 target_objects::print () const
 {

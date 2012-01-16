@@ -5,7 +5,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-parser::parser (lexer &lex, annotations::error_log &errors)
+parser::parser (lexer &lex, error_log &errors)
   : lex (lex)
   , errors (errors)
   , doc (0)

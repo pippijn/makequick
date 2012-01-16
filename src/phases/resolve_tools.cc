@@ -6,8 +6,6 @@
 
 #include <boost/filesystem/path.hpp>
 
-using annotations::error_log;
-
 struct resolve_tools
   : symbol_visitor
 {

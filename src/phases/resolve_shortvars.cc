@@ -7,8 +7,6 @@
 
 #include <boost/filesystem/path.hpp>
 
-using annotations::error_log;
-
 struct resolve_shortvars
   : symbol_visitor
 {

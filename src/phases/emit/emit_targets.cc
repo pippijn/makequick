@@ -31,7 +31,7 @@ struct emit_targets
   typedef std::map<std::string, std::vector<target> > target_map;
   target_map programs;
   target_map libraries;
-  annotations::output_file const &out;
+  output_file const &out;
   std::string cond;
 
   emit_targets (annotation_map &annots)

@@ -24,7 +24,7 @@ struct lexer
   void lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int leng);
 
   virtual int wrap () = 0;
-  virtual fs::path const *current_file () const = 0;
+  virtual fs::path const &current_file () const = 0;
 
   static char const *STRSTATE (int state);
   static char const *strstate (int state);

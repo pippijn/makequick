@@ -8,9 +8,6 @@
 
 #include <stdexcept>
 
-using annotations::error_log;
-using annotations::symbol_table;
-
 struct insert_syms
   : symbol_visitor
 {

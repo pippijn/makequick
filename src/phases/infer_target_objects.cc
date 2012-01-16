@@ -6,8 +6,6 @@
 
 #include <boost/filesystem/path.hpp>
 
-using annotations::target_objects;
-
 struct infer_target_objects
   : visitor
 {

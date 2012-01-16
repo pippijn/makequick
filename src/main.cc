@@ -57,28 +57,26 @@ collect (fs::path const &path, std::vector<fs::path> &files)
   if (is_directory (path) && path.filename () != "_build")
     for_each (fs::directory_iterator (path),
               fs::directory_iterator (),
-              boost::bind (collect, _1, boost::ref (files)));
+              bind (collect, _1, boost::ref (files)));
   else if (is_regular_file (path))
     files.push_back (path);
 }
 
-struct base_sort
+struct unbase
 {
-  base_sort (fs::path const &base)
-    : offset (base.native ().length () + 1)
+  unbase (fs::path const &base)
+    : base (base.native ())
   {
   }
 
-  bool operator () (fs::path const &a, fs::path const &b)
+  void operator () (fs::path &path)
   {
-#if 1
-    return a < b;
-#else
-    return strcmp (a.c_str () + offset, b.c_str () + offset) < 0;
-#endif
+    std::string const &native = path.native ();
+    assert (path.native ().substr (0, base.length ()) == base);
+    path = native.substr (base.length () + 1);
   }
 
-  size_t const offset;
+  std::string base;
 };
 
 static void
@@ -152,24 +150,31 @@ try
       return EXIT_FAILURE;
     }
 
-  std::vector<fs::path> files;
-  collect (path, files);
-  sort (files.begin (), files.end (), base_sort (path));
+  std::vector<fs::path> filevec;
+  filevec.push_back (path / "Rules.mq");
+  filevec.push_back (path / "configure.mq");
+  collect (path / "extra", filevec);
+  collect (path / "include", filevec);
+  collect (path / "src", filevec);
+  collect (path / "testsuite", filevec);
+  for_each (filevec.begin (), filevec.end (), unbase (path));
+  sort (filevec.begin (), filevec.end ());
+  std::auto_ptr<file_list> files (new file_list (path, filevec.begin (), filevec.end ()));
 
 #if 0
-  copy (files.begin (), files.end (), std::ostream_iterator<fs::path> (std::cout, "\n"));
+  copy (files->begin, files->end, std::ostream_iterator<fs::path> (std::cout, "\n"));
   return EXIT_SUCCESS;
 #endif
 
-  using namespace annotations;
   std::auto_ptr<error_log> errors (new error_log);
 
-  if (node_ptr doc = parse_files (files, *errors))
+  if (node_ptr doc = parse_files (*files, *errors))
     {
+      return 0;
       //load_store (doc);
 
       annotation_map annots;
-      annots.put ("files", new file_list (path, files.begin (), files.end ()));
+      annots.put ("files", files.release ());
       annots.put ("output", new output_file ((path / ".project" / "makepp.am").c_str (), "configure.out"));
       annots.put ("errors", errors.release ());
 

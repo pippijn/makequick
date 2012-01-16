@@ -111,9 +111,9 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
   std::vector<Vertex> sorted;
   topological_sort (G, back_inserter (sorted));
 
-  annotations::error_log const *errors = 0;
+  error_log const *errors = 0;
   if (annots)
-    errors = &annots->get<annotations::error_log> ("errors");
+    errors = &annots->get<error_log> ("errors");
   foreach (Vertex const &v, sorted)
     {
       if (should_terminate)

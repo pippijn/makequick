@@ -7,8 +7,6 @@
 #include "util/symbol_visitor.h"
 #include "util/extract_string.h"
 
-using annotations::error_log;
-
 struct resolve_vars
   : symbol_visitor
 {

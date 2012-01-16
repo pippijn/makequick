@@ -20,8 +20,8 @@ struct resolve_wildcards
   void visit (t_sources_members &n);
 
   bool in_sources;
-  annotations::file_list const &files;
-  annotations::error_log &errors;
+  file_list const &files;
+  error_log &errors;
 
   std::vector<fs::path> source_files;
   generic_node_vec wildcards;
@@ -107,7 +107,7 @@ struct translate_wildcard
 
 struct regex_matcher
 {
-  explicit regex_matcher (boost::regex const &re, std::vector<fs::path> const &source_files, node_ptr const &node, annotations::error_log &errors)
+  explicit regex_matcher (boost::regex const &re, std::vector<fs::path> const &source_files, node_ptr const &node, error_log &errors)
     : re (re)
     , source_files (source_files)
     , node (node)
@@ -128,7 +128,7 @@ struct regex_matcher
   boost::regex const &re;
   std::vector<fs::path> const &source_files;
   node_ptr const &node;
-  annotations::error_log &errors;
+  error_log &errors;
 };
 
 void

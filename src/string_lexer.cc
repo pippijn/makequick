@@ -28,8 +28,8 @@ string_lexer::wrap ()
   return 1;
 }
 
-fs::path const *
+fs::path const &
 string_lexer::current_file () const
 {
-  return &string_file;
+  return string_file;
 }

@@ -9,7 +9,7 @@ struct string_lexer
   ~string_lexer ();
 
   virtual int wrap ();
-  virtual fs::path const *current_file () const;
+  virtual fs::path const &current_file () const;
 
   std::string str;
 };

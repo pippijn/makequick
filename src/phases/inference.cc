@@ -11,9 +11,6 @@
 #include <boost/regex.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
-using annotations::file_list;
-using annotations::rule_info;
-
 struct inference
   : visitor
 {
@@ -54,7 +51,7 @@ struct inference
   {
     file_list const &files = annots.get ("files");
     foreach (fs::path const &f, boost::make_iterator_range (files.begin, files.end))
-      engine.add_file (files.rel (f));
+      engine.add_file (f);
   }
 
   ~inference ()

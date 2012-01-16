@@ -23,7 +23,7 @@ struct emit_link
 
   virtual void visit (token &n);
 
-  annotations::output_file const &out;
+  output_file const &out;
 
   emit_link (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))

@@ -38,7 +38,7 @@ struct emit_SOURCES
   } sstate;
 
   bool in_filename;
-  annotations::output_file const &out;
+  output_file const &out;
 
   emit_SOURCES (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))

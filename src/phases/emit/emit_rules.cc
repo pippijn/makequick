@@ -21,7 +21,7 @@ struct emit_rules
 
   bool in_rule;
   bool in_prereq;
-  annotations::output_file const &out;
+  output_file const &out;
   print p;
 
   emit_rules (annotation_map &annots)
