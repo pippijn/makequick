@@ -241,7 +241,7 @@ public:
     foreach (rule const &r1, inferred.rules)
       foreach (rule const &r2, inferred.rules)
         if (&r1 != &r2 && r1 == r2)
-          garbage.push_back (&std::min (r1, r2));
+          garbage.push_back (&std::max (r1, r2));
 
     for (std::vector<rule>::iterator it = inferred.rules.begin (); it != inferred.rules.end (); ++it)
       {

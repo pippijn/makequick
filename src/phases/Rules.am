@@ -1,5 +1,6 @@
 makepp_SOURCES +=		\
 	audit.cc		\
+	inference.cc		\
 	insert_syms.cc		\
 	sx.cc			\
 	xml.cc

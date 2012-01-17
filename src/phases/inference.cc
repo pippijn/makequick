@@ -105,61 +105,63 @@ make_target (node_vec const &list)
   return target;
 }
 
+struct make_regex
+{
+  static bool needs_regex (node_ptr const &n)
+  {
+    return n->as<token> ().tok != TK_FILENAME;
+  }
+
+  make_regex (bool is_re)
+    : is_re (is_re)
+    , in_multi (false)
+  {
+  }
+
+  bool is_re;
+  bool in_multi;
+
+  std::string &operator () (std::string &pr, node_ptr const &n)
+  {
+    token const &t = n->as<token> ();
+    switch (t.tok)
+      {
+      case TK_FILENAME:
+        pr += is_re ? regex_escape (t.string) : t.string;
+        if (in_multi)
+          pr += "|";
+        break;
+      case TK_FN_PERCENT:
+        assert (!in_multi);
+        pr += "(.+)";
+        break;
+      case TK_FN_PERPERCENT:
+        assert (!in_multi);
+        pr += ".*?([^/]+)";
+        break;
+      case TK_FN_LBRACE:
+        assert (!in_multi);
+        pr += "(?:";
+        in_multi = true;
+        break;
+      case TK_FN_RBRACE:
+        assert (in_multi);
+        in_multi = false;
+        pr[pr.size () - 1] = ')';
+        break;
+      default:
+        throw tokname (t.tok);
+      }
+    return pr;
+  }
+};
+
 static inference_engine::prerequisite
 make_prereq (node_vec const &list)
 {
-  bool is_re = false;
-  bool in_multi = false;
-  std::string pr;
-  foreach (node_ptr const &n, list)
-    {
-      token const &t = n->as<token> ();
-      switch (t.tok)
-        {
-        case TK_FILENAME:
-          if (is_re)
-            pr += regex_escape (t.string);
-          else
-            pr += t.string;
-          if (in_multi)
-            pr += "|";
-          break;
-        case TK_FN_PERCENT:
-          assert (!in_multi);
-          if (!is_re)
-            pr = regex_escape (pr);
-          pr += "(.+)";
-          is_re = true;
-          break;
-        case TK_FN_PERPERCENT:
-          assert (!in_multi);
-          if (!is_re)
-            pr = regex_escape (pr);
-          pr += ".*?([^/]+)";
-          is_re = true;
-          break;
-        case TK_FN_LBRACE:
-          assert (!in_multi);
-          if (!is_re)
-            pr = regex_escape (pr);
-          pr += "(?:";
-          is_re = true;
-          in_multi = true;
-          break;
-        case TK_FN_RBRACE:
-          assert (in_multi);
-          in_multi = false;
-          pr.resize (pr.size () - 1);
-          pr += ")";
-          break;
-        default:
-          throw tokname (t.tok);
-        }
-    }
-
-  if (is_re)
-    return boost::regex (pr);
-  return pr;
+  bool const is_re = find_if (list.begin (), list.end (), make_regex::needs_regex) != list.end ();
+  std::string pr = accumulate (list.begin (), list.end (), std::string (), make_regex (is_re));
+  return is_re ? boost::regex (pr) : inference_engine::prerequisite (pr);
 }
 
 

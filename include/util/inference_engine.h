@@ -106,9 +106,10 @@ struct inference_engine
     {
       return target == other.target && prereqs == other.prereqs;
     }
+    // a rule is smaller than another rule if it matched more precisely
     bool operator < (rule const &other) const
     {
-      return stem.size () > other.stem.size ();
+      return stem.size () < other.stem.size ();
     }
 
     rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code)
