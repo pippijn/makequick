@@ -1,4 +1,4 @@
-makepp_SOURCES +=		\
+libmakepp_a_SOURCES +=		\
 	error_log.cc		\
 	file_list.cc		\
 	output_file.cc		\

@@ -26,7 +26,7 @@ sub gen (&) {
             $params .= ", node_ptr const &$_";
             $args .= ", $_";
             $accessors .= "\n  node_ptr const &$_ () const { return (*this)[$i]; }";
-            $accessors .= "\n  void $_ (node_ptr const &n) { (*this)[$i] = n; }";
+            $accessors .= "\n  void $_ (node_ptr const &n) { set ($i, n); }";
          }
          ++$i;
       }

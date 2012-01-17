@@ -2,8 +2,6 @@
 
 #include "foreach.h"
 
-#include <algorithm>
-
 struct sx
   : visitor
 {

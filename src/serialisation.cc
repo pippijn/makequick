@@ -61,11 +61,11 @@ namespace nodes
   {
     compress_hash ();
     NodeList list;
-    list.set_root (root->index + 1);
+    list.set_root (root->index () + 1);
     foreach (node *n, nodes)
       {
         Node &sn = *list.add_node ();
-        sn.set_index (n->index + 1);
+        sn.set_index (n->index () + 1);
         store_loc (*sn.mutable_loc (), n->loc);
         if (generic_node *p = n->is<generic_node> ())
           {
@@ -73,7 +73,7 @@ namespace nodes
             list.set_type (p->type);
             foreach (node_ptr const &c, p->list)
               if (c)
-                list.add_child (c->index + 1);
+                list.add_child (c->index () + 1);
               else
                 list.add_child (0);
           }

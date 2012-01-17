@@ -8,6 +8,7 @@ project {
 	libtool: no
 
 	ac_prog {
+		li { RANLIB }
 		li { LEX }
 		li { YACC }
 	}

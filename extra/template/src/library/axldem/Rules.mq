@@ -1,4 +1,4 @@
-library axldem : aldor-user-library {
+library axldem < aldor-user-library {
 	sources {
 		src/axld_boot.as
 		src/axld_dirprod.as

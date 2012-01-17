@@ -1,0 +1,10 @@
+check_PROGRAMS += inference_engine_t
+TESTS += inference_engine_t
+inference_engine_t_SOURCES = testsuite/unit/inference_engine_t.cc
+inference_engine_t_LDADD = libmakepp.a
+
+check_PROGRAMS += symbol_table_t
+TESTS += symbol_table_t
+symbol_table_t_SOURCES = testsuite/unit/symbol_table_t.cc
+symbol_table_t_LDADD = libmakepp.a
+

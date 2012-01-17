@@ -63,6 +63,7 @@ phases::run (std::string const &name, node_ptr const &doc, annotation_map &annot
   phases *phase = map[name];
   if (!phase)
     throw std::invalid_argument ("phase " + C::filename (name) + " does not exist");
+  printf ("%%%% phase \"%s\"\n", name.c_str ());
   phase->run1 (doc, annots);
 }
 

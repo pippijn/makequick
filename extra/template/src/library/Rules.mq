@@ -17,7 +17,7 @@ template aldor-library {
 
 # Templates can inherit from other templates to create a combined template.
 # This template is for all non-core Aldor libraries.
-template aldor-user-library : aldor-library {
+template aldor-user-library < aldor-library {
 	# XXX: Alternative syntax?
 	#extend { aldor-library }
 

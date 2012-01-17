@@ -9,8 +9,6 @@ extra_dist {
 # The target filename is prepended with the current directory, unless it is
 # already relative to the source root. Explicit rules do not have $*, since
 # no matching is performed. Using it is an error.
-global {
-	ffi_table.h: ffi_table {
-		$< > $@
-	}
+ffi_table.h: ffi_table {
+	$< > $@
 }

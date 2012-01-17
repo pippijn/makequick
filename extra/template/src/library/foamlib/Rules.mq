@@ -1,5 +1,5 @@
 # This library inherits all flags from the aldor-library template.
-library foamlib : aldor-library {
+library foamlib < aldor-library {
 	sources {
 		src/fm_array.as
 		src/fm_basic.as

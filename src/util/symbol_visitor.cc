@@ -1,5 +1,4 @@
 #include "util/symbol_visitor.h"
-#include "util/resume.h"
 #include "util/local.h"
 
 #include "annotations/symbol_table.h"

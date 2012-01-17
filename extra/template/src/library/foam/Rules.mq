@@ -1,4 +1,4 @@
-library foam : aldor-library {
+library foam < aldor-library {
 	sources {
 		src/runtime.as
 	}

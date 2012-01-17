@@ -2,6 +2,7 @@
 
 #include "foreach.h"
 #include "object_pool.h"
+#include "phases.h"
 
 #include <cstdio>
 
@@ -12,8 +13,8 @@ location const location::generated = { &generated_file, 0, 0, 0, 0 };
 
 namespace nodes
 {
-  void intrusive_ptr_release (node *n) { if (!--n->refcnt) delete n; }
-  void intrusive_ptr_add_ref (node *n) { ++n->refcnt; }
+  void intrusive_ptr_release (node *n) { if (!--n->m.refcnt) delete n; }
+  void intrusive_ptr_add_ref (node *n) { ++n->m.refcnt; }
 
   static object_pool<104> mempool;
 
@@ -36,10 +37,9 @@ namespace nodes
 
   node::node (location const &loc)
     : loc (loc)
-    , refcnt (0)
-    , parent (NULL)
+    , m ()
   {
-    index = nodes.size ();
+    m.index = nodes.size ();
     nodes.push_back (this);
   }
 
@@ -48,7 +48,7 @@ namespace nodes
     if (this == nodes.back ())
       nodes.pop_back ();
     else
-      nodes[index] = 0;
+      nodes[index ()] = 0;
   }
 
   void
@@ -62,7 +62,7 @@ namespace nodes
               nodes.pop_back ();
             if (!nodes.empty ())
               {
-                (nodes[i] = nodes.back ())->index = i;
+                (nodes[i] = nodes.back ())->m.index = i;
                 nodes.pop_back ();
               }
           }
@@ -80,7 +80,7 @@ namespace nodes
 
     while (it != et)
       {
-        if (*it && (*it)->index != et - it - 1)
+        if (*it && (*it)->index () != et - it - 1)
           return false;
         ++it;
       }
@@ -106,31 +106,46 @@ namespace nodes
   }
 
 
-  void
-  node_list::clone_list (node_vec const &orig, node_vec &clone)
+  node_ptr
+  node_list::clone_list (node_list const &orig, node_list_ptr clone)
   {
-    clone.reserve (orig.size ());
-    foreach (node_ptr const &n, orig)
+    assert (clone->list.empty ());
+
+    clone->loc = orig.loc;
+    clone->list.reserve (orig.size ());
+    foreach (node_ptr const &n, orig.list)
       if (n)
-        clone.push_back (n->clone ());
+        clone->add (n->clone ());
       else
-        clone.push_back (0);
+        clone->add (0);
+
+    return clone;
   }
 
   node_list *
   node_list::add (node_ptr n)
   {
-#if 0
-    if (!n)
-      asm ("int $3");
-#endif
     if (n)
       {
-        assert (!n->parent);
-        n->parent = this;
-        n->parent_index = list.size ();
+        assert (!n->parent ());
+        n->m.parent = this;
+        n->m.parent_index = list.size ();
       }
     list.push_back (n);
+    return this;
+  }
+
+  node_list *
+  node_list::set (size_t i, node_ptr n)
+  {
+    if (n)
+      {
+        if (n->parent ())
+          n->parent ()->list.at (n->parent_index ()) = NULL;
+        n->m.parent = this;
+        n->m.parent_index = i;
+      }
+    list.at (i) = n;
     return this;
   }
 
@@ -140,7 +155,6 @@ namespace nodes
     return list.size ();
   }
 
-  node_ptr       &node_list::operator [] (size_t index)       { return list.at (index); }
   node_ptr const &node_list::operator [] (size_t index) const { return list.at (index); }
 
   node_list::node_list (location const &loc) : node (loc) { }
@@ -152,9 +166,9 @@ namespace nodes
       {
         if (n)
           {
-            assert (n->parent == this);
-            assert (n->parent_index == i);
-            n->parent = NULL;
+            assert (n->parent () == this);
+            assert (n->parent_index () == i);
+            n->m.parent = NULL;
           }
         ++i;
       }

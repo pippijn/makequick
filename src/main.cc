@@ -18,6 +18,18 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+static char const *const all_phases[] = {
+  "audit",
+  "insert_target_syms",
+  "inheritance",
+  "remove_templates",
+  "insert_vardecl_syms",
+  //"resolve_vars",
+  "insert_varadd_syms",
+  //"resolve_vars",
+  "sx",
+};
+
 fs::path
 resolve (fs::path const &p)
 {
@@ -106,6 +118,12 @@ usage ()
   phases::print ();
 }
 
+static void
+SX (node &n)
+{
+  phases::run ("sx", &n);
+}
+
 int
 main (int argc, char *argv[])
 try
@@ -180,6 +198,9 @@ try
       annots.put ("errors", errors.release ());
 
       error_log &errors = annots.get ("errors");
+
+      if (to_run.empty ())
+        to_run.assign (all_phases, all_phases + sizeof all_phases / sizeof *all_phases);
 
       try
       {

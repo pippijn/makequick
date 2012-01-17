@@ -1,4 +1,4 @@
-library model : aldor-user-library {
+library model < aldor-user-library {
 	sources {
 		src/dm_demo.as
 		src/dm_vers.as

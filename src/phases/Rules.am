@@ -1,6 +1,10 @@
 makepp_SOURCES +=		\
 	audit.cc		\
 	inference.cc		\
-	insert_syms.cc		\
+	inheritance.cc		\
+	insert_target_syms.cc	\
+	insert_varadd_syms.cc	\
+	insert_vardecl_syms.cc	\
+	remove_templates.cc	\
 	sx.cc			\
 	xml.cc

@@ -16,7 +16,7 @@ visitor::visit (generic_node &n)
 }
 
 bool
-visitor::resume (node_ptr const &n)
+(visitor::resume) (node_ptr const &n)
 {
   if (!n)
     return false;

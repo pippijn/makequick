@@ -50,7 +50,7 @@
    section_members => ['+'],
    sources_members => ['+'],
    sourcesref => ['ref'],
-   target_definition => ['name', 'cond', 'derive', 'dest', 'body'],
+   target_definition => ['name', 'derive', 'cond', 'dest', 'body'],
    target_members => ['*'],
    template => ['defn'],
    toplevel_declarations => ['+'],

@@ -1,4 +1,4 @@
-library aldorunit : aldor-user-library {
+library aldorunit < aldor-user-library {
 	sources {
 		src/exceptions/tst_afe.as
 		src/exceptions/tst_afet.as

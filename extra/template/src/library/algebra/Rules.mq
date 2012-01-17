@@ -1,4 +1,4 @@
-library algebra : aldor-user-library {
+library algebra < aldor-user-library {
 	sources {
 		src/algext/sit_algext.as
 		src/algext/sit_sae.as

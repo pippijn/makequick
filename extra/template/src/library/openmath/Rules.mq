@@ -1,4 +1,4 @@
-library openmath : aldor-user-library {
+library openmath < aldor-user-library {
 	sources {
 		src/om_base.as
 		src/om_boot.as

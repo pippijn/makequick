@@ -1,4 +1,4 @@
-library aldor : aldor-user-library {
+library aldor < aldor-user-library {
 	sources {
 		src/aldor_gloop.as
 		src/arith/sal_arith.as

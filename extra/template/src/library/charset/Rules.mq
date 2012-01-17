@@ -1,4 +1,4 @@
-library charset : aldor-user-library {
+library charset < aldor-user-library {
 	# You can add a description to a library. This is used in the configure
 	# summary and generated pkg-config files.
 	'Library for characteristic sets'

@@ -1,12 +1,11 @@
-bin_PROGRAMS = makepp
+noinst_LIBRARIES = libmakepp.a
 
-makepp_SOURCES =		\
+libmakepp_a_SOURCES =		\
 	annotation_map.cc	\
 	colours.cc		\
 	exception.cc		\
 	file_lexer.cc		\
 	lexer.cc		\
-	main.cc			\
 	node.cc			\
 	node_factory.cc		\
 	parser.cc		\
@@ -19,18 +18,27 @@ makepp_SOURCES =		\
 	yylex.ll		\
 	yyparse.yy
 
-nodist_makepp_SOURCES =		\
+nodist_libmakepp_a_SOURCES =	\
 	node_type.cc		\
 	nodes.pb.cc
 
 include annotations/Rules.am
-include phases/Rules.am
 include util/Rules.am
+
+bin_PROGRAMS = makepp
+
+makepp_SOURCES =			\
+	$(libmakepp_a_SOURCES)		\
+	$(nodist_libmakepp_a_SOURCES)	\
+	main.cc
+
+include phases/Rules.am
+
 
 GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h node_cc.h visitor_t.h node_fwd.h visitor_cc.h nodes.pb.h
 BUILT_SOURCES += yylex.cc yyparse.cc $(GENFILES)
 EXTRA_DIST += yylex.h
-CLEANFILES += $(GENFILES) $(nodist_makepp_SOURCES)
+CLEANFILES += $(GENFILES) $(nodist_libmakepp_a_SOURCES)
 
 nodes.pb.h: nodes.pb.cc
 nodes.pb.cc: include/gen/nodes.proto

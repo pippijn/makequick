@@ -1,7 +1,11 @@
-check_PROGRAMS += inference_engine_t
-TESTS += inference_engine_t
+include Sources.am
 
-inference_engine_t_SOURCES =		\
-	src/node.cc			\
-	src/util/inference_engine.cc	\
-	inference_engine_t.cc
+$(SRCDIR)/Sources.am: $(wildcard $(SRCDIR)/*_t.cc) $(SRCDIR)/Rules.am
+	$(AM_V_GEN)(for i in $(SRCDIR)/*_t.cc; do		\
+		T=`echo $$i | sed -e 's|^$(SRCDIR)/||;s|\.cc$$||'`;	\
+		echo "check_PROGRAMS += $$T";			\
+		echo "TESTS += $$T";				\
+		echo "$${T}_SOURCES = $(CURDIR)/$$T.cc";	\
+		echo "$${T}_LDADD = libmakepp.a";		\
+		echo;						\
+	done) > $@

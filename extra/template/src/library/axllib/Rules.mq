@@ -1,4 +1,4 @@
-library axllib : aldor-user-library {
+library axllib < aldor-user-library {
 	sources {
 		src/axl_array.as
 		src/axl_axlcat.as

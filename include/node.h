@@ -38,10 +38,18 @@ namespace nodes
     static void store (std::ostream &os, node_ptr const &root, bool text = false);
     static node_ptr load (std::istream &is, bool text = false);
 
-    int refcnt;
-    int index;
-    int parent_index;
-    node_list *parent;
+    struct m
+    {
+      int refcnt;
+      int index;
+      int parent_index;
+      node_list *parent;
+    } m;
+
+    int refcnt () const { return m.refcnt; }
+    int index () const { return m.index; }
+    int parent_index () const { return m.parent_index; }
+    node_list *parent () const { return m.parent; }
 
     static std::vector<node *> nodes;
 
@@ -54,11 +62,11 @@ namespace nodes
   struct node_list
     : node
   {
-    static void clone_list (node_vec const &orig, node_vec &clone);
+    static node_ptr clone_list (node_list const &orig, node_list_ptr clone);
 
     node_list *add (node_ptr n);
+    node_list *set (size_t i, node_ptr n);
     size_t size () const;
-    node_ptr       &operator [] (size_t index);
     node_ptr const &operator [] (size_t index) const;
 
     node_list (location const &loc);
@@ -73,7 +81,7 @@ namespace nodes
   {
     generic_node (int type, location const &loc) : node_list (loc), type (type) { }
 
-    int type;
+    int const type;
   };
 
   template<typename Derived>
@@ -109,10 +117,7 @@ namespace nodes
 
     virtual node_ptr clone () const
     {
-      boost::intrusive_ptr<Derived> clone = new Derived;
-      clone->loc = loc;
-      clone_list (list, clone->list);
-      return clone;
+      return clone_list (*this, new Derived);
     }
   };
 
@@ -154,7 +159,7 @@ operator < (nodes::generic_node_ptr const &a, nodes::generic_node_ptr const &b)
     return true;
   if (!b)
     return false;
-  return a->index < b->index;
+  return a->index () < b->index ();
 }
 
 

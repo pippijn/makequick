@@ -9,7 +9,6 @@
 #include "rule_init.h"
 #include "sighandler.h"
 #include "util/local.h"
-#include "util/resume.h"
 #include "visitor.h"
 #include "ylcode.h"
 

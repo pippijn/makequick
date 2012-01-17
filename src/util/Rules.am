@@ -1,4 +1,4 @@
-makepp_SOURCES +=		\
+libmakepp_a_SOURCES +=		\
 	extract_string.cc	\
 	inference_engine.cc	\
 	regex_escape.cc		\

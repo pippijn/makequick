@@ -1,4 +1,4 @@
-library xmllib : aldor-user-library {
+library xmllib < aldor-user-library {
 	sources {
 		src/xml_base.as
 		src/xml_basiccats.as

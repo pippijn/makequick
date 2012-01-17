@@ -1,7 +1,7 @@
 # The libgmp check in configure generates a condition that can be used to
 # create optional components. A user can specify --without-gmp to explicitly
 # disable these components, even if libgmp exists on the system.
-library runtime if GMP {
+library runtime-gmp if GMP {
 	sources {
 		sources (runtime)
 		# Some sources from the import can be excluded from this source list.

@@ -1,4 +1,4 @@
-library extio : aldor-user-library {
+library extio < aldor-user-library {
 	sources {
 		src/cas/eio_casc.as
 		src/cas/eio_cast.as

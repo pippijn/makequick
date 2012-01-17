@@ -14,3 +14,8 @@ namespace nodes
     bool resume (node_ptr const &n);
   };
 }
+
+#define resume_list()								\
+  for (std::vector<node_ptr>::iterator it = n.list.begin (), et = n.list.end ();\
+       it != et; ++it)								\
+    resume (*it)
