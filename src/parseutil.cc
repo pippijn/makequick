@@ -12,17 +12,15 @@ parse (lexer &lex, error_log &errors)
 
 
 node_ptr
-parse_files (file_list const &files, error_log &errors, int init, bool alternative)
+parse_files (file_list const &files, error_log &errors)
 {
   file_lexer lex (files);
-  lex.init (init, alternative);
   return parse (lex, errors);
 }
 
 node_ptr
-parse_string (std::string const &s, error_log &errors, int init, bool alternative)
+parse_string (std::string const &s, error_log &errors)
 {
   string_lexer lex (s);
-  lex.init (init, alternative);
   return parse (lex, errors);
 }

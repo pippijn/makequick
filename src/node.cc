@@ -37,6 +37,7 @@ namespace nodes
   node::node (location const &loc)
     : loc (loc)
     , refcnt (0)
+    , parent (NULL)
   {
     index = nodes.size ();
     nodes.push_back (this);
@@ -123,6 +124,12 @@ namespace nodes
     if (!n)
       asm ("int $3");
 #endif
+    if (n)
+      {
+        assert (!n->parent);
+        n->parent = this;
+        n->parent_index = list.size ();
+      }
     list.push_back (n);
     return this;
   }
@@ -137,6 +144,21 @@ namespace nodes
   node_ptr const &node_list::operator [] (size_t index) const { return list.at (index); }
 
   node_list::node_list (location const &loc) : node (loc) { }
+
+  node_list::~node_list ()
+  {
+    size_t i = 0;
+    foreach (node_ptr const &n, list)
+      {
+        if (n)
+          {
+            assert (n->parent == this);
+            assert (n->parent_index == i);
+            n->parent = NULL;
+          }
+        ++i;
+      }
+  }
 
 #include "node_cc.h"
 }

@@ -1,5 +1,0 @@
-global {
-	{a b c d}.i: foo.c {
-		echo hi
-	}
-}

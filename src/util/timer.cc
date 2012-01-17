@@ -65,7 +65,7 @@ lex_timer::~lex_timer ()
                                0.0) / times.size ();
   double total = 0.0 + (prev - start);
 
-  printf ("%%%% lex/parse: %lu token%s - avg: %.3gsec (%.1f tokens/sec) %lu bytes (%.1f MiB/sec)\n",
+  printf ("%%%% lex/parse: %lu token%s - avg: %fsec (%.1f tokens/sec) %lu bytes (%.1f MiB/sec)\n",
           times.size (),
           times.size () == 1 ? "" : "s",
           average,

@@ -1,5 +1,0 @@
-program datagen {
-	sources {
-		moo.c bar.c cow.c a.c b.c
-	}
-}

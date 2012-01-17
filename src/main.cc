@@ -54,7 +54,7 @@ resolve (fs::path const &p)
 static void
 collect (fs::path const &path, std::vector<fs::path> &files)
 {
-  if (is_directory (path) && path.filename () != "_build")
+  if (is_directory (path) && path.filename ().c_str ()[0] != '.')
     for_each (fs::directory_iterator (path),
               fs::directory_iterator (),
               bind (collect, _1, boost::ref (files)));
@@ -170,12 +170,13 @@ try
 
   if (node_ptr doc = parse_files (*files, *errors))
     {
-      return 0;
       //load_store (doc);
 
       annotation_map annots;
       annots.put ("files", files.release ());
+#if 0
       annots.put ("output", new output_file ((path / ".project" / "makepp.am").c_str (), "configure.out"));
+#endif
       annots.put ("errors", errors.release ());
 
       error_log &errors = annots.get ("errors");
@@ -200,8 +201,9 @@ try
 
       if (to_run.empty ())
         {
-          phases::run ("print", doc, annots);
+          //phases::run ("print", doc, annots);
           //phases::run ("xml", doc, annots);
+          phases::run ("sx", doc, annots);
         }
     }
   else

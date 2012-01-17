@@ -1,29 +1,15 @@
 #include "node.h"
 
-#include "annotations/symbol_table.h"
+struct symbol_table;
 
 struct symbol_visitor
   : nodes::visitor
 {
-  void visit (nodes::t_target_definition &n);
-  void visit (nodes::t_program &n);
-  void visit (nodes::t_library &n);
-  void visit (nodes::t_template &n);
-  void visit (nodes::t_toplevel_declarations &n);
+  void visit (nodes::generic_node &n);
 
   symbol_table &symtab;
 
-  enum visit_state
-  {
-    S_NONE,
-    S_PROGRAM,
-    S_LIBRARY,
-    S_TEMPLATE,
-  } state;
+  nodes::node_type current_symtype;
 
-  symbol_visitor (symbol_table &symtab)
-    : symtab (symtab)
-    , state (S_NONE)
-  {
-  }
+  symbol_visitor (symbol_table &symtab);
 };

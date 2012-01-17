@@ -1,5 +1,0 @@
-program datagen {
-	sources {
-		*.c
-	}
-}

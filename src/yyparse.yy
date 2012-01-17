@@ -4,8 +4,8 @@
 %}
 
 %union {
-  nodes::node *node;
-  nodes::node_list *list;
+  nodes::node *base;
+  nodes::node_list *node;
   tokens::token *token;
 }
 
@@ -63,57 +63,56 @@ using namespace nodes;
 
 %token TK_EOF 0				"end of file"
 
-%token<token> KW_IF			"if"
-%token<token> KW_ALIGNOF		"alignof"
-%token<token> KW_ARG_ENABLE		"arg_enable"
-%token<token> KW_C_BIGENDIAN		"c_bigendian"
-%token<token> KW_C_CHARSET		"c_charset"
-%token<token> KW_C_ENUM_FWDECL		"c_enum_fwdecl"
-%token<token> KW_C_FLOAT_FORMAT		"c_float_format"
-%token<token> KW_C_LATE_EXPANSION	"c_late_expansion"
-%token<token> KW_C_STDINT_H		"c_stdint_h"
-%token<token> KW_C_STMT_EXPRS		"c_stmt_exprs"
-%token<token> KW_C_TOKEN_PASTE		"c_token_paste"
-%token<token> KW_C_TYPEOF		"c_typeof"
-%token<token> KW_CFLAGS			"cflags"
-%token<token> KW_CONFIG_HEADER		"config_header:"
-%token<token> KW_CONTACT		"contact:"
-%token<token> KW_DEFINE			"define"
-%token<token> KW_ERROR			"error"
-%token<token> KW_EXCLUDE		"exclude"
-%token<token> KW_EXTRA_DIST		"extra_dist"
-%token<token> KW_FUNCTIONS		"functions"
-%token<token> KW_GLOBAL			"global"
-%token<token> KW_HEADER			"header:"
-%token<token> KW_HEADERS		"headers"
-%token<token> KW_LIBRARY		"library"
-%token<token> KW_LINK			"link"
-%token<token> KW_NODIST_SOURCES		"nodist_sources"
-%token<token> KW_NOTFOUND		"notfound:"
-%token<token> KW_OPTIONS		"options"
-%token<token> KW_PROGRAM		"program"
-%token<token> KW_PROJECT		"project"
-%token<token> KW_SECTION		"section"
-%token<token> KW_SIZEOF			"sizeof"
-%token<token> KW_SOURCES		"sources"
-%token<token> KW_SYMBOL			"symbol:"
-%token<token> KW_TEMPLATE		"template"
-%token<token> KW_VERSION		"version:"
+%token KW_ALIGNOF			"alignof"
+%token KW_ARG_ENABLE			"arg_enable"
+%token KW_BUILT_SOURCES			"built_sources"
+%token KW_CONFIG_HEADER			"config_header:"
+%token KW_CONTACT			"contact:"
+%token KW_DATA				"data"
+%token KW_DEFINE			"define"
+%token KW_DIR				"dir"
+%token KW_ERROR				"error"
+%token KW_EXCLUDE			"exclude"
+%token KW_EXTERN			"extern"
+%token KW_EXTRA_DIST			"extra_dist"
+%token KW_FUNCTIONS			"functions"
+%token KW_GLOBAL			"global"
+%token KW_HEADER			"header:"
+%token KW_HEADERS			"headers"
+%token KW_IF				"if"
+%token KW_LIBRARY			"library"
+%token KW_LINK				"link"
+%token KW_LOG_COMPILER			"log_compiler"
+%token KW_TEST				"test"
+%token KW_MANS				"mans"
+%token KW_NODIST_SOURCES		"nodist_sources"
+%token KW_NOTFOUND			"notfound:"
+%token KW_OPTIONS			"options"
+%token KW_PROGRAM			"program"
+%token KW_PROJECT			"project"
+%token KW_SECTION			"section"
+%token KW_SIZEOF			"sizeof"
+%token KW_SOURCES			"sources"
+%token KW_SYMBOL			"symbol:"
+%token KW_TEMPLATE			"template"
+%token KW_VERSION			"version:"
 
-%token<token> TK_LSQBRACK		"["
-%token<token> TK_RSQBRACK		"]"
-%token<token> TK_LBRACK			"("
-%token<token> TK_RBRACK			")"
-%token<token> TK_LBRACE			"{"
-%token<token> TK_RBRACE			"}"
-%token<token> TK_DOT			"."
-%token<token> TK_DOLLAR			"$"
-%token<token> TK_COLON			":"
-%token<token> TK_SEMICOLON		";"
-%token<token> TK_EQUALS			"="
-%token<token> TK_ARROW			"->"
-%token<token> TK_DARROW			"=>"
-%token<token> TK_WHITESPACE		"whitespace"
+%token TK_LSQBRACK			"["
+%token TK_RSQBRACK			"]"
+%token TK_LBRACK			"("
+%token TK_RBRACK			")"
+%token TK_LBRACE			"{"
+%token TK_RBRACE			"}"
+%token TK_DOT				"."
+%token TK_DOLLAR			"$"
+%token TK_COLON				":"
+%token TK_LESS				"<"
+%token TK_SEMICOLON			";"
+%token TK_EQUALS			"="
+%token TK_PLUSEQ			"+="
+%token TK_ARROW				"->"
+%token TK_DARROW			"=>"
+%token TK_WHITESPACE			"whitespace"
 
 %token<token> TK_FN_QMARK		"?"
 %token<token> TK_FN_SLASH		"/"
@@ -128,6 +127,8 @@ using namespace nodes;
 %token<token> TK_EXT_LIB		"external library"
 %token<token> TK_INT_LIB		"internal library"
 
+%token<token> TK_AC_CHECK		"autoconf check"
+%token<token> TK_FLAGS_ID		"tool flags"
 %token<token> TK_CODE			"shell code"
 %token<token> TK_FILENAME		"filename"
 %token<token> TK_FLAG			"tool flag"
@@ -140,18 +141,18 @@ using namespace nodes;
 
 %token R_FILENAME
 
-%type<list> sources target_definition
-%type<list> program library template target_members toplevel_declarations toplevel_declaration
-%type<list> filename filenames.0 filenames.1 sources_member sources_members sources_braces extra_dist
-%type<list> rules rule rule_lines rule_line link link_body vardecl vardecl_body nodist_sources
-%type<list> inheritance.opt inheritance if.opt if destination.opt destination
-%type<list> tool_flags flags identifiers
-%type<list> check_alignof check_cflags check_functions check_headers check_library check_sizeof
-%type<list> define arg_enable arg_enable_options arg_enable_choices
-%type<list> arg_enable_choice arg_enable_content project project_members project_member
-%type<list> variable variable_content section section_members
-%type<node> filename_part section_member target_member code_frag
-%type<token> identifier filename_token link_item string.opt identifier.opt ac_checks
+%type<node> sources headers mans data target_definition
+%type<node> program library template target_members toplevel_declarations toplevel_declaration
+%type<node> single_filename filename filenames.0 filenames.1 sources_member sources_members sources_braces extra_dist
+%type<node> rule rule_lines rule_line link link_body vardecl vardecl_body nodist_sources built_sources
+%type<node> inheritance.opt inheritance if.opt if destination.opt destination
+%type<node> tool_flags flags flag identifiers global_or_target_member log_compiler log_compilers
+%type<node> check_alignof check_flags check_functions check_headers check_library check_sizeof
+%type<node> define arg_enable arg_enable_options arg_enable_choices
+%type<node> arg_enable_choice arg_enable_content project project_members project_member
+%type<node> variable variable_content section section_members
+%type<base> filename_part flag_part section_member target_member code_frag
+%type<token> filename_token link_item string.opt identifier.opt
 %type<token> arg_default check_library_notfound.opt
 
 %destructor { delete $$; } <*>
@@ -181,9 +182,13 @@ toplevel_declaration
 	| program
 	| library
 	| template
-	| extra_dist
-	| "global" "{" rules "}"
-		{ $$ = $3; delete $1; delete $2; delete $4; }
+	| headers
+	| mans
+	| data
+	| log_compiler
+	| "extern" sources_braces
+		{ $$ = make_node<n_extern> (@$, $2); }
+	| global_or_target_member
 	;
 
 
@@ -194,7 +199,7 @@ toplevel_declaration
  ****************************************************************************/
 project
 	: "project" TK_STRING "{" project_members "}"
-		{ $$ = make_node<n_project> (@$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_project> (@$, $2, $4); }
 	;
 
 project_members
@@ -206,17 +211,17 @@ project_members
 
 project_member
 	: "version:" TK_STRING
-		{ $$ = make_node<n_project_version> (@$, $2); delete $1; }
+		{ $$ = make_node<n_project_version> (@$, $2); }
 	| "contact:" TK_STRING
-		{ $$ = make_node<n_project_contact> (@$, $2); delete $1; }
-	| "config_header:" filename TK_WHITESPACE
-		{ $$ = make_node<n_project_header> (@$, $2); delete $1; delete $3; }
+		{ $$ = make_node<n_project_contact> (@$, $2); }
+	| "config_header:" single_filename
+		{ $$ = make_node<n_project_header> (@$, $2); }
 	| section
 	;
 
 section
 	: "section" string.opt "{" section_members "}"
-		{ $$ = make_node<n_section> (@$, $2, $4); delete $1; delete $3; delete $5; }
+		{ $$ = make_node<n_section> (@$, $2, $4); }
 	;
 
 section_members
@@ -227,13 +232,13 @@ section_members
 	;
 
 section_member
-	: ac_checks
+	: TK_AC_CHECK
 		{ $$ = make_node<n_ac_check> (@$, $1); }
 	| arg_enable
 		{ $$ = $1; }
 	| check_alignof
 		{ $$ = $1; }
-	| check_cflags
+	| check_flags
 		{ $$ = $1; }
 	| check_functions
 		{ $$ = $1; }
@@ -244,35 +249,23 @@ section_member
 	| check_sizeof
 		{ $$ = $1; }
 	| "error" TK_STRING
-		{ $$ = make_node<n_error> (@$, $2); delete $1; }
+		{ $$ = make_node<n_error> (@$, $2); }
 	| define
 		{ $$ = $1; }
 	| TK_STRING
 		{ $$ = $1; }
 	;
 
-ac_checks
-	: "c_bigendian"
-	| "c_typeof"
-	| "c_charset"
-	| "c_enum_fwdecl"
-	| "c_stmt_exprs"
-	| "c_late_expansion"
-	| "c_token_paste"
-	| "c_float_format"
-	| "c_stdint_h"
-	;
-
 arg_enable
-	: "arg_enable" identifier "=" arg_default "{"
+	: "arg_enable" TK_IDENTIFIER "=" arg_default "{"
 	    TK_STRING
 	    arg_enable_content
 	  "}"
-		{ $$ = make_node<n_arg_enable> (@$, $2, $4, $6, $7); delete $1; delete $3; delete $5; delete $8; }
+		{ $$ = make_node<n_arg_enable> (@$, $2, $4, $6, $7); }
 	;
 
 arg_default
-	: identifier
+	: TK_IDENTIFIER
 	| TK_STRING
 	;
 
@@ -284,7 +277,7 @@ arg_enable_content
 
 arg_enable_options
 	: "options" "{" arg_enable_choices "}"
-		{ $$ = $3; delete $1; delete $2; delete $4; }
+		{ $$ = $3; }
 	;
 
 arg_enable_choices
@@ -295,54 +288,54 @@ arg_enable_choices
 	;
 
 arg_enable_choice
-	: identifier "=>" "{" section_members "}"
-		{ $$ = make_node<n_arg_enable_choice> (@$, $1, $4); delete $2; delete $3; delete $5; }
+	: TK_IDENTIFIER "=>" "{" section_members "}"
+		{ $$ = make_node<n_arg_enable_choice> (@$, $1, $4); }
 	;
 
 check_alignof
 	: "alignof" "{" TK_STRING "}"
-		{ $$ = make_node<n_check_alignof> (@$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_alignof> (@$, $3); }
 	;
 
-check_cflags
-	: "cflags" identifier.opt flags_begin flags flags_end
-		{ $$ = make_node<n_check_cflags> (@$, $2, $4); delete $1; }
+check_flags
+	: TK_FLAGS_ID identifier.opt flags_begin flags flags_end
+		{ $$ = make_node<n_check_flags> (@$, $1, $2, $4); }
 	;
 
 check_functions
 	: "functions" "{" identifiers "}"
-		{ $$ = make_node<n_check_functions> (@$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_functions> (@$, $3); }
 	;
 
 check_headers
-	: "headers" "{" filenames.1 TK_WHITESPACE "}"
-		{ $$ = make_node<n_check_headers> (@$, $3); delete $1; delete $2; delete $4; delete $5; }
+	: "headers" sources_begin TK_WHITESPACE filenames.1 "}"
+		{ $$ = make_node<n_check_headers> (@$, $4); }
 	;
 
 check_library
-	: "library" identifier "{"
-	    "symbol:" identifier
-	    "header:" filename TK_WHITESPACE
+	: "library" TK_IDENTIFIER "{"
+	    "symbol:" TK_IDENTIFIER
+	    "header:" single_filename
 	    check_library_notfound.opt
 	    string.opt
 	  "}"
-		{ $$ = make_node<n_check_library> (@$, $2, $5, $7, $9, $10); delete $1; delete $3; delete $4; delete $6; delete $8; delete $11; }
+		{ $$ = make_node<n_check_library> (@$, $2, $5, $7, $8, $9); }
 	;
 
 check_library_notfound.opt
 	: { $$ = NULL; }
 	| "notfound:" TK_STRING
-		{ $$ = $2; delete $1; }
+		{ $$ = $2; }
 	;
 
 check_sizeof
 	: "sizeof" "{" TK_STRING "}"
-		{ $$ = make_node<n_check_sizeof> (@$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = make_node<n_check_sizeof> (@$, $3); }
 	;
 
 define
-	: "define" identifier "{" TK_STRING "}"
-		{ $$ = make_node<n_define> (@$, $2, $4); delete $1; delete $3; delete $5; }
+	: "define" TK_IDENTIFIER "{" TK_STRING "}"
+		{ $$ = make_node<n_define> (@$, $2, $4); }
 	;
 
 
@@ -353,22 +346,22 @@ define
  ****************************************************************************/
 program
 	: "program" target_definition
-		{ $$ = make_node<n_program> (@$, $2); delete $1; }
+		{ $$ = make_node<n_program> (@$, $2); }
 	;
 
 library
 	: "library" target_definition
-		{ $$ = make_node<n_library> (@$, $2); delete $1; }
+		{ $$ = make_node<n_library> (@$, $2); }
 	;
 
 template
 	: "template" target_definition
-		{ $$ = make_node<n_template> (@$, $2); delete $1; }
+		{ $$ = make_node<n_template> (@$, $2); }
 	;
 
 target_definition
-	: identifier if.opt inheritance.opt destination.opt "{" target_members "}"
-		{ $$ = make_node<n_target_definition> (@$, $1, $2, $3, $4, $6); delete $5; delete $7; }
+	: TK_IDENTIFIER inheritance.opt if.opt destination.opt "{" target_members "}"
+		{ $$ = make_node<n_target_definition> (@$, $1, $2, $3, $4, $6); }
 	;
 
 inheritance.opt
@@ -377,8 +370,8 @@ inheritance.opt
 	;
 
 inheritance
-	: ":" identifier
-		{ $$ = make_node<n_inheritance> (@$, $2); delete $1; }
+	: "<" TK_IDENTIFIER
+		{ $$ = make_node<n_inheritance> (@$, $2); }
 	;
 
 destination.opt
@@ -387,26 +380,35 @@ destination.opt
 	;
 
 destination
-	: "->" identifier
-		{ $$ = make_node<n_destination> (@$, $2); delete $1; }
+	: "->" TK_IDENTIFIER
+		{ $$ = make_node<n_destination> (@$, $2); }
 	;
 
 target_members
-	: target_member
-		{ $$ = make_node<n_target_members> (@$, $1); }
+	:
+		{ $$ = make_node<n_target_members> (@$); }
 	| target_members target_member
 		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 target_member
-	: sources		{ $$ = $1; }
-	| TK_STRING		{ $$ = $1; }
-	| nodist_sources	{ $$ = $1; }
-	| extra_dist		{ $$ = $1; }
-	| rule			{ $$ = $1; }
-	| link			{ $$ = $1; }
-	| vardecl		{ $$ = $1; }
-	| tool_flags		{ $$ = $1; }
+	: sources			{ $$ = $1; }
+	| TK_STRING			{ $$ = $1; }
+	| nodist_sources		{ $$ = $1; }
+	| link				{ $$ = $1; }
+	| global_or_target_member	{ $$ = $1; }
+	;
+
+global_or_target_member
+	: rule
+	| vardecl
+	| extra_dist
+	| tool_flags
+	| built_sources
+	| "dir" TK_IDENTIFIER "=" single_filename
+		{ $$ = make_node<n_dir> (@$, $2, $4); }
+	| "test" identifier.opt if.opt sources_braces
+		{ $$ = make_node<n_test> (@$, $2, $3, $4); }
 	;
 
 /****************************************************************************
@@ -416,30 +418,48 @@ target_member
  ****************************************************************************/
 sources
 	: "sources" if.opt sources_braces
-		{ $$ = make_node<n_sources> (@$, $2, $3); delete $1; }
+		{ $$ = make_node<n_sources> (@$, $2, $3); }
 	;
 
 nodist_sources
 	: "nodist_sources" if.opt sources_braces
-		{ $$ = make_node<n_nodist_sources> (@$, $2, $3); delete $1; }
+		{ $$ = make_node<n_nodist_sources> (@$, $2, $3); }
 	;
 
 extra_dist
 	: "extra_dist" if.opt sources_braces
-		{ $$ = make_node<n_extra_dist> (@$, $2, $3); delete $1; }
+		{ $$ = make_node<n_extra_dist> (@$, $2, $3); }
 	;
 
+
+headers
+	: "headers" if.opt destination.opt sources_braces
+		{ $$ = make_node<n_headers> (@$, $2, $3, $4); }
+	;
+
+built_sources
+	: "built_sources" sources_braces
+		{ $$ = make_node<n_built_sources> (@$, $2); }
+	;
+
+mans
+	: "mans" if.opt destination.opt sources_braces
+		{ $$ = make_node<n_mans> (@$, $2, $3, $4); }
+	;
+
+data
+	: "data" if.opt destination.opt sources_braces
+		{ $$ = make_node<n_data> (@$, $2, $3, $4); }
+	;
+
+
 sources_braces
-	: sources_begin sources_members TK_WHITESPACE sources_end
-		{ $$ = $2; delete $3; }
+	: sources_begin sources_members TK_WHITESPACE "}"
+		{ $$ = $2; }
 	;
 
 sources_begin
-	: "{" { self->lex.push_state (yy::FILENAME); delete $1; }
-	;
-
-sources_end
-	: "}" { self->lex.pop_state (); delete $1; }
+	: "{" { self->lex.push_state (yy::FILENAME); }
 	;
 
 sources_members
@@ -451,11 +471,11 @@ sources_members
 
 sources_member
 	: TK_WHITESPACE filename
-		{ $$ = $2; delete $1; }
-	| "sources" "(" identifier ")"
-		{ $$ = make_node<n_sourcesref> (@$, $3); delete $1; delete $2; delete $4; }
-	| "exclude" "{" sources_members "}"
-		{ $$ = make_node<n_exclude> (@$, $3); delete $1; delete $2; delete $4; }
+		{ $$ = $2; }
+	| TK_WHITESPACE "sources" "(" TK_IDENTIFIER ")"
+		{ $$ = make_node<n_sourcesref> (@$, $4); }
+	| TK_WHITESPACE "exclude" sources_braces
+		{ $$ = make_node<n_exclude> (@$, $3); }
 	;
 
 /****************************************************************************
@@ -464,23 +484,37 @@ sources_member
  *
  ****************************************************************************/
 tool_flags
-	: identifier if.opt flags_begin flags flags_end
+	: TK_FLAGS_ID if.opt flags_begin flags flags_end
 		{ $$ = make_node<n_tool_flags> (@$, $1, $2, $4); }
 	;
 
 flags_begin
-	: "{" { self->lex.push_state (yy::FLAGS); delete $1; }
+	: "{" { self->lex.push_state (yy::FLAGS); }
 	;
 
 flags_end
-	: "}" { self->lex.pop_state (); delete $1; }
+	: "}" { self->lex.pop_state (); }
 	;
 
 flags
-	:
+	: TK_WHITESPACE
 		{ $$ = make_node<n_flags> (@$); }
-	| flags TK_FLAG
+	| flags flag TK_WHITESPACE
 		{ ($$ = $1)->add ($2)->loc = @$; }
+	;
+
+flag
+	: flag_part
+		{ $$ = make_node<n_flag> (@$, $1); }
+	| flag flag_part
+		{ ($$ = $1)->add ($2)->loc = @$; }
+	;
+
+flag_part
+	: TK_FLAG
+		{ $$ = $1; }
+	| variable
+		{ $$ = $1; }
 	;
 
 /****************************************************************************
@@ -488,33 +522,18 @@ flags
  *	Custom rules
  *
  ****************************************************************************/
-rules
-	: rule
-		{ $$ = make_node<n_rules> (@$, $1); }
-	| rules rule
-		{ ($$ = $1)->add ($2)->loc = @$; }
-	;
-
 rule
-	: filenames.1 ":" filenames.0 rule_begin rule_lines rule_end
-		{ $$ = make_node<n_rule> (@$, $1, $3, $5); delete $2; }
+	: filenames.1 ":" filenames.0 "{" rule_lines "}"
+		{ $$ = make_node<n_rule> (@$, $1, $3, $5); }
 	| filenames.1 ":" filenames.0 ";"
-		{ $$ = make_node<n_rule> (@$, $1, $3,  0); delete $2; delete $4; }
-	;
-
-rule_begin
-	: "{" { self->lex.push_state (yy::RULE_CODE); delete $1; }
-	;
-
-rule_end
-	: "}" { self->lex.pop_state (); delete $1; }
+		{ $$ = make_node<n_rule> (@$, $1, $3,  0); }
 	;
 
 rule_lines
-	: rule_line TK_WHITESPACE
-		{ $$ = make_node<n_rule_lines> (@$, $1); delete $2; }
-	| rule_lines rule_line TK_WHITESPACE
-		{ ($$ = $1)->add ($2)->loc = @$; delete $3; }
+	: rule_line
+		{ $$ = make_node<n_rule_lines> (@$, $1); }
+	| rule_lines TK_WHITESPACE rule_line
+		{ ($$ = $1)->add ($3)->loc = @$; }
 	;
 
 rule_line
@@ -525,17 +544,34 @@ rule_line
 	;
 
 filenames.0
-	:
+	: TK_WHITESPACE
 		{ $$ = make_node<n_filenames> (@$); }
 	| filenames.0 filename TK_WHITESPACE
-		{ ($$ = $1)->add ($2)->loc = @$; $$->loc.file = $2->loc.file; delete $3; }
+		{ ($$ = $1)->add ($2)->loc = @$; $$->loc.file = $2->loc.file; }
 	;
 
 filenames.1
-	: filename
+	: filename TK_WHITESPACE
 		{ $$ = make_node<n_filenames> (@$, $1); }
-	| filenames.1 TK_WHITESPACE filename
-		{ ($$ = $1)->add ($3)->loc = @$; delete $2; }
+	| filenames.1 filename TK_WHITESPACE
+		{ ($$ = $1)->add ($2)->loc = @$; }
+	;
+
+/****************************************************************************
+ *
+ *	Test suite support
+ *
+ ****************************************************************************/
+log_compiler
+	: "log_compiler" "{" log_compilers "}"
+		{ $$ = $3; }
+	;
+
+log_compilers
+	: rule
+		{ $$ = make_node<n_log_compilers> (@$, $1); }
+	| log_compilers rule
+		{ ($$ = $1)->add ($2)->loc = @$; }
 	;
 
 /****************************************************************************
@@ -545,15 +581,15 @@ filenames.1
  ****************************************************************************/
 link
 	: "link" if.opt link_begin link_body link_end
-		{ $$ = make_node<n_link> (@$, $2, $4); delete $1; }
+		{ $$ = make_node<n_link> (@$, $2, $4); }
 	;
 
 link_begin
-	: "{" { self->lex.push_state (yy::LINK); delete $1; }
+	: "{" { self->lex.push_state (yy::LINK); }
 	;
 
 link_end
-	: "}" { self->lex.pop_state (); delete $1; }
+	: "}" { self->lex.pop_state (); }
 	;
 
 link_body
@@ -574,13 +610,10 @@ link_item
  *
  ****************************************************************************/
 vardecl
-	: identifier vardecl_begin vardecl_body TK_WHITESPACE
-		{ $$ = make_node<n_vardecl> (@$, $1, $3); self->lex.pop_state (); delete $4; }
-	;
-
-vardecl_begin
-	: "="
-		{ self->lex.push_state (yy::VARDECL); delete $1; }
+	: TK_IDENTIFIER "=" vardecl_body TK_WHITESPACE
+		{ $$ = make_node<n_vardecl> (@$, $1, $3); }
+	| TK_IDENTIFIER "+=" vardecl_body TK_WHITESPACE
+		{ $$ = make_node<n_varadd> (@$, $1, $3); }
 	;
 
 vardecl_body
@@ -601,8 +634,8 @@ if.opt
 	;
 
 if
-	: "if" identifier
-		{ $$ = make_node<n_if> (@$, $2); delete $1; }
+	: "if" TK_IDENTIFIER
+		{ $$ = make_node<n_if> (@$, $2); }
 	;
 
 /****************************************************************************
@@ -617,18 +650,27 @@ string.opt
 
 identifier.opt
 	: { $$ = NULL; }
-	| identifier
-	;
-
-identifier
-	: TK_IDENTIFIER
+	| TK_IDENTIFIER
 	;
 
 identifiers
-	: identifier
+	: TK_IDENTIFIER
 		{ $$ = make_node<n_identifiers> (@$, $1); }
-	| identifiers identifier
+	| identifiers TK_IDENTIFIER
 		{ ($$ = $1)->add ($2)->loc = @$; }
+	;
+
+single_filename
+	: single_filename_begin filename single_filename_end
+		{ $$ = $2; }
+	;
+
+single_filename_begin
+	: { self->lex.push_state (yy::FILENAME); self->lex.push_state (yy::INITWS); }
+	;
+
+single_filename_end
+	: TK_WHITESPACE { self->lex.pop_state (); }
 	;
 
 filename
@@ -641,8 +683,8 @@ filename
 filename_part
 	: filename_token
 		{ $$ = $1; }
-	| "$" variable
-		{ $$ = $2; delete $1; }
+	| variable
+		{ $$ = $1; }
 	;
 
 filename_token
@@ -662,28 +704,30 @@ filename_token
 code_frag
 	: TK_CODE
 		{ $$ = $1; }
-	| "$" variable
-		{ $$ = $2; delete $1; }
+	| variable
+		{ $$ = $1; }
 	;
 
 variable
-	: TK_SHORTVAR
-		{ $$ = make_node<n_shortvar> (@$, $1); }
-	| TK_INTEGER
-		{ $$ = make_node<n_intvar> (@$, $1); }
-	| "(" variable_content ")"
-		{ $$ = make_node<n_roundvar> (@$, $2); delete $1; delete $3; }
-	| "[" identifier "]"
-		{ $$ = make_node<n_squarevar> (@$, $2); delete $1; delete $3; }
+	: "$" TK_SHORTVAR
+		{ $$ = make_node<n_shortvar> (@$, $2); }
+	| "$" TK_INTEGER
+		{ $$ = make_node<n_intvar> (@$, $2); }
+	| "$" "(" variable_content ")"
+		{ $$ = $3; }
+	| "$" "[" TK_IDENTIFIER "]"
+		{ $$ = make_node<n_squarevar> (@$, $3); }
 	;
 
 variable_content
-	: identifier
-		{ $$ = make_node<n_variable_content> (@$, $1,  0,  0); }
-	| identifier "." identifier
-		{ $$ = make_node<n_variable_content> (@$, $1, $3,  0); delete $2; }
-	| identifier "." identifier ":" identifier
-		{ $$ = make_node<n_variable_content> (@$, $1, $3, $5); delete $2; delete $4; }
+	: TK_IDENTIFIER
+		{ $$ = make_node<n_roundvar> (@$, $1); }
+	| TK_IDENTIFIER variable
+		{ $$ = make_node<n_callvar> (@$, $1, $2); }
+	| TK_IDENTIFIER "." TK_IDENTIFIER
+		{ $$ = make_node<n_accessvar> (@$, $1, $3); }
+	| TK_IDENTIFIER "." TK_IDENTIFIER ":" TK_IDENTIFIER
+		{ $$ = make_node<n_filtervar> (@$, $1, $3, $5); }
 	;
 
 %%

@@ -40,6 +40,8 @@ namespace nodes
 
     int refcnt;
     int index;
+    int parent_index;
+    node_list *parent;
 
     static std::vector<node *> nodes;
 
@@ -60,6 +62,7 @@ namespace nodes
     node_ptr const &operator [] (size_t index) const;
 
     node_list (location const &loc);
+    ~node_list ();
 
     node_vec list;
   };
@@ -143,6 +146,17 @@ namespace nodes
     return &n->as<T> ();
   }
 }
+
+static inline bool
+operator < (nodes::generic_node_ptr const &a, nodes::generic_node_ptr const &b)
+{
+  if (!a)
+    return true;
+  if (!b)
+    return false;
+  return a->index < b->index;
+}
+
 
 namespace tokens
 {

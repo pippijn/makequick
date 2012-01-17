@@ -1,4 +1,0 @@
-global {
-	obj/%.o: inc/%.h src/%.c ;
-	obj/%.o: inc/%.h src/%.c obj/main.o ;
-}

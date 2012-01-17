@@ -2,47 +2,41 @@
 #include "util/resume.h"
 #include "util/local.h"
 
+#include "annotations/symbol_table.h"
+
 using namespace nodes;
 
-void
-symbol_visitor::visit (t_target_definition &n)
+symbol_visitor::symbol_visitor (symbol_table &symtab)
+  : symtab (symtab)
+  , current_symtype (n_document)
 {
-  //symtab.enter_scope (&n);
+}
+
+static bool
+has_scope (node_type type)
+{
+  switch (type)
+    {
+    case n_program:
+    case n_template:
+    case n_library:
+       return true;
+    default:
+       return false;
+    }
+}
+
+void
+symbol_visitor::visit (generic_node &n)
+{
+  local (current_symtype);
+  node_type const type = node_type (n.type);
+  if (has_scope (type))
+    {
+      current_symtype = type;
+      symtab.enter_scope (&n);
+    }
   resume_list ();
-  //symtab.leave_scope ();
-}
-
-void
-symbol_visitor::visit (t_program &n)
-{
-  local (state) = S_PROGRAM;
-  symtab.enter_scope (&n);
-  visitor::visit (n);
-  symtab.leave_scope ();
-}
-
-void
-symbol_visitor::visit (t_library &n)
-{
-  local (state) = S_LIBRARY;
-  symtab.enter_scope (&n);
-  visitor::visit (n);
-  symtab.leave_scope ();
-}
-
-void
-symbol_visitor::visit (t_template &n)
-{
-  local (state) = S_TEMPLATE;
-  symtab.enter_scope (&n);
-  visitor::visit (n);
-  symtab.leave_scope ();
-}
-
-void
-symbol_visitor::visit (t_toplevel_declarations &n)
-{
-  symtab.enter_scope (&n);
-  visitor::visit (n);
-  symtab.leave_scope ();
+  if (has_scope (type))
+    symtab.leave_scope ();
 }

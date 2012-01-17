@@ -1,216 +1,310 @@
 %{
 #include "lexer.h"
 #include "lexer/pimpl.h"
-
-static std::string
-move (std::string &s)
-{
-  std::string r = s;
-  s.clear ();
-  return r;
-}
-
-#define YY_USER_ACTION lloc (yylloc, yylineno, yycolumn, yytext, yyleng);
-
-#define Return(TOK)					\
-  return impl->make_token<TOK> (yylval, yylloc, yytext, yyleng)
-
-#define PUSH(STATE)	push_state (STATE)
-#define POP()		pop_state ()
-
-#define YY_DECL int lexer::lex (YYSTYPE *yylval_param, YYLTYPE *yylloc_param)
-
-#define BACKTRACK(N) do {		\
-  yycolumn -= yyleng - N;		\
-  impl->T.bytes -= yyleng - N;		\
-  yyless (N);				\
-} while (0)
+#include "lexer/util.h"
 %}
 
 %option prefix="yy"
 %option header-file="/tmp/yylex.h"
 %option bison-locations
 %option reentrant
-/*%option ecs full 8bit*/
+%option ecs full 8bit
 %option stack
 %option nounput noinput nounistd
 %option nodefault
 %option never-interactive
 
-%x VAR_INIT VAR_RBODY VAR_SQBODY
-%x RULE_INIT RULE_CODE RULE_LINE
-%x FILENAME RULE_FILENAME MULTIFILE SOURCES LINK VARDECL FLAGS
+%x INITWS
+%x VAR_INIT VAR_RBODY VAR_SQBODY TARGET_NAME
+%x RULE_INIT RULE_CODE RULE_LINES RULE_LINE
+%x VARDECL_INIT VARDECL_NAME VARDECL_CODE VARDECL VARDECL_LINE
+%x FILENAME RULE_FILENAME MULTIFILE IMPORT EXCLUDE LINK FLAGS
 
 /* Whitespace */
-SPACE	[ \t\v]
-WS	[ \t\v\n\r]
-NWS	[^ \t\v\n\r]
-FLAG	[^ \t\v\n\r{}]
+SPACE	[ \t\v\f]
+WS	[ \t\v\f\n\r]
+IGNORED	({WS}+|"#".*)+
+/* Tool flags */
+FLAG	[^ \t\v\f\n\r}#$]
 /* Filenames */
-FN	[^ \t\v\n\r{}/%*.:?$]
-FNSTART	([./*%{?]|"**"|"%%")
+FN	[^ \t\v\f\n\r{}%*:;?$#<>!]
 /* Identifiers */
 ID	[a-zA-Z_-][a-zA-Z0-9_-]*
+UC	[A-Z][A-Z0-9_]*
+/* Variable declaration */
+VDSTART	{UC}+{WS}*("+"?)"="
+SVAR	[@*<^+$]
 /* Rule start */
 MULTI	"{"[^}\n\r]+"}"
-RLSTART	(({FNSTART}|{MULTI})({NWS}|{MULTI})+|{ID})":"
+RLSTART	.+":".+[;{]
 /* Numbers */
 DIGIT	[0-9]
 INTEGER	{DIGIT}+
+/* Strings */
+SSTRING	'(\\.|[^\\'])+'
+DSTRING	\"(\\.|[^\\"])+\"
+BSTRING	`(\\.|[^\\`])+`
+STRING	({SSTRING}|{DSTRING}|{BSTRING})
 
 %%
-"if"					{ Return (KW_IF); }
-"alignof"				{ Return (KW_ALIGNOF); }
-"arg_enable"				{ Return (KW_ARG_ENABLE); }
-"c_bigendian"				{ Return (KW_C_BIGENDIAN); }
-"c_charset"				{ Return (KW_C_CHARSET); }
-"c_enum_fwdecl"				{ Return (KW_C_ENUM_FWDECL); }
-"c_float_format"			{ Return (KW_C_FLOAT_FORMAT); }
-"c_late_expansion"			{ Return (KW_C_LATE_EXPANSION); }
-"c_stdint_h"				{ Return (KW_C_STDINT_H); }
-"c_token_paste"				{ Return (KW_C_TOKEN_PASTE); }
-"c_typeof"				{ Return (KW_C_TYPEOF); }
-"cflags"				{ Return (KW_CFLAGS); }
-"config_header:"			{ Return (KW_CONFIG_HEADER); }
-"contact:"				{ Return (KW_CONTACT); }
-"define"				{ Return (KW_DEFINE); }
-"error"					{ Return (KW_ERROR); }
-"exclude"				{ Return (KW_EXCLUDE); }
-"extra_dist"				{ Return (KW_EXTRA_DIST); }
-"functions"				{ Return (KW_FUNCTIONS); }
-"global"				{ Return (KW_GLOBAL); }
-"header:"				{ Return (KW_HEADER); }
-"headers"				{ Return (KW_HEADERS); }
-"library"				{ Return (KW_LIBRARY); }
-"link"					{ Return (KW_LINK); }
-"nodist_sources"			{ Return (KW_NODIST_SOURCES); }
-"notfound:"				{ Return (KW_NOTFOUND); }
-"options"				{ Return (KW_OPTIONS); }
-"program"				{ Return (KW_PROGRAM); }
-"project"				{ Return (KW_PROJECT); }
-"section"				{ Return (KW_SECTION); }
-"sizeof"				{ Return (KW_SIZEOF); }
-"sources"				{ Return (KW_SOURCES); }
-"symbol:"				{ Return (KW_SYMBOL); }
-"template"				{ Return (KW_TEMPLATE); }
-"version:"				{ Return (KW_VERSION); }
+"c_bigendian"				{ RetToken (TK_AC_CHECK); }
+"c_charset"				{ RetToken (TK_AC_CHECK); }
+"c_enum_fwdecl"				{ RetToken (TK_AC_CHECK); }
+"c_float_format"			{ RetToken (TK_AC_CHECK); }
+"c_late_expansion"			{ RetToken (TK_AC_CHECK); }
+"c_stdint_h"				{ RetToken (TK_AC_CHECK); }
+"c_token_paste"				{ RetToken (TK_AC_CHECK); }
+"c_typeof"				{ RetToken (TK_AC_CHECK); }
+
+"alignof"				{ RetKeyword (KW_ALIGNOF); }
+"arg_enable"				{ RetKeyword (KW_ARG_ENABLE); }
+"built_sources"				{ RetKeyword (KW_BUILT_SOURCES); }
+"config_header:"			{ RetKeyword (KW_CONFIG_HEADER); }
+"contact:"				{ RetKeyword (KW_CONTACT); }
+"data"					{ RetKeyword (KW_DATA); }
+"define"				{ RetKeyword (KW_DEFINE); }
+"dir"					{ RetKeyword (KW_DIR); }
+"error"					{ RetKeyword (KW_ERROR); }
+"exclude"				{ RetKeyword (KW_EXCLUDE); }
+"extern"				{ RetKeyword (KW_EXTERN); }
+"extra_dist"				{ RetKeyword (KW_EXTRA_DIST); }
+"functions"				{ RetKeyword (KW_FUNCTIONS); }
+"global"				{ RetKeyword (KW_GLOBAL); }
+"header:"				{ RetKeyword (KW_HEADER); }
+"headers"				{ RetKeyword (KW_HEADERS); }
+"if"					{ RetKeyword (KW_IF); }
+"library"				{ RetKeyword (KW_LIBRARY); }
+"link"					{ RetKeyword (KW_LINK); }
+"test"					{ RetKeyword (KW_TEST); }
+"log_compiler"				{ RetKeyword (KW_LOG_COMPILER); }
+"mans"					{ RetKeyword (KW_MANS); }
+"nodist_sources"			{ RetKeyword (KW_NODIST_SOURCES); }
+"notfound:"				{ RetKeyword (KW_NOTFOUND); }
+"options"				{ RetKeyword (KW_OPTIONS); }
+"program"				{ PUSH (TARGET_NAME); RetKeyword (KW_PROGRAM); }
+"project"				{ RetKeyword (KW_PROJECT); }
+"section"				{ RetKeyword (KW_SECTION); }
+"sizeof"				{ RetKeyword (KW_SIZEOF); }
+"sources"				{ RetKeyword (KW_SOURCES); }
+"symbol:"				{ RetKeyword (KW_SYMBOL); }
+"template"				{ RetKeyword (KW_TEMPLATE); }
+"version:"				{ RetKeyword (KW_VERSION); }
+
+<INITWS>{
+	{WS}+				{ /* ignore initial whitespace */ }
+	.				{ POP (); BACKTRACK (0); }
+}
+
+<*>{
+	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
+}
+<VAR_INIT>{
+	{SVAR}				{ POP (); RetToken (TK_SHORTVAR); }
+	"("{SVAR}D")"			{ POP (); RetToken (TK_SHORTVAR); }
+	"("{SVAR}F")"			{ POP (); RetToken (TK_SHORTVAR); }
+	{INTEGER}			{ POP (); RetToken (TK_INTEGER); }
+	"("				{ SWITCH (VAR_RBODY); RetKeyword (TK_LBRACK); }
+	"["				{ SWITCH (VAR_SQBODY); RetKeyword (TK_LSQBRACK); }
+}
+<VAR_RBODY>{
+	{WS}+				{ }
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	"."				{ RetKeyword (TK_DOT); }
+	":"				{ RetKeyword (TK_COLON); }
+	")"				{ POP (); RetKeyword (TK_RBRACK); }
+}
+<VAR_SQBODY>{
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	"]"				{ POP (); RetKeyword (TK_RSQBRACK); }
+}
+
+<TARGET_NAME>{
+	{SPACE}+			{ }
+	{FN}+				{ POP (); RetToken (TK_IDENTIFIER); }
+}
+
 
 <INITIAL>{
-	{WS}+				{ }
-	/*{NWS}+{FNSTART}			{ PUSH (FILENAME); BACKTRACK (0); }*/
-	/*{FNSTART}{NWS}			{ PUSH (FILENAME); BACKTRACK (0); }*/
-	{NWS}+{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
-	{RLSTART}			{ PUSH (RULE_INIT); PUSH (FILENAME); BACKTRACK (0); }
-	{ID}				{ Return (TK_IDENTIFIER); }
-	"("				{ Return (TK_LBRACK); }
-	")"				{ Return (TK_RBRACK); }
-	"{"				{ Return (TK_LBRACE); }
-	"}"				{ Return (TK_RBRACE); }
-	"="				{ Return (TK_EQUALS); }
-	":"				{ Return (TK_COLON); }
-	"->"				{ Return (TK_ARROW); }
-	"=>"				{ Return (TK_DARROW); }
-	'(\\.|[^'])*'			{ Return (TK_STRING); }
-	`(\\.|[^`])*`			{ Return (TK_STRING); }
+	{WS}				{ }
+	{ID}"flags"			{ RetToken (TK_FLAGS_ID); }
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	^{SPACE}+{RLSTART}$		{ PUSH (RULE_INIT); PUSH (INITWS); BACKTRACK (0); }
+	^{RLSTART}$			{ PUSH (RULE_INIT); BACKTRACK (0); }
+	^{SPACE}*{VDSTART}.+$		{ PUSH (VARDECL); BACKTRACK (0); }
+	^{SPACE}*{VDSTART}$		{ PUSH (VARDECL_INIT); BACKTRACK (0); }
+	"("				{ RetKeyword (TK_LBRACK); }
+	")"				{ RetKeyword (TK_RBRACK); }
+	"{"				{ RetKeyword (TK_LBRACE); }
+	"}"				{ RetKeyword (TK_RBRACE); }
+	"="				{ RetKeyword (TK_EQUALS); }
+	"<"				{ RetKeyword (TK_LESS); }
+	"->"				{ RetKeyword (TK_ARROW); }
+	"=>"				{ RetKeyword (TK_DARROW); }
+
+	{STRING}			{ RetToken (TK_STRING); }
+}
+
+<RULE_INIT>{
+	{WS}+				{ RetKeyword (TK_WHITESPACE); }
+	":"				{ PushKeyword (TK_COLON); RetKeyword (TK_WHITESPACE); }
+	";"				{ POP (); RetKeyword (TK_SEMICOLON); }
+	"{\n"				{ SWITCH (RULE_CODE); RetKeyword (TK_LBRACE); }
+	.				{ PUSH (FILENAME); BACKTRACK (0); }
+}
+<RULE_CODE>{
+	^\t{1}				{ impl->indent = 1; SWITCH (RULE_LINES); BACKTRACK (0); }
+	^\t{2}				{ impl->indent = 2; SWITCH (RULE_LINES); BACKTRACK (0); }
+	^\t{3}				{ impl->indent = 3; SWITCH (RULE_LINES); BACKTRACK (0); }
+}
+<RULE_LINES>{
+	\t{1}[^\t]			{ if (impl->indent < 1) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (1); }
+	\t{2}[^\t]			{ if (impl->indent < 2) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (2); }
+	\t{3}[^\t]			{ if (impl->indent < 3) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (3); }
+	"}"				{ POP (); RetKeyword (TK_RBRACE); }
+}
+<RULE_LINE>{
+	[^\n\t$]+			{ RetToken (TK_CODE); }
+	\n\t{1}				{ if (impl->indent >= 1) { BACKTRACK (1); POP (); } }
+	\n\t{2}				{ if (impl->indent >= 2) { BACKTRACK (2); POP (); } }
+	\n\t{3}				{ if (impl->indent >= 3) { BACKTRACK (3); POP (); } }
+	\n"}"				{ if (impl->indent == 1) { BACKTRACK (1); POP (); } }
+	\n\t{1}"}"			{ if (impl->indent >= 2) { BACKTRACK (2); POP (); } }
+	\n\t{2}"}"			{ if (impl->indent >= 3) { BACKTRACK (3); POP (); } }
 }
 
 <FILENAME>{
-	{WS}+				{ Return (TK_WHITESPACE); }
-}
-<RULE_FILENAME>{
-	{WS}+				{ POP (); Return (TK_WHITESPACE); }
-}
-<FILENAME,RULE_FILENAME>{
-	{FN}+				{ Return (TK_FILENAME); }
-	"."				{ Return (TK_FN_DOT); }
-	"%"				{ Return (TK_FN_PERCENT); }
-	"%%"				{ Return (TK_FN_PERPERCENT); }
-	"?"				{ Return (TK_FN_QMARK); }
-	"/"				{ Return (TK_FN_SLASH); }
-	"*"				{ Return (TK_FN_STAR); }
-	"**"				{ Return (TK_FN_STARSTAR); }
-	"{"				{ PUSH (MULTIFILE); Return (TK_FN_LBRACE); }
-	":"				{ POP (); BACKTRACK (0); }
-	"}"				{ Return (TK_RBRACE); }
+	{IGNORED}			{ RetKeyword (TK_WHITESPACE); }
+	{FN}+				{ RetToken (TK_FILENAME); }
+	"%"				{ RetToken (TK_FN_PERCENT); }
+	"%%"				{ RetToken (TK_FN_PERPERCENT); }
+	"?"				{ RetToken (TK_FN_QMARK); }
+	"*"				{ RetToken (TK_FN_STAR); }
+	"**"				{ RetToken (TK_FN_STARSTAR); }
+	"{".				{ PUSH (MULTIFILE); BACKTRACK (1); RetToken (TK_FN_LBRACE); }
+	"sources"{SPACE}*"("		{ PUSH (IMPORT); BACKTRACK (0); }
+	"exclude"{SPACE}*"{"		{ PUSH (EXCLUDE); BACKTRACK (0); }
+	.				{ POP (); BACKTRACK (0); }
 }
 <MULTIFILE>{
+	{SPACE}+			{ }
+	{FN}+				{ RetToken (TK_FILENAME); }
+	"}"				{ POP (); RetToken (TK_FN_RBRACE); }
+}
+
+<IMPORT>{
+	{SPACE}				{ }
+	"sources"			{ RetKeyword (KW_SOURCES); }
+	"("				{ RetKeyword (TK_LBRACK); }
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	")"				{ POP (); RetKeyword (TK_RBRACK); }
+}
+<EXCLUDE>{
+	{SPACE}				{ }
+	"exclude"			{ RetKeyword (KW_EXCLUDE); }
+	"{"				{ RetKeyword (TK_LBRACE); }
+	"}"				{ POP (); RetKeyword (TK_RBRACE); }
+}
+
+<FLAGS>{
+	{IGNORED}			{ RetKeyword (TK_WHITESPACE); }
+	{FLAG}+				{ RetToken (TK_FLAG); }
+	"}"				{ RetKeyword (TK_RBRACE); }
+}
+
+<VARDECL>{
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	{SPACE}+			{ }
+	"="				{ SWITCH (VARDECL_LINE); RetKeyword (TK_EQUALS); }
+	"+="				{ SWITCH (VARDECL_LINE); RetKeyword (TK_PLUSEQ); }
+}
+<VARDECL_LINE>{
+	[^\n$]+				{ RetToken (TK_CODE); }
+	\n				{ POP (); RetKeyword (TK_WHITESPACE); }
+}
+
+<VARDECL_INIT>{
+	{SPACE}*[A-Z]			{ impl->indent = yyleng; SWITCH (VARDECL_NAME); BACKTRACK (yyleng - 1); }
+}
+<VARDECL_NAME>{
+	{ID}				{ RetToken (TK_IDENTIFIER); }
+	{SPACE}*"="			{ RetKeyword (TK_EQUALS); }
+	\n\t				{ SWITCH (VARDECL_CODE); BACKTRACK (0); }
+}
+<VARDECL_CODE>{
+	\n\t*				{ if (yyleng - 1 < impl->indent) { POP (); BACKTRACK (0); RetKeyword (TK_WHITESPACE); } }
+	.+				{ RetToken (TK_CODE); }
+}
+
+<LINK>{
 	{WS}+				{ }
-	{FN}+				{ Return (TK_FILENAME); }
-	"}"				{ POP (); Return (TK_FN_RBRACE); }
+	-l{ID}				{ RetToken (TK_EXT_LIB); }
+	{ID}				{ RetToken (TK_INT_LIB); }
+	"}"				{ RetKeyword (TK_RBRACE); }
+}
+
+
+ /*
+<FILENAME>{
+	{WS}+				{ RetKeyword (TK_WHITESPACE); }
+}
+<RULE_FILENAME>{
+	{WS}+				{ POP (); RetKeyword (TK_WHITESPACE); }
+}
+<FILENAME,RULE_FILENAME>{
+	{FN}+				{ RetToken (TK_FILENAME); }
+	"."				{ RetToken (TK_FN_DOT); }
+	"%"				{ RetToken (TK_FN_PERCENT); }
+	"%%"				{ RetToken (TK_FN_PERPERCENT); }
+	"?"				{ RetToken (TK_FN_QMARK); }
+	"/"				{ RetToken (TK_FN_SLASH); }
+	"*"				{ RetToken (TK_FN_STAR); }
+	"**"				{ RetToken (TK_FN_STARSTAR); }
+	"{"				{ PUSH (MULTIFILE); RetToken (TK_FN_LBRACE); }
+	":"				{ POP (); BACKTRACK (0); }
+	"}"				{ RetToken (TK_RBRACE); }
 }
 
 <RULE_INIT>{
 	{WS}+				{ }
-	":"				{ Return (TK_COLON); }
-	";"				{ POP (); Return (TK_SEMICOLON); }
+	":"				{ RetKeyword (TK_COLON); }
+	";"				{ POP (); RetKeyword (TK_SEMICOLON); }
 	"{"				{ POP (); BACKTRACK (0); }
 	{NWS}				{ PUSH (RULE_FILENAME); BACKTRACK (0); }
 }
 
 <RULE_CODE>{
 	\n				{ }
-	"}"				{ Return (TK_RBRACE); }
+	"}"				{ RetKeyword (TK_RBRACE); }
 	^\t{2}				{ PUSH (RULE_LINE); }
 }
 
 <RULE_LINE>{
 	\n				{ }
-	^\t{3}				{ impl->text = "\n         "; Return (TK_CODE); }
-	^\t{2}				{ Return (TK_WHITESPACE); }
-	^\t{1}"}"			{ POP (); BACKTRACK (1); Return (TK_WHITESPACE); }
-	[^\n\t$]+			{ Return (TK_CODE); }
+	^\t{3}				{ impl->text = "\n         "; RetToken (TK_CODE); }
+	^\t{2}				{ RetKeyword (TK_WHITESPACE); }
+	^\t{1}"}"			{ POP (); BACKTRACK (1); RetKeyword (TK_WHITESPACE); }
+	[^\n\t$]+			{ RetToken (TK_CODE); }
 }
 
 <FILENAME,RULE_FILENAME,MULTIFILE,RULE_LINE>{
-	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
-}
-
-<VAR_INIT>{
-	[@*<^+$]			{ POP (); Return (TK_SHORTVAR); }
-	"("[@<*]D")"			{ POP (); Return (TK_SHORTVAR); }
-	"("[@<*]F")"			{ POP (); Return (TK_SHORTVAR); }
-	{INTEGER}			{ POP (); Return (TK_INTEGER); }
-	"("				{ BEGIN (VAR_RBODY); Return (TK_LBRACK); }
-	"["				{ BEGIN (VAR_SQBODY); Return (TK_LSQBRACK); }
-}
-<VAR_RBODY>{
-	{WS}+				{ }
-	{ID}				{ Return (TK_IDENTIFIER); }
-	"."				{ Return (TK_DOT); }
-	":"				{ Return (TK_COLON); }
-	")"				{ POP (); Return (TK_RBRACK); }
-}
-<VAR_SQBODY>{
-	{ID}				{ Return (TK_IDENTIFIER); }
-	"]"				{ POP (); Return (TK_RSQBRACK); }
-}
-
-<LINK>{
-	{WS}+				{ }
-	-l{ID}				{ Return (TK_EXT_LIB); }
-	{ID}				{ Return (TK_INT_LIB); }
-	"}"				{ Return (TK_RBRACE); }
+	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
 }
 
 <VARDECL>{
 	\n				{ }
 	^\t{2}				{ }
-	^\t{1}				{ Return (TK_WHITESPACE); }
-	^{NWS}				{ BACKTRACK (0); Return (TK_WHITESPACE); }
-	[^\n\t$]+			{ Return (TK_CODE); }
-	"$"				{ PUSH (VAR_INIT); Return (TK_DOLLAR); }
+	^\t{1}				{ RetKeyword (TK_WHITESPACE); }
+	^{NWS}				{ BACKTRACK (0); RetKeyword (TK_WHITESPACE); }
+	[^\n\t$]+			{ RetToken (TK_CODE); }
+	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
 }
 
-<FLAGS>{
-	{WS}+				{ }
-	{FLAG}+				{ Return (TK_FLAG); }
-	"}"				{ Return (TK_RBRACE); }
-}
+ */
 
 
 <*>"#".*				{ }
 
-<*>(.|\n)				{ Return (TK_ERROR); }
+<*>(.|\n)				{ RetToken (TK_ERROR); }
 %%
 
 #define SELF static_cast<lexer *> (yyget_extra (yyscanner))
@@ -228,40 +322,33 @@ lexer::state () const
   return YY_START;
 }
 
+#define STATE_VERBOSE 0
+
 void
 lexer::push_state (int state)
 {
-#if LEXER_VERBOSE
-  printf ("PUSH (%s)\n", STRSTATE (state));
+#if STATE_VERBOSE
+  printf ("PUSH (%s -> %s)\n", STRSTATE (this->state ()), STRSTATE (state));
 #endif
   yy_push_state (state, yyscanner);
 }
 
 void
-lexer::pop_state ()
+lexer::switch_state (int state)
 {
-#if LEXER_VERBOSE
-  printf ("POP (%s)\n", STRSTATE (state ()));
+  yyguts_t *yyg = (yyguts_t *)yyscanner;
+#if STATE_VERBOSE
+  printf ("SWITCH (%s -> %s)\n", STRSTATE (this->state ()), STRSTATE (state));
 #endif
-  yy_pop_state (yyscanner);
+  BEGIN (state);
 }
 
-template<short Tok>
-int
-lexer::pimpl::make_token (YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
+void
+lexer::pop_state ()
 {
-  if (!this->text.empty ())
-    lval->token = new tokens::token (*lloc, Tok, move (this->text));
-  else
-    lval->token = new tokens::token (*lloc, Tok, text, leng);
-#if LEXER_VERBOSE
-  printf ("[%d:%d-%d:%d]: %s <<%s>>\n",
-          lloc->first_line,
-          lloc->first_column,
-          lloc->last_line,
-          lloc->last_column,
-	  tokname (Tok),
-          text);
+  int state = this->state ();
+  yy_pop_state (yyscanner);
+#if STATE_VERBOSE
+  printf ("POP (%s -> %s)\n", STRSTATE (state), STRSTATE (this->state ()));
 #endif
-  return Tok;
 }

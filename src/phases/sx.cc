@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-struct xml
+struct sx
   : visitor
 {
   virtual void visit (token &n);
@@ -12,10 +12,11 @@ struct xml
 
   int in_multifile;
 
-  xml (annotation_map &annots) : in_multifile (0) { }
+  sx (annotation_map &annots) : in_multifile (0) { }
+  ~sx () { puts (""); }
 };
 
-static phase<xml> thisphase ("xml", noauto);
+static phase<sx> thisphase ("sx", noauto);
 
 
 static int indent;
@@ -37,6 +38,12 @@ escape (std::string const &s)
   return x;
 }
 
+static std::string
+sxname (char const *s)
+{
+  return '|' + std::string (s + 1, strlen (s) - 2) + '|';
+}
+
 #define CYAN "\e[0;36m"
 #define GREEN "\e[0;32m"
 #define WHITE "\e[1;37m"
@@ -44,37 +51,32 @@ escape (std::string const &s)
 #define R "\e[0m"
 
 void
-xml::visit (token &n)
+sx::visit (token &n)
 {
-  printf ("%*s%s", indent, "", tokname (n.tok));
+  printf ("\n%*s(%s", indent, "", sxname (tokname (n.tok)).c_str ());
   if (n.loc.first_line)
-    printf ("["YELLOW"%d:%d"R"-"YELLOW"%d:%d"R"]",
+    printf (" (loc "YELLOW"%d:%d"R" "YELLOW"%d:%d"R")",
             n.loc.first_line, n.loc.first_column,
             n.loc.last_line, n.loc.last_column);
-#if 0
-  printf (": "WHITE"\"%s\""R"\n", escape (n.string).c_str ());
-#else
-  printf (": "WHITE"<<%s>>"R"\n", n.string.c_str ());
-#endif
+  printf (" \""WHITE"%s"R"\")", escape (n.string).c_str ());
 }
 
 void 
-xml::visit (generic_node &n)
+sx::visit (generic_node &n)
 {
-  printf ("%*s<"CYAN"%s"R, indent, "", node_type_name[n.type]);
+  printf ("\n%*s("CYAN"%s"R, indent, "", node_type_name[n.type]);
   if (n.loc.first_line)
-    printf (" s='"YELLOW"%d:%d"R"' e='"YELLOW"%d:%d"R"'",
+    printf (" (loc "YELLOW"%d:%d"R" "YELLOW"%d:%d"R")",
             n.loc.first_line, n.loc.first_column,
             n.loc.last_line, n.loc.last_column);
   else
-    printf (" "GREEN"generated='true'"R);
-  printf (">\n");
+    printf (" (loc "GREEN"generated"R")");
   indent += 2;
   foreach (node_ptr const &p, n.list)
     if (p)
       p->accept (*this);
     else
-      printf ("%*s<"CYAN"%s"R"/>\n", indent, "", "nil");
+      printf ("\n%*s"CYAN"#NIL"R"", indent, "");
   indent -= 2;
-  printf ("%*s</"CYAN"%s"R">\n", indent, "", node_type_name[n.type]);
+  printf (")");
 }

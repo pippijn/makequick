@@ -8,29 +8,38 @@ use Dir::Self;
 
 my $nodes = do (__DIR__ . "/nodes.pm");
 
-for my $node (keys %$nodes) {
-   my ($params, $args, $accessors);
-   my $i = 0;
-   for (@{ $nodes->{$node} }) {
-      if ($_ eq '*') {
-         $params = "";
-         $args = "";
-         $accessors = "";
-      } elsif ($_ eq '+') {
-         $params = ", node_ptr const &e0";
-         $args = ", e0";
-         $accessors = "";
-      } else {
-         $params .= ", node_ptr const &$_";
-         $args .= ", $_";
-         $accessors .= "\n  node_ptr const &$_ () const { return (*this)[$i]; }";
-         $accessors .= "\n  void $_ (node_ptr const &n) { (*this)[$i] = n; }";
+sub gen (&) {
+   my $sub = shift;
+   for my $node (keys %$nodes) {
+      my ($params, $args, $accessors);
+      my $i = 0;
+      for (@{ $nodes->{$node} }) {
+         if ($_ eq '*') {
+            $params = "";
+            $args = "";
+            $accessors = "";
+         } elsif ($_ eq '+') {
+            $params = ", node_ptr const &e0";
+            $args = ", e0";
+            $accessors = "";
+         } else {
+            $params .= ", node_ptr const &$_";
+            $args .= ", $_";
+            $accessors .= "\n  node_ptr const &$_ () const { return (*this)[$i]; }";
+            $accessors .= "\n  void $_ (node_ptr const &n) { (*this)[$i] = n; }";
+         }
+         ++$i;
       }
-      ++$i;
-   }
 
-   my ($num) = $node =~ /_([01])$/;
-   $node =~ s/_[01]$//;
+      my ($num) = $node =~ /_([01])$/;
+      $node =~ s/_[01]$//;
+
+      $sub->($num, $node, $params, $args, $accessors);
+   }
+}
+
+gen {
+   my ($num, $node, $params, $args, $accessors) = @_;
 
    print <<EOF unless $num;
 struct t_$node
@@ -43,6 +52,10 @@ struct t_$node
 };
 
 EOF
+};
+
+gen {
+   my ($num, $node, $params, $args, $accessors) = @_;
 
    print <<EOF;
 template<>
@@ -55,4 +68,4 @@ EOF
    } else {
       print "  return new t_$node (loc$args);\n}\n\n";
    }
-}
+};

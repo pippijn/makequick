@@ -285,14 +285,6 @@ print::visit (t_library &n)
 }
 
 void
-print::visit (t_rules &n)
-{
-  fprintf (fh, "global {\n");
-  visitor::visit (n);
-  fprintf (fh, "}\n");
-}
-
-void
 print::visit (t_arg_enable_choice &n)
 {
   puts (__PRETTY_FUNCTION__);

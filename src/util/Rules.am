@@ -1,5 +1,4 @@
 makepp_SOURCES +=		\
-	create_file_list.cc	\
 	extract_string.cc	\
 	inference_engine.cc	\
 	regex_escape.cc		\

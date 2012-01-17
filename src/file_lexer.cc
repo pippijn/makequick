@@ -38,7 +38,6 @@ file_lexer::close_file ()
 static bool
 is_rule_file (fs::path const &file)
 {
-  std::cout << file << "\n";
   return file.extension () == ".mq";
 }
 
@@ -49,13 +48,13 @@ file_lexer::wrap ()
     {
       std::string msg = "end of file ";
       msg += strstate (state ());
-      yyerror (impl->loc, 0, msg.c_str ());
+      yyerror (&current_location (), 0, msg.c_str ());
     }
 
   if (close_file ())
     yyset_lineno (1, yyscanner);
 
-  while (!is_rule_file (*cur))
+  while (cur != files.end && !is_rule_file (*cur))
     ++cur;
 
   if (cur == files.end)

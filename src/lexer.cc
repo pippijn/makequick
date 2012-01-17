@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "lexer/pimpl.h"
+#include "lexer/util.h"
 #include "rule_init.h"
 #include "yystate.h"
 
@@ -14,20 +15,28 @@ lexer::STRSTATE (int state)
 {
   switch (state)
     {
-    case yy::INITIAL    : return "INITIAL";
-    case yy::VAR_INIT   : return "VAR_INIT";
-    case yy::VAR_RBODY  : return "VAR_RBODY";
-    case yy::VAR_SQBODY : return "VAR_SQBODY";
-    case yy::RULE_INIT  : return "RULE_INIT";
-    case yy::RULE_CODE  : return "RULE_CODE";
-    case yy::RULE_LINE  : return "RULE_LINE";
-    case yy::FILENAME   : return "FILENAME";
-    case yy::MULTIFILE  : return "MULTIFILE";
-    case yy::SOURCES    : return "SOURCES";
-    case yy::LINK       : return "LINK";
-    case yy::VARDECL    : return "VARDECL";
-    case yy::FLAGS      : return "FLAGS";
-    default             : return "<unknown>";
+    case yy::INITIAL     : return "INITIAL";
+    case yy::INITWS      : return "INITWS";
+    case yy::EXCLUDE     : return "EXCLUDE";
+    case yy::FILENAME    : return "FILENAME";
+    case yy::FLAGS       : return "FLAGS";
+    case yy::IMPORT      : return "IMPORT";
+    case yy::LINK        : return "LINK";
+    case yy::MULTIFILE   : return "MULTIFILE";
+    case yy::RULE_CODE   : return "RULE_CODE";
+    case yy::RULE_INIT   : return "RULE_INIT";
+    case yy::RULE_LINE   : return "RULE_LINE";
+    case yy::RULE_LINES  : return "RULE_LINES";
+    case yy::TARGET_NAME : return "TARGET_NAME";
+    case yy::VARDECL_CODE: return "VARDECL_CODE";
+    case yy::VARDECL_INIT: return "VARDECL_INIT";
+    case yy::VARDECL_LINE: return "VARDECL_LINE";
+    case yy::VARDECL_NAME: return "VARDECL_NAME";
+    case yy::VARDECL     : return "VARDECL";
+    case yy::VAR_INIT    : return "VAR_INIT";
+    case yy::VAR_RBODY   : return "VAR_RBODY";
+    case yy::VAR_SQBODY  : return "VAR_SQBODY";
+    default              : return "<unknown>";
     }
 }
 
@@ -36,20 +45,28 @@ lexer::strstate (int state)
 {
   switch (state)
     {
-    case yy::INITIAL    : return "in initial state";
-    case yy::VAR_INIT   : return "after $";
-    case yy::VAR_RBODY  : return "in variable body";
-    case yy::VAR_SQBODY : return "in gvar body";
-    case yy::RULE_INIT  : return "in rule declaration";
-    case yy::RULE_CODE  : return "in rule code";
-    case yy::RULE_LINE  : return "in rule line";
-    case yy::FILENAME   : return "in filename";
-    case yy::MULTIFILE  : return "in multi-rule wildcard";
-    case yy::SOURCES    : return "in sources block";
-    case yy::LINK       : return "in link section";
-    case yy::VARDECL    : return "in variable declaration";
-    case yy::FLAGS      : return "in tool flags";
-    default             : return "<unknown>";
+    case yy::INITIAL     : return "in initial state";
+    case yy::INITWS      : return "in whitespace before rule";
+    case yy::EXCLUDE     : return "in sources exclude";
+    case yy::FILENAME    : return "in filename";
+    case yy::FLAGS       : return "in tool flags";
+    case yy::IMPORT      : return "in sources import";
+    case yy::LINK        : return "in link section";
+    case yy::MULTIFILE   : return "in multi-rule wildcard";
+    case yy::RULE_CODE   : return "in rule code";
+    case yy::RULE_INIT   : return "in rule declaration";
+    case yy::RULE_LINE   : return "in rule line continuation";
+    case yy::RULE_LINES  : return "in rule line";
+    case yy::TARGET_NAME : return "target name";
+    case yy::VARDECL_CODE: return "in variable declaration value";
+    case yy::VARDECL_INIT: return "in whitespace before variable declaration";
+    case yy::VARDECL_LINE: return "in single line variable declaration value";
+    case yy::VARDECL_NAME: return "in variable declaration name";
+    case yy::VARDECL     : return "in single line variable declaration name";
+    case yy::VAR_INIT    : return "after $";
+    case yy::VAR_RBODY   : return "in variable body";
+    case yy::VAR_SQBODY  : return "in gvar body";
+    default              : return "<unknown>";
     }
 }
 
@@ -66,47 +83,14 @@ lexer::~lexer ()
   yylex_destroy (yyscanner);
 }
 
-void
-lexer::init (int init, bool alternative)
-{
-  impl->init = init;
-  impl->alternative = alternative;
-}
-
-int
-lexer::INIT (int init, bool alternative)
-{
-  switch (init)
-    {
-    case r_filename:
-      push_state (yy::FILENAME);
-      if (alternative)
-        push_state (yy::MULTIFILE);
-      return R_FILENAME;
-    }
-  throw std::invalid_argument ("invalid rule init");
-}
-
 int
 lexer::next (YYSTYPE *yylval, YYLTYPE *yylloc)
 {
-  if (impl->init)
-    {
-      int init = 0;
-      std::swap (init, impl->init);
-      
-      bool alternative = false;
-      std::swap (alternative, impl->alternative);
+  int tok = impl->get_deferred (yylval, yylloc);
+  if (tok == 0)
+    tok = lex (yylval, yylloc);
 
-      return INIT (init, alternative);
-    }
-  int tok = lex (yylval, yylloc);
-#if LEXER_VERBOSE
-  if (tok)
-    printf ("%-16s: \"%s\"\n", tokname (tok), yylval->token->string.c_str ());
-#endif
-
-  impl->T.next ();
+  impl->profiler.next ();
 
   return tok;
 }
@@ -140,5 +124,87 @@ lexer::lloc (YYLTYPE *yylloc, int &lineno, int &column, char const *text, int le
   yylloc->last_column = column;
 
   impl->loc = yylloc;
-  impl->T.bytes += leng;
+  impl->profiler.bytes += leng;
+}
+
+YYLTYPE const &
+lexer::current_location () const
+{
+  return *impl->loc;
+}
+
+
+int
+lexer::pimpl::get_deferred (YYSTYPE *lval, YYLTYPE *lloc)
+{
+  if (deferred.empty ())
+    return 0;
+
+  deferred_token const &token = deferred.back ();
+  int tok = token.token;
+  lval->token = token.text.empty () ? NULL : new tokens::token (token.lloc, token.token, token.text);
+  *lloc = token.lloc;
+  deferred.pop_back ();
+
+  return tok;
+}
+
+
+#define LEXER_VERBOSE 0
+
+void
+lexer::pimpl::verbose (int tok, char const *type, YYLTYPE const *lloc, char const *text, int leng)
+{
+#if LEXER_VERBOSE
+  printf ("[%d:%d-%d:%d]: %s <<%s>> (%s)\n",
+          lloc->first_line,
+          lloc->first_column,
+          lloc->last_line,
+          lloc->last_column,
+	  tokname (tok),
+          escaped (text, leng).c_str (),
+          type);
+#endif
+}
+
+
+void
+lexer::pimpl::push_keyword (int tok, YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
+{
+  verbose (tok, "deferred keyword", lloc, text, leng);
+
+  assert (this->text.empty ());
+  deferred.push_back (deferred_token (tok, *lloc));
+}
+
+int
+lexer::pimpl::make_keyword (int tok, YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
+{
+  verbose (tok, "immediate keyword", lloc, text, leng);
+
+  assert (this->text.empty ());
+  lval->token = NULL;
+  return tok;
+}
+
+
+void
+lexer::pimpl::push_token (int tok, YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
+{
+  verbose (tok, "deferred token", lloc, text, leng);
+
+  deferred.push_back (deferred_token (tok, *lloc, text, leng));
+}
+
+int
+lexer::pimpl::make_token (int tok, YYSTYPE *lval, YYLTYPE const *lloc, char const *text, int leng)
+{
+  std::string token_text = this->text.empty ()
+                         ? std::string (text, leng)
+			 : move (this->text);
+  verbose (tok, "immediate token", lloc, token_text.data (), token_text.length ());
+
+  assert (!token_text.empty ());
+  lval->token = new tokens::token (*lloc, tok, token_text);
+  return tok;
 }
