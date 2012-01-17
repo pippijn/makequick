@@ -81,7 +81,8 @@ struct inference
   }
 };
 
-static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars", "multirule");
+//static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars", "multirule");
+static phase<inference> thisphase ("inference", noauto);
 
 
 static std::string
