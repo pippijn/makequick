@@ -236,6 +236,20 @@ public:
                       inferred.files.end ());
       }
 
+    // TODO: this is *super* slow, optimise it.
+    std::vector<rule const *> garbage;
+    foreach (rule const &r1, inferred.rules)
+      foreach (rule const &r2, inferred.rules)
+        if (&r1 != &r2 && r1 == r2)
+          garbage.push_back (&std::min (r1, r2));
+
+    for (std::vector<rule>::iterator it = inferred.rules.begin (); it != inferred.rules.end (); ++it)
+      {
+        std::vector<rule const *>::const_iterator found = find (garbage.begin (), garbage.end (), &*it);
+        if (found != garbage.end ())
+          it = inferred.rules.erase (it);
+      }
+
     rules.insert (rules.end (),
                   inferred.rules.begin (),
                   inferred.rules.end ());

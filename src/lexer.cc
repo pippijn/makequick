@@ -27,7 +27,6 @@ lexer::STRSTATE (int state)
     case yy::RULE_INIT   : return "RULE_INIT";
     case yy::RULE_LINE   : return "RULE_LINE";
     case yy::RULE_LINES  : return "RULE_LINES";
-    case yy::TARGET_NAME : return "TARGET_NAME";
     case yy::VARDECL_CODE: return "VARDECL_CODE";
     case yy::VARDECL_INIT: return "VARDECL_INIT";
     case yy::VARDECL_LINE: return "VARDECL_LINE";
@@ -57,7 +56,6 @@ lexer::strstate (int state)
     case yy::RULE_INIT   : return "in rule declaration";
     case yy::RULE_LINE   : return "in rule line continuation";
     case yy::RULE_LINES  : return "in rule line";
-    case yy::TARGET_NAME : return "target name";
     case yy::VARDECL_CODE: return "in variable declaration value";
     case yy::VARDECL_INIT: return "in whitespace before variable declaration";
     case yy::VARDECL_LINE: return "in single line variable declaration value";

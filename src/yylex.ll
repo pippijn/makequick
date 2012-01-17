@@ -15,7 +15,7 @@
 %option never-interactive
 
 %x INITWS
-%x VAR_INIT VAR_RBODY VAR_SQBODY TARGET_NAME
+%x VAR_INIT VAR_RBODY VAR_SQBODY
 %x RULE_INIT RULE_CODE RULE_LINES RULE_LINE
 %x VARDECL_INIT VARDECL_NAME VARDECL_CODE VARDECL VARDECL_LINE
 %x FILENAME RULE_FILENAME MULTIFILE IMPORT EXCLUDE LINK FLAGS
@@ -29,7 +29,7 @@ FLAG	[^ \t\v\f\n\r}#$]
 /* Filenames */
 FN	[^ \t\v\f\n\r{}%*:;?$#<>!]
 /* Identifiers */
-ID	[a-zA-Z_-][a-zA-Z0-9_-]*
+ID	[a-zA-Z_-][a-zA-Z0-9_/-]*
 UC	[A-Z][A-Z0-9_]*
 /* Variable declaration */
 VDSTART	{UC}+{WS}*("+"?)"="
@@ -81,7 +81,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 "nodist_sources"			{ RetKeyword (KW_NODIST_SOURCES); }
 "notfound:"				{ RetKeyword (KW_NOTFOUND); }
 "options"				{ RetKeyword (KW_OPTIONS); }
-"program"				{ PUSH (TARGET_NAME); RetKeyword (KW_PROGRAM); }
+"program"				{ RetKeyword (KW_PROGRAM); }
 "project"				{ RetKeyword (KW_PROJECT); }
 "section"				{ RetKeyword (KW_SECTION); }
 "sizeof"				{ RetKeyword (KW_SIZEOF); }
@@ -116,11 +116,6 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 <VAR_SQBODY>{
 	{ID}				{ RetToken (TK_IDENTIFIER); }
 	"]"				{ POP (); RetKeyword (TK_RSQBRACK); }
-}
-
-<TARGET_NAME>{
-	{SPACE}+			{ }
-	{FN}+				{ POP (); RetToken (TK_IDENTIFIER); }
 }
 
 
@@ -241,65 +236,6 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{ID}				{ RetToken (TK_INT_LIB); }
 	"}"				{ RetKeyword (TK_RBRACE); }
 }
-
-
- /*
-<FILENAME>{
-	{WS}+				{ RetKeyword (TK_WHITESPACE); }
-}
-<RULE_FILENAME>{
-	{WS}+				{ POP (); RetKeyword (TK_WHITESPACE); }
-}
-<FILENAME,RULE_FILENAME>{
-	{FN}+				{ RetToken (TK_FILENAME); }
-	"."				{ RetToken (TK_FN_DOT); }
-	"%"				{ RetToken (TK_FN_PERCENT); }
-	"%%"				{ RetToken (TK_FN_PERPERCENT); }
-	"?"				{ RetToken (TK_FN_QMARK); }
-	"/"				{ RetToken (TK_FN_SLASH); }
-	"*"				{ RetToken (TK_FN_STAR); }
-	"**"				{ RetToken (TK_FN_STARSTAR); }
-	"{"				{ PUSH (MULTIFILE); RetToken (TK_FN_LBRACE); }
-	":"				{ POP (); BACKTRACK (0); }
-	"}"				{ RetToken (TK_RBRACE); }
-}
-
-<RULE_INIT>{
-	{WS}+				{ }
-	":"				{ RetKeyword (TK_COLON); }
-	";"				{ POP (); RetKeyword (TK_SEMICOLON); }
-	"{"				{ POP (); BACKTRACK (0); }
-	{NWS}				{ PUSH (RULE_FILENAME); BACKTRACK (0); }
-}
-
-<RULE_CODE>{
-	\n				{ }
-	"}"				{ RetKeyword (TK_RBRACE); }
-	^\t{2}				{ PUSH (RULE_LINE); }
-}
-
-<RULE_LINE>{
-	\n				{ }
-	^\t{3}				{ impl->text = "\n         "; RetToken (TK_CODE); }
-	^\t{2}				{ RetKeyword (TK_WHITESPACE); }
-	^\t{1}"}"			{ POP (); BACKTRACK (1); RetKeyword (TK_WHITESPACE); }
-	[^\n\t$]+			{ RetToken (TK_CODE); }
-}
-
-<FILENAME,RULE_FILENAME,MULTIFILE,RULE_LINE>{
-	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
-}
-
-<VARDECL>{
-	\n				{ }
-	^\t{2}				{ }
-	^\t{1}				{ RetKeyword (TK_WHITESPACE); }
-	^{NWS}				{ BACKTRACK (0); RetKeyword (TK_WHITESPACE); }
-	[^\n\t$]+			{ RetToken (TK_CODE); }
-	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
-}
-
- */
 
 
 <*>"#".*				{ }

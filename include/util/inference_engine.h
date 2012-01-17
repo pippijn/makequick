@@ -51,6 +51,8 @@ struct inference_engine
        * file name itself.
        */
       virtual std::string stem (fs::path const &file) const = 0;
+
+      virtual bool operator == (file_base const &other) const = 0;
     };
     
     template<typename T>
@@ -64,6 +66,13 @@ struct inference_engine
       virtual bool matches (fs::path const &file) const;
       virtual std::string stem (fs::path const &file) const;
 
+      virtual bool operator == (file_base const &other) const
+      {
+        if (dynamic_cast<file_t const *> (&other) == NULL)
+          return false;
+        return data == static_cast<file_t const &> (other).data;
+      }
+
       file_t (T const &data);
     };
 
@@ -74,6 +83,7 @@ struct inference_engine
 
     bool final () const { return file->final (); }
     bool matches (fs::path const &f) const { return file->matches (f); }
+    bool operator == (prerequisite const &other) const { return *file == *other.file; }
 
     std::string const &str () const { return dynamic_cast<file_t<std::string> &> (*file).data; }
 
@@ -92,6 +102,14 @@ struct inference_engine
     node_ptr code;
 
     void print () const;
+    bool operator == (rule const &other) const
+    {
+      return target == other.target && prereqs == other.prereqs;
+    }
+    bool operator < (rule const &other) const
+    {
+      return stem.size () > other.stem.size ();
+    }
 
     rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code)
       : target (target)

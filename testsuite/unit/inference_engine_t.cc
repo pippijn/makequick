@@ -18,6 +18,12 @@ main ()
   dag.add_rule ("inc/%.h", R ("yacc/(.+).y"));
   dag.add_rule ("inc/moo.h", R ("yacc/cow.y"));
 
+  dag.add_rule ("%.c", R ("(.+).as"));
+  dag.add_rule ("testsuite/%.c", R ("testsuite/(.+).as"));
+
+  dag.add_file ("aldor.as");
+  dag.add_file ("testsuite/aldor-test.as");
+
   dag.add_file ("/usr/bin/gcc");
 #if 1
   int const FILES = 2;
