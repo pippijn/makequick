@@ -7,5 +7,6 @@ makepp_SOURCES +=		\
 	insert_vardecl_syms.cc	\
 	merge_blocks.cc		\
 	remove_templates.cc	\
+	resolve_vars.cc		\
 	sx.cc			\
 	xml.cc

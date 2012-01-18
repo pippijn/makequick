@@ -19,6 +19,8 @@ struct YYLTYPE
 #define YYLTYPE_IS_TRIVIAL 1
 
 #include "yyparse.h"
+typedef struct lexer *YY_EXTRA_TYPE;
+#define YY_EXTRA_TYPE YY_EXTRA_TYPE
 #ifndef FLEX_SCANNER
 #include "yylex.h"
 #endif

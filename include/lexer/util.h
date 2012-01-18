@@ -40,8 +40,8 @@ escaped (char const *text, int leng)
 #define SWITCH(STATE)		switch_state (STATE)
 
 #define BACKTRACK(N) do {		\
-  yycolumn -= yyleng - N;		\
-  impl->profiler.bytes -= yyleng - N;	\
+  yycolumn -= yyleng - (N);		\
+  impl->profiler.bytes -= yyleng - (N);	\
   yyless (N);				\
 } while (0)
 

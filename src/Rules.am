@@ -55,8 +55,14 @@ yystate.h: yylex.h
 yylex.h: yylex.cc
 yylex.cc: $(CURDIR)/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<
-	@test -z "`diff ${@:.cc=.h} /tmp/${@:.cc=.h} 2>&1`"	\
-		|| (echo "Updating ${@:.cc=.h}" && mv /tmp/${@:.cc=.h} ${@:.cc=.h})
+	@grep -v '^static yyconst flex_int16_t yy_nxt' /tmp/${@:.cc=.h}	\
+		| grep -v '^    \({\|},\|} ;\)$$'	\
+		| grep -v '^ *-\?[0-9]\+,'		\
+		| grep -v '^$$'				\
+		> ${@:.cc=.h}.tmp
+	@test -z "`diff ${@:.cc=.h} ${@:.cc=.h}.tmp 2>&1`"	\
+		|| (echo "Updating ${@:.cc=.h}" && mv ${@:.cc=.h}.tmp ${@:.cc=.h})
+	@$(RM) ${@:.cc=.h}.tmp
 
 %.h: include/gen/%.pl include/gen/nodes.pm
 	$(AM_V_GEN)perl $< > $@

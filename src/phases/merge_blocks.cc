@@ -54,6 +54,7 @@ struct merge_blocks
   void visit (t_target_definition &n);
   void visit (t_link &n);
   void visit (t_extra_dist &n);
+  void visit (t_test &n);
 
   merge_blocks (annotation_map &annots)
   {
@@ -61,6 +62,7 @@ struct merge_blocks
 
   merger<t_link, &t_link::items, t_link_body> link_merger;
   merger<t_extra_dist, &t_extra_dist::sources, t_sources_members> extra_dist_merger;
+  merger<t_test, &t_test::sources, t_sources_members> test_merger;
 };
 
 static phase<merge_blocks> thisphase ("merge_blocks", "inheritance");
@@ -69,6 +71,7 @@ static phase<merge_blocks> thisphase ("merge_blocks", "inheritance");
 void
 merge_blocks::visit (t_target_definition &n)
 {
+  // extra_dist and test are not reset, as they are global
   link_merger.clear ();
   visitor::visit (n);
 }
@@ -82,6 +85,11 @@ merge_blocks::visit (t_link &n)
 void
 merge_blocks::visit (t_extra_dist &n)
 {
-  // extra_dist is not reset in visit(target_definition), as it's global
   extra_dist_merger.visit (n);
+}
+
+void
+merge_blocks::visit (t_test &n)
+{
+  test_merger.visit (n);
 }

@@ -16,7 +16,7 @@
 
 %x INITWS
 %x VAR_INIT VAR_RBODY VAR_SQBODY
-%x RULE_INIT RULE_CODE RULE_LINES RULE_LINE
+%x RULE_INIT RULE_CODE RULE_LINES RULE_CONT
 %x VARDECL_INIT VARDECL_NAME VARDECL_CODE VARDECL VARDECL_LINE
 %x FILENAME RULE_FILENAME MULTIFILE IMPORT EXCLUDE LINK FLAGS
 
@@ -96,9 +96,6 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	.				{ POP (); BACKTRACK (0); }
 }
 
-<*>{
-	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
-}
 <VAR_INIT>{
 	{SVAR}				{ POP (); RetToken (TK_SHORTVAR); }
 	"("{SVAR}D")"			{ POP (); RetToken (TK_SHORTVAR); }
@@ -118,6 +115,9 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{ID}				{ RetToken (TK_IDENTIFIER); }
 	"]"				{ POP (); RetKeyword (TK_RSQBRACK); }
 }
+<*>{
+	"$"				{ PUSH (VAR_INIT); RetKeyword (TK_DOLLAR); }
+}
 
 
 <INITIAL>{
@@ -126,8 +126,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{NAME}				{ RetToken (TK_IDENTIFIER); }
 	^{SPACE}+{RLSTART}$		{ PUSH (RULE_INIT); PUSH (INITWS); BACKTRACK (0); }
 	^{RLSTART}$			{ PUSH (RULE_INIT); BACKTRACK (0); }
-	^{SPACE}*{VDSTART}.+$		{ PUSH (VARDECL); BACKTRACK (0); }
-	^{SPACE}*{VDSTART}$		{ PUSH (VARDECL_INIT); BACKTRACK (0); }
+	^{SPACE}*{VDSTART}		{ PUSH (VARDECL); BACKTRACK (0); }
 	"("				{ RetKeyword (TK_LBRACK); }
 	")"				{ RetKeyword (TK_RBRACK); }
 	"{"				{ RetKeyword (TK_LBRACE); }
@@ -144,28 +143,19 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{WS}+				{ RetKeyword (TK_WHITESPACE); }
 	":"				{ PushKeyword (TK_COLON); RetKeyword (TK_WHITESPACE); }
 	";"				{ POP (); RetKeyword (TK_SEMICOLON); }
-	"{\n"				{ SWITCH (RULE_CODE); RetKeyword (TK_LBRACE); }
+	"{\n"				{ SWITCH (RULE_CODE); BACKTRACK (1); RetKeyword (TK_LBRACE); }
 	.				{ PUSH (FILENAME); BACKTRACK (0); }
 }
 <RULE_CODE>{
-	^\t{1}				{ impl->indent = 1; SWITCH (RULE_LINES); BACKTRACK (0); }
-	^\t{2}				{ impl->indent = 2; SWITCH (RULE_LINES); BACKTRACK (0); }
-	^\t{3}				{ impl->indent = 3; SWITCH (RULE_LINES); BACKTRACK (0); }
+	\n\t+				{ impl->indent = yyleng - 1; SWITCH (RULE_LINES); BACKTRACK (0); }
 }
 <RULE_LINES>{
-	\t{1}[^\t]			{ if (impl->indent < 1) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (1); }
-	\t{2}[^\t]			{ if (impl->indent < 2) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (2); }
-	\t{3}[^\t]			{ if (impl->indent < 3) RetToken (TK_ERROR); PUSH (RULE_LINE); BACKTRACK (3); }
-	"}"				{ POP (); RetKeyword (TK_RBRACE); }
+	[^\n$]+				{ RetToken (TK_CODE); }
+	\n\t+				{ if (yyleng - 1 > impl->indent) { BACKTRACK (yyleng - 1); SWITCH (RULE_CONT); } else if (yyleng - 1 < impl->indent) RetToken (TK_ERROR); else RetKeyword (TK_WHITESPACE); }
+	\n\t*"}"			{ if (impl->indent >= yyleng - 1) { POP (); RetKeyword (TK_RBRACE); } else { BACKTRACK (yyleng - 1); } }
 }
-<RULE_LINE>{
-	[^\n\t$]+			{ RetToken (TK_CODE); }
-	\n\t{1}				{ if (impl->indent >= 1) { BACKTRACK (1); POP (); } }
-	\n\t{2}				{ if (impl->indent >= 2) { BACKTRACK (2); POP (); } }
-	\n\t{3}				{ if (impl->indent >= 3) { BACKTRACK (3); POP (); } }
-	\n"}"				{ if (impl->indent == 1) { BACKTRACK (1); POP (); } }
-	\n\t{1}"}"			{ if (impl->indent >= 2) { BACKTRACK (2); POP (); } }
-	\n\t{2}"}"			{ if (impl->indent >= 3) { BACKTRACK (3); POP (); } }
+<RULE_CONT>{
+	(\t[^\n$]+|\t)			{ SWITCH (RULE_LINES); RetToken (TK_CODE); }
 }
 
 <FILENAME>{
@@ -208,27 +198,22 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 }
 
 <VARDECL>{
+	{SPACE}*[A-Z]			{ impl->indent = yyleng; BACKTRACK (yyleng - 1); SWITCH (VARDECL_NAME); }
+}
+<VARDECL_NAME>{
 	{ID}				{ RetToken (TK_IDENTIFIER); }
-	{SPACE}+			{ }
-	"="				{ SWITCH (VARDECL_LINE); RetKeyword (TK_EQUALS); }
-	"+="				{ SWITCH (VARDECL_LINE); RetKeyword (TK_PLUSEQ); }
+	{SPACE}*"="$			{ SWITCH (VARDECL_CODE); RetKeyword (TK_EQUALS); }
+	{SPACE}*"+="$			{ SWITCH (VARDECL_CODE); RetKeyword (TK_PLUSEQ); }
+	{SPACE}*"="			{ SWITCH (VARDECL_LINE); RetKeyword (TK_EQUALS); }
+	{SPACE}*"+="			{ SWITCH (VARDECL_LINE); RetKeyword (TK_PLUSEQ); }
 }
 <VARDECL_LINE>{
 	[^\n$]+				{ RetToken (TK_CODE); }
 	\n				{ POP (); RetKeyword (TK_WHITESPACE); }
 }
-
-<VARDECL_INIT>{
-	{SPACE}*[A-Z]			{ impl->indent = yyleng; SWITCH (VARDECL_NAME); BACKTRACK (yyleng - 1); }
-}
-<VARDECL_NAME>{
-	{ID}				{ RetToken (TK_IDENTIFIER); }
-	{SPACE}*"="			{ RetKeyword (TK_EQUALS); }
-	\n\t				{ SWITCH (VARDECL_CODE); BACKTRACK (0); }
-}
 <VARDECL_CODE>{
-	\n\t*				{ if (yyleng - 1 < impl->indent) { POP (); BACKTRACK (0); RetKeyword (TK_WHITESPACE); } }
-	.+				{ RetToken (TK_CODE); }
+	\n\t*				{ if (yyleng - 1 < impl->indent) { POP (); BACKTRACK (0); RetKeyword (TK_WHITESPACE); } BACKTRACK (yyleng - 1); }
+	\t?[^\n$]+			{ RetToken (TK_CODE); }
 }
 
 <LINK>{
@@ -244,7 +229,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 <*>(.|\n)				{ RetToken (TK_ERROR); }
 %%
 
-#define SELF static_cast<lexer *> (yyget_extra (yyscanner))
+#define SELF yyget_extra (yyscanner)
 
 int
 yywrap (yyscan_t yyscanner)

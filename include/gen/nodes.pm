@@ -65,7 +65,7 @@
 
    shortvar => ['var'],
    intvar => ['num'],
-   roundvar => ['content'],
+   roundvar => ['name'],
    squarevar => ['name'],
    callvar => ['name', 'func'],
    accessvar => ['name', 'member'],

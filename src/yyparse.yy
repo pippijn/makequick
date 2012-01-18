@@ -528,8 +528,8 @@ rule
 	;
 
 rule_lines
-	: rule_line
-		{ $$ = make_node<n_rule_lines> (@$, $1); }
+	: TK_WHITESPACE rule_line
+		{ $$ = make_node<n_rule_lines> (@$, $2); }
 	| rule_lines TK_WHITESPACE rule_line
 		{ ($$ = $1)->add ($3)->loc = @$; }
 	;

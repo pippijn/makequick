@@ -24,8 +24,8 @@ lexer::STRSTATE (int state)
     case yy::LINK        : return "LINK";
     case yy::MULTIFILE   : return "MULTIFILE";
     case yy::RULE_CODE   : return "RULE_CODE";
+    case yy::RULE_CONT   : return "RULE_CONT";
     case yy::RULE_INIT   : return "RULE_INIT";
-    case yy::RULE_LINE   : return "RULE_LINE";
     case yy::RULE_LINES  : return "RULE_LINES";
     case yy::VARDECL_CODE: return "VARDECL_CODE";
     case yy::VARDECL_INIT: return "VARDECL_INIT";
@@ -53,8 +53,8 @@ lexer::strstate (int state)
     case yy::LINK        : return "in link section";
     case yy::MULTIFILE   : return "in multi-rule wildcard";
     case yy::RULE_CODE   : return "in rule code";
+    case yy::RULE_CONT   : return "in rule line continuation";
     case yy::RULE_INIT   : return "in rule declaration";
-    case yy::RULE_LINE   : return "in rule line continuation";
     case yy::RULE_LINES  : return "in rule line";
     case yy::VARDECL_CODE: return "in variable declaration value";
     case yy::VARDECL_INIT: return "in whitespace before variable declaration";

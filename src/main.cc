@@ -25,9 +25,8 @@ static char const *const all_phases[] = {
   "merge_blocks",
   "remove_templates",
   "insert_vardecl_syms",
-  //"resolve_vars",
   "insert_varadd_syms",
-  //"resolve_vars",
+  "resolve_vars",
   "sx",
 };
 
