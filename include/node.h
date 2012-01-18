@@ -51,6 +51,8 @@ namespace nodes
     int parent_index () const { return m.parent_index; }
     node_list *parent () const { return m.parent; }
 
+    void unlink ();
+
     static std::vector<node *> nodes;
 
     static void compress_hash ();
@@ -155,10 +157,9 @@ namespace nodes
 static inline bool
 operator < (nodes::generic_node_ptr const &a, nodes::generic_node_ptr const &b)
 {
-  if (!a)
-    return true;
-  if (!b)
-    return false;
+  if (!a && !b) return false;
+  if (!a) return true;
+  if (!b) return false;
   return a->index () < b->index ();
 }
 

@@ -29,8 +29,10 @@ bin_PROGRAMS = makepp
 
 makepp_SOURCES =			\
 	$(libmakepp_a_SOURCES)		\
-	$(nodist_libmakepp_a_SOURCES)	\
 	main.cc
+
+nodist_makepp_SOURCES =			\
+	$(nodist_libmakepp_a_SOURCES)
 
 include phases/Rules.am
 

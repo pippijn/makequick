@@ -5,6 +5,7 @@ makepp_SOURCES +=		\
 	insert_target_syms.cc	\
 	insert_varadd_syms.cc	\
 	insert_vardecl_syms.cc	\
+	merge_blocks.cc		\
 	remove_templates.cc	\
 	sx.cc			\
 	xml.cc

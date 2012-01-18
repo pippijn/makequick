@@ -40,6 +40,7 @@ namespace nodes
     , m ()
   {
     m.index = nodes.size ();
+    m.parent_index = -1;
     nodes.push_back (this);
   }
 
@@ -49,6 +50,19 @@ namespace nodes
       nodes.pop_back ();
     else
       nodes[index ()] = 0;
+  }
+
+  void
+  node::unlink ()
+  {
+    // remove self from parent
+    if (parent ())
+      {
+        parent ()->list.at (parent_index ()) = NULL;
+        m.parent_index = -1;
+      }
+    // invariant: no parent => parent_index == -1
+    assert (parent_index () == -1);
   }
 
   void
@@ -122,15 +136,22 @@ namespace nodes
     return clone;
   }
 
+  static void
+  move (node_ptr const &n, node_list *list, size_t i)
+  {
+    if (!n)
+      return;
+    // move away from original parent
+    n->unlink ();
+    // set list as new parent
+    n->m.parent = list;
+    n->m.parent_index = i;
+  }
+
   node_list *
   node_list::add (node_ptr n)
   {
-    if (n)
-      {
-        assert (!n->parent ());
-        n->m.parent = this;
-        n->m.parent_index = list.size ();
-      }
+    move (n, this, list.size ());
     list.push_back (n);
     return this;
   }
@@ -138,13 +159,7 @@ namespace nodes
   node_list *
   node_list::set (size_t i, node_ptr n)
   {
-    if (n)
-      {
-        if (n->parent ())
-          n->parent ()->list.at (n->parent_index ()) = NULL;
-        n->m.parent = this;
-        n->m.parent_index = i;
-      }
+    move (n, this, i);
     list.at (i) = n;
     return this;
   }

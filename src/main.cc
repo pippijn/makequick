@@ -22,6 +22,7 @@ static char const *const all_phases[] = {
   "audit",
   "insert_target_syms",
   "inheritance",
+  "merge_blocks",
   "remove_templates",
   "insert_vardecl_syms",
   //"resolve_vars",
@@ -128,6 +129,8 @@ int
 main (int argc, char *argv[])
 try
 {
+  char const *const mem_low = (char const *)sbrk (0);
+
   ++argv;
 
   if (!argv[0] || !strcmp (argv[0], "--help"))
@@ -188,7 +191,7 @@ try
 
   if (node_ptr doc = parse_files (*files, *errors))
     {
-      //load_store (doc);
+      load_store (doc);
 
       annotation_map annots;
       annots.put ("files", files.release ());
@@ -232,6 +235,9 @@ try
       errors->print (path, argv[0]);
       return EXIT_FAILURE;
     }
+
+  char const *const mem_high = (char const *)sbrk (0);
+  printf ("%%%% memory used: %ld MiB\n", (mem_high - mem_low) / 1024 / 1024);
 
   return should_terminate;
 }

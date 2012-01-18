@@ -5,6 +5,7 @@
 #include "colours.h"
 #include "foreach.h"
 #include "sighandler.h"
+#include "util/timer.h"
 
 #include <cstdio>
 #include <tr1/unordered_map>
@@ -63,6 +64,7 @@ phases::run (std::string const &name, node_ptr const &doc, annotation_map &annot
   phases *phase = map[name];
   if (!phase)
     throw std::invalid_argument ("phase " + C::filename (name) + " does not exist");
+
   printf ("%%%% phase \"%s\"\n", name.c_str ());
   phase->run1 (doc, annots);
 }
@@ -105,7 +107,11 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
     {
       add_edge (et - it, 0, G);
       foreach (std::string const &dep, it->second->self->dependencies)
-        add_edge (et - it, et - find_if (phases.rbegin (), phases.rend (), pair_equals (dep)), G);
+        {
+          if (!map[dep])
+            throw std::invalid_argument ("phase " + C::filename (dep) + " does not exist");
+          add_edge (et - it, et - find_if (phases.rbegin (), phases.rend (), pair_equals (dep)), G);
+        }
     }
 
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
