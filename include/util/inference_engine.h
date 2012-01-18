@@ -120,13 +120,13 @@ struct inference_engine
     }
   };
 
-  struct information
+  struct knowledge
   {
     std::vector<fs::path> files;
     std::vector<rule> baserules;
     std::vector<rule> rules;
   };
-  information info;
+  knowledge info;
 
   /// Add a file to the initially assumed file list.
   void add_file (fs::path const &file);
