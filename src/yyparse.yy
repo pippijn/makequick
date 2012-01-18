@@ -115,8 +115,6 @@ using namespace nodes;
 %token TK_WHITESPACE			"whitespace"
 
 %token<token> TK_FN_QMARK		"?"
-%token<token> TK_FN_SLASH		"/"
-%token<token> TK_FN_DOT			"'.'"
 %token<token> TK_FN_LBRACE		"'{'"
 %token<token> TK_FN_RBRACE		"'}'"
 %token<token> TK_FN_STAR		"*"
@@ -691,8 +689,6 @@ filename_token
 	: TK_FILENAME
 	| TK_IDENTIFIER
 	| "?"
-	| "/"
-	| "'.'"
 	| "'{'"
 	| "'}'"
 	| "*"

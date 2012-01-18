@@ -29,7 +29,8 @@ FLAG	[^ \t\v\f\n\r}#$]
 /* Filenames */
 FN	[^ \t\v\f\n\r{}%*:;?$#<>!]
 /* Identifiers */
-ID	[a-zA-Z_-][a-zA-Z0-9_/-]*
+ID	[a-zA-Z_-][a-zA-Z0-9_-]*
+NAME	[a-zA-Z_-][a-zA-Z0-9_/.-]*
 UC	[A-Z][A-Z0-9_]*
 /* Variable declaration */
 VDSTART	{UC}+{WS}*("+"?)"="
@@ -122,7 +123,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 <INITIAL>{
 	{WS}				{ }
 	{ID}"flags"			{ RetToken (TK_FLAGS_ID); }
-	{ID}				{ RetToken (TK_IDENTIFIER); }
+	{NAME}				{ RetToken (TK_IDENTIFIER); }
 	^{SPACE}+{RLSTART}$		{ PUSH (RULE_INIT); PUSH (INITWS); BACKTRACK (0); }
 	^{RLSTART}$			{ PUSH (RULE_INIT); BACKTRACK (0); }
 	^{SPACE}*{VDSTART}.+$		{ PUSH (VARDECL); BACKTRACK (0); }
