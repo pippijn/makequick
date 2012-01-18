@@ -4,4 +4,5 @@ EXTRA_DIST +=			\
 	local.h			\
 	regex_escape.h		\
 	symbol_visitor.h	\
-	timer.h
+	timer.h			\
+	unique_visitor.h

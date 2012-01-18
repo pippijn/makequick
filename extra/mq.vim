@@ -17,7 +17,7 @@ syn region	mqString		start=+'+  skip=+\\\\\|\\'+  end=+'+  contains=mqSpecial,mq
 syn region	mqString		start=+`+  skip=+\\\\\|\\`+  end=+`+  contains=mqSpecial,mqVariable
 
 syn match	mqVariable		"\$[$*@0-9^<]"
-syn match	mqVarDecl		"\v^\s*[A-Z_]+(\s*\=)@="
+syn match	mqVarDecl		"\v^\s*[A-Z0-9_]+(\s*\=)@="
 syn region	mqVariable		start=+\$(+  end=+)+  contains=mqVariable
 syn region	mqVariable		start=+\$\[+  end=+]+  contains=mqVariable
 

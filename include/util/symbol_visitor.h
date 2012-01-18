@@ -12,4 +12,6 @@ struct symbol_visitor
   nodes::node_type current_symtype;
 
   symbol_visitor (symbol_table &symtab);
+
+  virtual bool override (nodes::generic_node &n) { return false; }
 };

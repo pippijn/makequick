@@ -5,21 +5,19 @@
 #include "colours.h"
 #include "foreach.h"
 #include "util/symbol_visitor.h"
+#include "util/unique_visitor.h"
 
 #include <stdexcept>
 
 struct inheritance
   : symbol_visitor
+  , unique_visitor
 {
-  std::vector<bool> seen;
 
   generic_node_ptr lookup (std::string const &name) const
   {
     return symtab.lookup (T_TEMPLATE, name);
   }
-
-  bool done (generic_node const &base) const { return seen[base.index ()]; }
-  void mark (generic_node const &base)       { seen[base.index ()] = true; }
 
   void visit (t_target_definition &n);
 
@@ -27,7 +25,6 @@ struct inheritance
 
   inheritance (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
-    , seen (node::hash_size ())
     , errors (annots.get ("errors"))
   {
   }

@@ -22,11 +22,11 @@ static char const *const all_phases[] = {
   "audit",
   "insert_target_syms",
   "inheritance",
-  "merge_blocks",
   "remove_templates",
   "insert_vardecl_syms",
   "insert_varadd_syms",
   "resolve_vars",
+  "merge_blocks",
   "sx",
 };
 
@@ -190,7 +190,7 @@ try
 
   if (node_ptr doc = parse_files (*files, *errors))
     {
-      load_store (doc);
+      //load_store (doc);
 
       annotation_map annots;
       annots.put ("files", files.release ());

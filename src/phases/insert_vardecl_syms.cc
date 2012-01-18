@@ -58,7 +58,7 @@ node_type_to_symbol_type (node_type type)
 }
 
 static generic_node_ptr
-make_var (std::string const &name, std::string const &value)
+make_var (std::string const &value)
 {
   return new t_vardecl_body (location::generated,
            new token (location::generated, TK_FILENAME, value));
@@ -71,7 +71,7 @@ insert_vardecl_syms::visit (t_target_definition &n)
 
   if (!symtab.insert (type, "TARGET", &n))
     throw std::runtime_error ("unable to add $(TARGET) variable");
-  if (!symtab.insert (T_VARIABLE, "CURDIR", make_var ("CURDIR", n.loc.file->parent_path ().native ())))
+  if (!symtab.insert (T_VARIABLE, "CURDIR", make_var (n.loc.file->parent_path ().native ())))
     throw std::runtime_error ("unable to add $(TARGET) variable");
 
   symbol_visitor::visit (n);

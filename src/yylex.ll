@@ -201,7 +201,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{SPACE}*[A-Z]			{ impl->indent = yyleng; BACKTRACK (yyleng - 1); SWITCH (VARDECL_NAME); }
 }
 <VARDECL_NAME>{
-	{ID}				{ RetToken (TK_IDENTIFIER); }
+	{UC}				{ RetToken (TK_IDENTIFIER); }
 	{SPACE}*"="$			{ SWITCH (VARDECL_CODE); RetKeyword (TK_EQUALS); }
 	{SPACE}*"+="$			{ SWITCH (VARDECL_CODE); RetKeyword (TK_PLUSEQ); }
 	{SPACE}*"="			{ SWITCH (VARDECL_LINE); RetKeyword (TK_EQUALS); }

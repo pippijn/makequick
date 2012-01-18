@@ -35,7 +35,8 @@ symbol_visitor::visit (generic_node &n)
       current_symtype = type;
       symtab.enter_scope (&n);
     }
-  resume_list ();
+  if (!override (n))
+    resume_list ();
   if (has_scope (type))
     symtab.leave_scope ();
 }
