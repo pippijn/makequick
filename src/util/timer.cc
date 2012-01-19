@@ -41,7 +41,9 @@ timer::timer (char const *name)
 
 timer::~timer ()
 {
-  printf ("%%%% %s: %.3gsec\n", name, 0.0 + (now () - start));
+  double time = 0 + (now () - start);
+  if (time > 0.1)
+    printf ("%%%% %s: %.3gsec\n", name, time);
 }
 
 
@@ -55,6 +57,7 @@ lex_timer::lex_timer (char const *name)
 
 lex_timer::~lex_timer ()
 {
+#if LEX_TIMING
   sort (times.begin (), times.end ());
   if (times.empty ())
     return;
@@ -73,6 +76,7 @@ lex_timer::~lex_timer ()
           bytes,
           double (bytes) / 1024 / 1024,
           double (bytes) / total / 1024 / 1024);
+#endif
 }
 
 void

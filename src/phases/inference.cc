@@ -57,8 +57,8 @@ struct inference
   ~inference ()
   {
     engine.infer ();
-#if 0
-    engine.print ();
+#if 1
+    //engine.print ();
     if (!std::uncaught_exception ())
       throw "inference test";
 #endif
@@ -81,8 +81,7 @@ struct inference
   }
 };
 
-//static phase<inference> thisphase ("inference", "concat_sources", "resolve_vars", "multirule");
-static phase<inference> thisphase ("inference", noauto);
+static phase<inference> thisphase ("inference", "reparse_vars");
 
 
 static std::string
@@ -106,20 +105,38 @@ make_target (node_vec const &list)
   return target;
 }
 
-struct make_regex
+struct make_prerequisite
 {
   static bool needs_regex (node_ptr const &n)
   {
-    return n->as<token> ().tok != TK_FILENAME;
+    int tok = n->as<token> ().tok;
+    return tok != TK_FILENAME;// && tok != TK_FN_PERCENT;
   }
 
-  make_regex (bool is_re)
-    : is_re (is_re)
-    , in_multi (false)
+  static bool needs_wildcard (node_ptr const &n)
+  {
+    int tok = n->as<token> ().tok;
+    return tok != TK_FILENAME;
+  }
+};
+
+struct make_string
+{
+  std::string &operator () (std::string &pr, node_ptr const &n)
+  {
+    token const &t = n->as<token> ();
+    pr += t.string;
+    return pr;
+  }
+};
+
+struct make_regex
+{
+  make_regex ()
+    : in_multi (false)
   {
   }
 
-  bool is_re;
   bool in_multi;
 
   std::string &operator () (std::string &pr, node_ptr const &n)
@@ -128,7 +145,7 @@ struct make_regex
     switch (t.tok)
       {
       case TK_FILENAME:
-        pr += is_re ? regex_escape (t.string) : t.string;
+        pr += regex_escape (t.string);
         if (in_multi)
           pr += "|";
         break;
@@ -157,12 +174,25 @@ struct make_regex
   }
 };
 
+template<typename Maker>
+static std::string
+make_prereq (node_vec const &list)
+{
+  return accumulate (list.begin (), list.end (), std::string (), Maker ());
+}
+
 static inference_engine::prerequisite
 make_prereq (node_vec const &list)
 {
-  bool const is_re = find_if (list.begin (), list.end (), make_regex::needs_regex) != list.end ();
-  std::string pr = accumulate (list.begin (), list.end (), std::string (), make_regex (is_re));
-  return is_re ? boost::regex (pr) : inference_engine::prerequisite (pr);
+  if (find_if (list.begin (), list.end (), make_prerequisite::needs_regex) != list.end ())
+    return boost::regex (make_prereq<make_regex> (list));
+
+  std::string pr = make_prereq<make_string> (list);
+
+  if (find_if (list.begin (), list.end (), make_prerequisite::needs_wildcard) != list.end ())
+    return inference_engine::wildcard (pr);
+
+  return pr;
 }
 
 

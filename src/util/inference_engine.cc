@@ -1,10 +1,19 @@
-#include "util/inference_engine.h"
-#include "util/foreach.h"
+#include <cstdio>
+#include <set>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/regex.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/range.hpp>
 #include <boost/spirit/home/phoenix.hpp>
+#include <boost/thread.hpp>
+
+#include "util/inference_engine.h"
+#include "util/foreach.h"
+#include "util/timer.h"
+
+
+#define THREADED_PARTIALS 1
 
 
 typedef inference_engine::rule rule;
@@ -48,13 +57,95 @@ inference_engine::add_rule (std::string const &target,
  */
 class inference_engine::engine
 {
+  struct target_less
+  {
+    bool operator () (rule const &a, rule const &b)
+    {
+      if (a.target < b.target)
+        return true;
+      if (a.target == b.target)
+        return a.prereqs < b.prereqs;
+      return false;
+    }
+  };
+
+  struct stem_size_less
+  {
+    // a rule is smaller than another rule if it matched more precisely
+    bool operator () (rule const &a, rule const &b)
+    {
+      return a.stem.size () < b.stem.size ();
+    }
+  };
+
+  template<typename T>
+  struct deref_less
+  {
+    bool operator () (T const *a, T const *b)
+    {
+      return *a < *b;
+    }
+  };
+
   typedef std::map<std::string, std::vector<rule> > partial_map;
   typedef std::vector<partial_map> partial_vec;
+  typedef std::multiset<rule, target_less> rule_set;
 
   struct inferred
   {
-    std::vector<rule> rules;
+    rule_set rules;
     std::vector<fs::path> files;
+  };
+
+  template<bool DoLock>
+  struct partial_inference
+  {
+    void operator () (size_t from, size_t to)
+    {
+      typedef boost::iterator_range<std::vector<fs::path>::const_iterator> sub_range;
+
+      foreach (fs::path const &f, sub_range (files.begin () + from, files.begin () + to))
+        foreach (rule const &r, rules)
+          {
+            ptrdiff_t ridx = &r - &rules.front ();
+            foreach (prerequisite const &p, r.prereqs)
+              if (p->matches (f))
+                {
+                  // instantiate rule
+                  rule instance = r;
+                  instance.prereqs[&p - &r.prereqs.front ()] = f.native ();
+
+                  if (DoLock) lock->lock ();
+                  partials[ridx][p->stem (f)].push_back (instance);
+                  if (DoLock) lock->unlock ();
+                }
+          }
+    }
+
+    partial_inference (std::vector<rule> const &rules,
+                       std::vector<fs::path> const &files,
+                       partial_vec &partials,
+                       boost::mutex &lock)
+      : rules (rules)
+      , files (files)
+      , partials (partials)
+      , lock (&lock)
+    {
+    }
+
+    partial_inference (std::vector<rule> const &rules,
+                       std::vector<fs::path> const &files,
+                       partial_vec &partials)
+      : rules (rules)
+      , files (files)
+      , partials (partials)
+    {
+    }
+
+    std::vector<rule> const &rules;
+    std::vector<fs::path> const &files;
+    partial_vec &partials;
+    boost::mutex *lock;
   };
 
   /** \brief Infer partial rules from patterns.
@@ -81,19 +172,32 @@ class inference_engine::engine
                               std::vector<fs::path> const &files,
                               partial_vec &partials)
   {
-    foreach (fs::path const &f, files)
-      foreach (rule const &r, rules)
-        {
-          ptrdiff_t ridx = &r - &*rules.begin ();
-          foreach (prerequisite const &p, r.prereqs)
-            if (p->matches (f))
-              {
-                // instantiate rule
-                rule instance = r;
-                instance.prereqs[&p - &*r.prereqs.begin ()] = f.native ();
-                partials[ridx][p->stem (f)].push_back (instance);
-              }
-        }
+#if THREADED_PARTIALS
+    unsigned long operations = files.size () * rules.size ();
+    if (operations > 160000)
+      {
+        size_t partitions = std::min (10lu, operations / 80000);
+        printf ("doing %ld operations => splitting in %ld partitions\n", operations, partitions);
+
+        boost::mutex lock;
+        boost::ptr_vector<boost::thread> threads;
+        // start workers
+        for (size_t i = 0; i < partitions; i++)
+          threads.push_back (
+            new boost::thread (
+              partial_inference<true> (rules, files, partials, lock),
+              files.size () *  i      / partitions,
+              files.size () * (i + 1) / partitions));
+
+        // wait for each to finish
+        foreach (boost::thread &thread, threads)
+          thread.join ();
+      }
+    else
+#endif
+      {
+        partial_inference<false> (rules, files, partials) (0, files.size ());
+      }
   }
 
   /** \brief Merge partial rules into complete instances.
@@ -151,7 +255,7 @@ class inference_engine::engine
                   else
                     continue;
 
-                inferred.rules.push_back (mainrule);
+                inferred.rules.insert (mainrule);
                 inferred.files.push_back (mainrule.target);
 
                 complete.push_back (mainrule.stem);
@@ -236,19 +340,23 @@ public:
                       inferred.files.end ());
       }
 
-    // TODO: this is *super* slow, optimise it.
-    std::vector<rule const *> garbage;
-    foreach (rule const &r1, inferred.rules)
-      foreach (rule const &r2, inferred.rules)
-        if (&r1 != &r2 && r1 == r2)
-          garbage.push_back (&std::max (r1, r2));
-
-    for (std::vector<rule>::iterator it = inferred.rules.begin (); it != inferred.rules.end (); ++it)
-      {
-        std::vector<rule const *>::const_iterator found = find (garbage.begin (), garbage.end (), &*it);
-        if (found != garbage.end ())
-          it = inferred.rules.erase (it);
-      }
+    // find most precisely matching rule
+    {
+      rule_set::iterator it = inferred.rules.begin ();
+      rule_set::iterator et = inferred.rules.end ();
+      while (it != et)
+        {
+          rule_set::iterator ubound = inferred.rules.upper_bound (*it);
+          if (distance (it, ubound) > 1)
+            {
+              std::vector<rule> range (it, ubound);
+              sort (range.begin (), range.end (), stem_size_less ());
+              inferred.rules.erase (it, ubound);
+              inferred.rules.insert (range.front ());
+            }
+          it = ubound;
+        }
+    }
 
     rules.insert (rules.end (),
                   inferred.rules.begin (),
@@ -262,12 +370,12 @@ void
 inference_engine::infer ()
 {
   assert (info.rules.empty ());
-#if 0
+#if 1
   timer T ("inference");
   printf ("running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
 #endif
   engine::infer (info.baserules, info.rules, info.files);
-#if 0
+#if 1
   printf ("inferred %lu rules; we now have %lu files\n", info.rules.size (), info.files.size ());
 #endif
 }
@@ -304,75 +412,4 @@ rule::print () const
     }
   if (!stem.empty ())
     std::cout << " ($* = " << stem << ")";
-}
-
-
-template<typename T>
-inference_engine::prerequisite::file_t<T>::file_t (T const &data)
-  : data (data)
-{
-}
-
-
-template inference_engine::prerequisite::file_t<std::string>::file_t (std::string const &data);
-
-template<>
-inline void
-inference_engine::prerequisite::file_t<std::string>::print () const
-{
-  std::cout << '"' << data << '"';
-}
-
-template<>
-inline bool
-inference_engine::prerequisite::file_t<std::string>::final () const
-{
-  return true;
-}
-
-template<>
-inline bool
-inference_engine::prerequisite::file_t<std::string>::matches (fs::path const &file) const
-{
-  return file == data;
-}
-
-template<>
-inline std::string
-inference_engine::prerequisite::file_t<std::string>::stem (fs::path const &file) const
-{
-  return file == data ? file.native () : "";
-}
-
-
-template inference_engine::prerequisite::file_t<boost::regex>::file_t (boost::regex const &data);
-
-template<>
-inline void
-inference_engine::prerequisite::file_t<boost::regex>::print () const
-{
-  std::cout << '{' << data << '}';
-}
-
-template<>
-inline bool
-inference_engine::prerequisite::file_t<boost::regex>::final () const
-{
-  return false;
-}
-
-template<>
-inline bool
-inference_engine::prerequisite::file_t<boost::regex>::matches (fs::path const &file) const
-{
-  return regex_match (file.native (), data);
-}
-
-template<>
-inline std::string
-inference_engine::prerequisite::file_t<boost::regex>::stem (fs::path const &file) const
-{
-  boost::smatch matches;
-  regex_match (file.native (), matches, data);
-  return matches.str (1);
 }

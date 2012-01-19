@@ -1,0 +1,7 @@
+libmakepp_a_SOURCES +=		\
+	inference_prereq.cc
+
+EXTRA_DIST +=			\
+	regex.h			\
+	string.h		\
+	wildcard.h

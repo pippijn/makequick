@@ -28,6 +28,8 @@ static char const *const all_phases[] = {
   "resolve_vars",
   "flatten_vars",
   "reparse_vars",
+  "inference",
+  "flatten_filenames",
   "merge_blocks",
   "sx",
 };

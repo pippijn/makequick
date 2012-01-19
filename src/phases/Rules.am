@@ -1,5 +1,6 @@
 makepp_SOURCES +=		\
 	audit.cc		\
+	flatten_filenames.cc	\
 	flatten_vars.cc		\
 	inference.cc		\
 	inheritance.cc		\

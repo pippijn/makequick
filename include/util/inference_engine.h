@@ -84,12 +84,25 @@ struct inference_engine
     bool final () const { return file->final (); }
     bool matches (fs::path const &f) const { return file->matches (f); }
     bool operator == (prerequisite const &other) const { return *file == *other.file; }
+    bool operator <  (prerequisite const &other) const { return str () < other.str (); }
 
     std::string const &str () const { return dynamic_cast<file_t<std::string> &> (*file).data; }
 
     template<typename T>
     prerequisite (T const &file)
       : file (new file_t<T> (file))
+    {
+    }
+  };
+
+  struct wildcard
+  {
+    std::string const wc;
+
+    bool operator == (wildcard const &rhs) const { return wc == rhs.wc; }
+
+    wildcard (std::string const &wc)
+      : wc (wc)
     {
     }
   };
@@ -102,15 +115,6 @@ struct inference_engine
     node_ptr code;
 
     void print () const;
-    bool operator == (rule const &other) const
-    {
-      return target == other.target && prereqs == other.prereqs;
-    }
-    // a rule is smaller than another rule if it matched more precisely
-    bool operator < (rule const &other) const
-    {
-      return stem.size () < other.stem.size ();
-    }
 
     rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code)
       : target (target)
