@@ -21,9 +21,10 @@ syn match	mqVarDecl		"\v^\s*[A-Z0-9_]+(\s*\=)@="
 syn region	mqVariable		start=+\$(+  end=+)+  contains=mqVariable
 syn region	mqVariable		start=+\$\[+  end=+]+  contains=mqVariable
 
-syn match	mqElementNode		"[a-z]\+flags"
-syn keyword	mqElementNode		program library sources link build custom ex li
-syn keyword	mqElementNode		extra_dist nodist_sources rule project section headers mans data
+syn match	mqElementNode		"[a-z_]\+flags"
+syn match	mqElementNode		"[a-z_]*sources"
+syn keyword	mqElementNode		program library link build custom ex li dir
+syn keyword	mqElementNode		extra_dist rule project section headers mans data
 syn keyword	mqElementNode		functions arg_enable arg_with options define c_bigendian c_typeof
 syn keyword	mqElementNode		c_charset c_enum_fwdecl c_late_expansion c_token_paste c_float_format
 syn keyword	mqElementNode		c_stdint_h alignof c_stmt_exprs output exclude pkg-config template

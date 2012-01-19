@@ -10,6 +10,8 @@ makepp_SOURCES +=		\
 	merge_blocks.cc		\
 	remove_templates.cc	\
 	reparse_vars.cc		\
+	resolve_sources.cc	\
 	resolve_vars.cc		\
+	resolve_wildcards.cc	\
 	sx.cc			\
 	xml.cc

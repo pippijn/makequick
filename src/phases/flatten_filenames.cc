@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "phase.h"
 
 #include "annotations/error_log.h"
@@ -22,35 +24,32 @@ struct flatten_filenames
 //static phase<flatten_filenames> thisphase ("flatten_filenames", "inference", "resolve_sources");
 static phase<flatten_filenames> thisphase ("flatten_filenames", "resolve_vars");
 
+static bool
+cant_flatten (node_ptr const &n)
+{
+  token_ptr tok = n->is<token> ();
+  return !tok || tok->tok != TK_FILENAME;
+}
 
 void
 flatten_filenames::visit (t_filename &n)
-    // TODO: after inference and source filename resolution, this code works
-#if 0
 {
+  if (find_if (n.list.begin (), n.list.end (), cant_flatten) != n.list.end ())
+    return;
+
   node_vec const &body = unlink_all (n.list);
 
   std::string code;
   location loc = location::invalid;
   foreach (node_ptr const &p, body)
     {
-      if (token_ptr tok = p->is<token> ())
+      token &tok = p->as<token> ();
+      if (loc == location::invalid)
         {
-          assert (tok->tok == TK_FILENAME);
-          if (loc == location::invalid)
-            {
-              assert (code.empty ());
-              loc = tok->loc;
-            }
-          code += tok->string;
+          assert (code.empty ());
+          loc = tok.loc;
         }
-      else
-        {
-          assert (loc != location::invalid);
-          n.add (new token (loc, TK_FILENAME, move (code)));
-          loc = location::invalid;
-          n.add (p);
-        }
+      code += tok.string;
     }
   if (loc != location::invalid)
     {
@@ -58,39 +57,3 @@ flatten_filenames::visit (t_filename &n)
       n.add (new token (loc, TK_FILENAME, move (code)));
     }
 }
-#else
-{
-  node_vec const &body = unlink_all (n.list);
-
-  std::string code;
-  location loc = location::invalid;
-  foreach (node_ptr const &p, body)
-    {
-      token_ptr tok = p->is<token> ();
-      if (tok && tok->tok == TK_FILENAME)
-        {
-          if (loc == location::invalid)
-            {
-              assert (code.empty ());
-              loc = tok->loc;
-            }
-          code += tok->string;
-        }
-      else
-        {
-          if (!code.empty ())
-            {
-              assert (loc != location::invalid);
-              n.add (new token (loc, TK_FILENAME, move (code)));
-              loc = location::invalid;
-            }
-          n.add (p);
-        }
-    }
-  if (loc != location::invalid)
-    {
-      assert (!code.empty ());
-      n.add (new token (loc, TK_FILENAME, move (code)));
-    }
-}
-#endif

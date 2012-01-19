@@ -4,7 +4,6 @@
 #include "annotations/file_list.h"
 #include "util/colours.h"
 #include "util/foreach.h"
-#include "util/create_file_list.h"
 #include "util/regex_escape.h"
 
 #include <numeric>
@@ -105,10 +104,20 @@ struct translate_wildcard
   int in_alt;
 };
 
+
+static bool
+starts_with (std::string const &a, std::string const &b)
+{
+  return a.size () >= b.size () && !memcmp (a.data (), b.data (), b.size ());
+}
+
 struct regex_matcher
 {
-  explicit regex_matcher (boost::regex const &re, std::vector<fs::path> const &source_files, node_ptr const &node, error_log &errors)
+  explicit regex_matcher (boost::regex const &re, std::string const &CURDIR,
+                          std::vector<fs::path> const &source_files, node_ptr const &node,
+                          error_log &errors)
     : re (re)
+    , CURDIR (CURDIR)
     , source_files (source_files)
     , node (node)
     , errors (errors)
@@ -117,18 +126,41 @@ struct regex_matcher
 
   bool operator () (fs::path const &p) const
   {
+    if (!starts_with (p.native (), CURDIR))
+      return false;
     if (find (source_files.begin (), source_files.end (), p) != source_files.end ())
       return false;
+#if 0
+    printf ("\"%s\" =~ /%s/\n", p.c_str (), re.str ().c_str ());
+#endif
     bool matched = regex_match (p.c_str (), re);
+#if WARN_WILDCARD
     if (matched)
       errors.add<warning> (node, "wildcard matched file: " + C::filename (p));
+#endif
     return matched;
   }
 
   boost::regex const &re;
+  std::string const &CURDIR;
   std::vector<fs::path> const &source_files;
   node_ptr const &node;
   error_log &errors;
+};
+
+struct add_file
+{
+  add_file (t_sources_members_ptr members)
+    : members (members)
+  {
+  }
+
+  void operator () (fs::path const &file)
+  {
+    members->add (new t_filename (members->loc, new token (members->loc, TK_FILENAME, file.native ())));
+  }
+
+  t_sources_members_ptr members;
 };
 
 void
@@ -141,34 +173,40 @@ resolve_wildcards::visit (t_sources_members &n)
   resume_list ();
   in_sources = false;
 
-  //printf ("%lu wildcards, %lu source files\n", wildcards.size (), source_files.size ());
-
-  if (!wildcards.empty ())
+  if (wildcards.empty ())
     {
-      std::string regex = "(";
-      foreach (generic_node_ptr const &wc, wildcards)
-        {
-          if (wc->list.front ()->as<token> ().tok == TK_FN_SLASH)
-            regex_escape (regex, files.base.native ());
-          else
-            regex_escape (regex, wc->loc.file->parent_path ().native () + "/");
-          regex += accumulate (wc->list.begin (),
-                               wc->list.end (),
-                               std::string (),
-                               translate_wildcard ());
-          if (wc != wildcards.back ())
-            regex += '|';
-        }
-      wildcards.clear ();
-      regex += ")";
-
-      copy_if (files.begin, files.end,
-               back_inserter (source_files),
-               regex_matcher (boost::regex (regex), source_files, &n, errors));
+      source_files.clear ();
+      return;
     }
 
-  n.list.clear ();
+#if 0
+  printf ("%lu wildcards, %lu source files\n", wildcards.size (), source_files.size ());
+#endif
 
-  create_file_list (source_files, n.list, n.loc);
+  std::string CURDIR = n.loc.file->parent_path ().native ();
+
+  std::string regex;
+  if (!CURDIR.empty ())
+    regex_escape (regex, CURDIR + "/");
+  regex += '(';
+  foreach (generic_node_ptr const &wc, wildcards)
+    {
+      assert (starts_with (wc->loc.file->parent_path ().native (), CURDIR));
+      regex += accumulate (wc->list.begin (),
+                           wc->list.end (),
+                           std::string (),
+                           translate_wildcard ());
+      if (wc != wildcards.back ())
+        regex += '|';
+    }
+  wildcards.clear ();
+  regex += ')';
+
+  copy_if (files.begin, files.end,
+           back_inserter (source_files),
+           regex_matcher (boost::regex (regex), CURDIR, source_files, &n, errors));
+
+  n.clear ();
+  for_each (source_files.begin (), source_files.end (), add_file (&n));
   source_files.clear ();
 }

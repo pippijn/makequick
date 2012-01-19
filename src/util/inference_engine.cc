@@ -32,21 +32,13 @@ inference_engine::add_rule (std::string const &target,
 {
   rule r (target, prereqs, code);
 
-  using namespace boost::phoenix;
-  using namespace boost::phoenix::arg_names;
-
-  if (std::find_if (prereqs.begin (),
-                    prereqs.end (),
-                    !bind (&prerequisite::final, arg1))
-      != prereqs.end ())
-    info.baserules.push_back (r);
-  else
+  if (prereqs.empty ())
     {
-      // XXX: we can't do this, yet
-      //info.files.push_back (target);
-      //info.rules.push_back (r);
-      info.baserules.push_back (r);
+      info.files.push_back (target);
+      info.rules.push_back (r);
     }
+  else
+    info.baserules.push_back (r);
 }
 
 
@@ -177,7 +169,9 @@ class inference_engine::engine
     if (operations > 160000)
       {
         size_t partitions = std::min (10lu, operations / 80000);
+#if 0
         printf ("doing %ld operations => splitting in %ld partitions\n", operations, partitions);
+#endif
 
         boost::mutex lock;
         boost::ptr_vector<boost::thread> threads;
@@ -369,13 +363,12 @@ public:
 void
 inference_engine::infer ()
 {
-  assert (info.rules.empty ());
-#if 1
+#if 0
   timer T ("inference");
   printf ("running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
 #endif
   engine::infer (info.baserules, info.rules, info.files);
-#if 1
+#if 0
   printf ("inferred %lu rules; we now have %lu files\n", info.rules.size (), info.files.size ());
 #endif
 }

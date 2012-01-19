@@ -57,8 +57,8 @@ struct inference
   ~inference ()
   {
     engine.infer ();
-#if 1
-    //engine.print ();
+#if 0
+    engine.print ();
     if (!std::uncaught_exception ())
       throw "inference test";
 #endif

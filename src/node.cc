@@ -101,7 +101,9 @@ namespace nodes
     if (parent ())
       {
         assert (parent_index () != -1);
-        parent ()->list.at (parent_index ()) = NULL;
+        node_ptr &position = parent ()->list.at (parent_index ());
+        assert (position == this);
+        position = NULL;
         m.parent = NULL;
         m.parent_index = -1;
       }
@@ -329,6 +331,15 @@ namespace nodes
             return false;
         }
     return true;
+  }
+
+  void
+  node_list::clear ()
+  {
+    foreach (node_ptr const &n, list)
+      if (n)
+        n->unlink ();
+    list.clear ();
   }
 
   size_t

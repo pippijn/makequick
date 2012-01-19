@@ -93,6 +93,8 @@ namespace nodes
     void replace (size_t index, node_vec const &list);
     void replace (node &n, node_vec const &list);
 
+    void clear ();
+
     node_list (location const &loc);
     ~node_list ();
 
