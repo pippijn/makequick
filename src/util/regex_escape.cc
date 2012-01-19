@@ -1,6 +1,6 @@
 #include "util/regex_escape.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 
 void
 regex_escape (std::string &regex, std::string const &wc)

@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 
 /** \brief Concatenate all non-wildcard path parts in filenames.
  */

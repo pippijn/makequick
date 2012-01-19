@@ -1,4 +1,4 @@
-#include "colours.h"
+#include "util/colours.h"
 
 #include <boost/filesystem/path.hpp>
 

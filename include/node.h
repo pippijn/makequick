@@ -16,7 +16,16 @@ struct location
   int last_column;
 
   static location const generated;
+  static location const invalid;
 };
+
+bool operator == (location const &a, location const &b);
+
+static inline bool
+operator != (location const &a, location const &b)
+{
+  return !(a == b);
+}
 
 namespace nodes
 {
@@ -51,6 +60,12 @@ namespace nodes
     int parent_index () const { return m.parent_index; }
     node_list *parent () const { return m.parent; }
 
+    node_ptr const &prev_sibling () const;
+    node_ptr const &next_sibling () const;
+
+    bool has_prev_sibling () const;
+    bool has_next_sibling () const;
+
     void unlink ();
 
     static std::vector<node *> nodes;
@@ -70,6 +85,9 @@ namespace nodes
     node_list *set (size_t i, node_ptr n);
     size_t size () const;
     node_ptr const &operator [] (size_t index) const;
+
+    bool audit_list () const;
+    void replace (size_t index, node_vec::const_iterator it, node_vec::const_iterator et);
 
     node_list (location const &loc);
     ~node_list ();
@@ -172,7 +190,7 @@ namespace tokens
   struct token
     : node
   {
-    virtual void accept (visitor &v) { v.visit (*this); }
+    virtual void accept (visitor &v) { v.visit (*token_ptr (this)); }
     virtual node_ptr clone () const { return new token (loc, tok, string); }
     token ()
       : node (location::generated)

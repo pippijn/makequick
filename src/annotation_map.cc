@@ -1,5 +1,5 @@
 #include "annotation_map.h"
-#include "colours.h"
+#include "util/colours.h"
 
 #include <stdexcept>
 

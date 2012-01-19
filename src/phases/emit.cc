@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 
 struct emit
   : visitor

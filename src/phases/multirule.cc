@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 #include "util/make_filename.h"
 
 #include <algorithm>
@@ -69,7 +69,7 @@ multirule::visit (t_filename &n)
                 }
               token_vec::const_iterator rb = find_if (lb, multifile.end (), rbrace);
               assert (rb != multifile.end ());
-              assert (std::distance (lb, rb) > 2);
+              assert (distance (lb, rb) > 2);
 
               token_vec const instance (multifile.begin (), lb);
 

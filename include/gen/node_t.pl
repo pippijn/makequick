@@ -45,7 +45,7 @@ gen {
 struct t_$node
   : generic_node_t<t_$node>
 {
-  virtual void accept (visitor &v) { v.visit (*this); }
+  virtual void accept (visitor &v) { v.visit (*t_${node}_ptr (this)); }
 
   t_$node ();
   t_$node (location const &loc$params);$accessors

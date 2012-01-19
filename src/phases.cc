@@ -2,9 +2,9 @@
 
 #include "annotations/error_log.h"
 #include "annotation_map.h"
-#include "colours.h"
-#include "foreach.h"
 #include "sighandler.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 #include "util/timer.h"
 
 #include <cstdio>

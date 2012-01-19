@@ -3,8 +3,8 @@
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
 #include "annotations/rule_info.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 
 #include <boost/filesystem/operations.hpp>
 
@@ -72,7 +72,7 @@ try_resolve (file_list const &files,
 #if 0
   std::cout << "looking for " << path << "\n";
 #endif
-  if (exists (path) || std::binary_search (buildable.begin (), buildable.end (), path))
+  if (exists (path) || binary_search (buildable.begin (), buildable.end (), path))
     {
       file = path.native ();
       return true;

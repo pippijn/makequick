@@ -1,8 +1,8 @@
 #include "phase.h"
 
 #include "annotations/target_objects.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 
 #include <boost/filesystem/path.hpp>
 

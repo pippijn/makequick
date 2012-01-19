@@ -1,8 +1,8 @@
 #include "phase.h"
 
 #include "annotations/output_file.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>

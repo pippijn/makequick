@@ -2,8 +2,8 @@
 
 #include "annotations/error_log.h"
 #include "annotations/symbol_table.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
@@ -61,7 +61,7 @@ static generic_node_ptr
 make_var (std::string const &value)
 {
   return new t_vardecl_body (location::generated,
-           new token (location::generated, TK_FILENAME, value));
+           new token (location::generated, TK_CODE, value));
 }
 
 void

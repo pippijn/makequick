@@ -3,6 +3,7 @@
 #include "node_ptr.h"
 
 #include <exception>
+#include <string>
 #include <vector>
 
 struct semantic_error

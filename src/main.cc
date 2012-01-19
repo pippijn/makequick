@@ -4,10 +4,10 @@
 #include "annotations/file_list.h"
 #include "annotations/error_log.h"
 #include "annotation_map.h"
-#include "foreach.h"
 #include "parseutil.h"
 #include "phases.h"
 #include "sighandler.h"
+#include "util/foreach.h"
 #include "util/timer.h"
 
 #include <cstdio>
@@ -26,6 +26,8 @@ static char const *const all_phases[] = {
   "insert_vardecl_syms",
   "insert_varadd_syms",
   "resolve_vars",
+  "flatten_vars",
+  "reparse_vars",
   "merge_blocks",
   "sx",
 };

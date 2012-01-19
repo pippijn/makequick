@@ -2,8 +2,8 @@
 
 #include "annotations/error_log.h"
 #include "annotations/file_list.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 #include "util/create_file_list.h"
 #include "util/regex_escape.h"
 

@@ -2,7 +2,7 @@
 
 #include "annotations/file_list.h"
 #include "annotations/rule_info.h"
-#include "foreach.h"
+#include "util/foreach.h"
 #include "util/inference_engine.h"
 #include "util/regex_escape.h"
 
@@ -71,10 +71,10 @@ struct inference
         rules.rules.push_back (rule_info::rule ());
         rule_info::rule &ri = rules.rules.back ();
         ri.target = r.target;
-        std::transform (r.prereqs.begin (),
-                        r.prereqs.end (),
-                        back_inserter (ri.prereq),
-                        bind (&inference_engine::prerequisite::str, arg1));
+        transform (r.prereqs.begin (),
+                   r.prereqs.end (),
+                   back_inserter (ri.prereq),
+                   bind (&inference_engine::prerequisite::str, arg1));
         ri.stem = r.stem;
         ri.code = r.code;
       }

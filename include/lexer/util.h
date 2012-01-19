@@ -1,10 +1,4 @@
-static std::string
-move (std::string &s)
-{
-  std::string r = s;
-  s.clear ();
-  return r;
-}
+#include "util/move.h"
 
 static std::string
 escaped (char const *text, int leng)

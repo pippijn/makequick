@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 #include "util/make_filename.h"
 #include "util/symbol_visitor.h"
 

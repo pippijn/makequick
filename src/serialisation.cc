@@ -1,7 +1,7 @@
 #include "node.h"
 
-#include "foreach.h"
 #include "nodes.pb.h"
+#include "util/foreach.h"
 
 #include <fstream>
 

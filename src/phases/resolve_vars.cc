@@ -1,7 +1,7 @@
 #include "phase.h"
 
 #include "annotations/symbol_table.h"
-#include "foreach.h"
+#include "util/foreach.h"
 #include "util/symbol_visitor.h"
 #include "util/extract_string.h"
 #include "util/unique_visitor.h"

@@ -3,8 +3,8 @@
 #include "annotations/error_log.h"
 #include "annotations/rule_info.h"
 #include "annotations/target_objects.h"
-#include "colours.h"
-#include "foreach.h"
+#include "util/colours.h"
+#include "util/foreach.h"
 
 #include <boost/filesystem/path.hpp>
 
@@ -127,9 +127,9 @@ instantiate_rules::instantiate (t_target_definition &n,
 {
   foreach (PrereqT const &obj, targets)
     {
-      if (std::find (rules.files.begin (),
-                     rules.files.end (),
-                     obj) == rules.files.end ())
+      if (find (rules.files.begin (),
+                rules.files.end (),
+                obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));
           continue;

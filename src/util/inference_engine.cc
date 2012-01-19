@@ -1,5 +1,5 @@
 #include "util/inference_engine.h"
-#include "foreach.h"
+#include "util/foreach.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/path.hpp>

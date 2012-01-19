@@ -1,8 +1,8 @@
 #include "annotations/symbol_table.h"
 
-#include "foreach.h"
 #include "phases.h"
 #include "node.h"
+#include "util/foreach.h"
 
 #include <cstdio>
 #include <stdexcept>

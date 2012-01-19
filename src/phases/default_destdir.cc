@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "foreach.h"
+#include "util/foreach.h"
 
 struct default_destdir
   : visitor

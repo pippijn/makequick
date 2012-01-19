@@ -1,5 +1,6 @@
 makepp_SOURCES +=		\
 	audit.cc		\
+	flatten_vars.cc		\
 	inference.cc		\
 	inheritance.cc		\
 	insert_target_syms.cc	\
@@ -7,6 +8,7 @@ makepp_SOURCES +=		\
 	insert_vardecl_syms.cc	\
 	merge_blocks.cc		\
 	remove_templates.cc	\
+	reparse_vars.cc		\
 	resolve_vars.cc		\
 	sx.cc			\
 	xml.cc
