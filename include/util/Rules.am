@@ -1,8 +1,13 @@
 EXTRA_DIST +=			\
+	colours.h		\
 	extract_string.h	\
+	foreach.h		\
 	inference_engine.h	\
 	local.h			\
+	make_var.h		\
+	move.h			\
 	regex_escape.h		\
 	symbol_visitor.h	\
 	timer.h			\
-	unique_visitor.h
+	unique_visitor.h	\
+	unlink.h

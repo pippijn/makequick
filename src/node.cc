@@ -51,6 +51,7 @@ namespace nodes
     : loc (loc)
     , m ()
   {
+    assert (loc != location::invalid);
     m.index = nodes.size ();
     m.parent_index = -1;
     nodes.push_back (this);

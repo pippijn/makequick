@@ -67,7 +67,7 @@
    intvar => ['num'],
    roundvar => ['name'],
    squarevar => ['name'],
-   callvar => ['name', 'func'],
+   callvar => ['name', 'arg'],
    accessvar => ['name', 'member'],
    filtervar => ['name', 'member', 'filter'],
 }

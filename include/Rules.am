@@ -8,10 +8,8 @@ include util/Rules.am
 EXTRA_DIST +=			\
 	annotation.h		\
 	annotation_map.h	\
-	colours.h		\
 	exception.h		\
 	file_lexer.h		\
-	foreach.h		\
 	lexer.h			\
 	node.h			\
 	node_ptr.h		\

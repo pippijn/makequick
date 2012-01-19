@@ -4,6 +4,7 @@
 #include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/make_var.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
@@ -55,13 +56,6 @@ node_type_to_symbol_type (node_type type)
     case n_template: return T_TEMPLATE;
     }
   throw std::runtime_error ("invalid state in target_definition");
-}
-
-static generic_node_ptr
-make_var (std::string const &value)
-{
-  return new t_vardecl_body (location::generated,
-           new token (location::generated, TK_CODE, value));
 }
 
 void
