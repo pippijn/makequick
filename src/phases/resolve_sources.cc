@@ -8,7 +8,8 @@
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
-#include "fs/path.hpp"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 
 template<typename ForwardIterator>
@@ -55,13 +56,13 @@ try_resolve (file_list const &files,
              file_set const &buildable,
              std::string &file, fs::path const &dir = fs::path ())
 {
-  fs::path const &path = file[0] == '/' ? fs::path (file.c_str () + 1) : dir / file;
+  fs::path const &path = file[0] == '/' ? file.c_str () + 1 : dir / file;
 #if 0
   std::cout << "looking for " << path << "\n";
 #endif
   if (exists (path) || buildable.find (path) != buildable.end ())
     {
-      file = native (dir / file);
+      file = (dir / file).native ();
       return true;
     }
 
@@ -71,7 +72,7 @@ try_resolve (file_list const &files,
 static location
 proper_loc (node &n)
 {
-  if (c_str (*n.loc.file)[0] != '<')
+  if (n.loc.file->c_str ()[0] != '<')
     return n.loc;
   assert (n.parent ());
   return proper_loc (*n.parent ());
@@ -91,7 +92,7 @@ resolve_sources::visit (t_filename &n)
           std::cout << "resolving " << file << "\n";
 #endif
 
-          fs::path CURDIR = parent_path (*proper_loc (n).file);
+          fs::path CURDIR = proper_loc (n).file->parent_path ();
           if (generic_node_ptr curdir = symtab.lookup (T_VARIABLE, "CURDIR"))
             CURDIR = fs::path ((*curdir)[0]->as<token> ().string);
 

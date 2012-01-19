@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "fs/fwd.hpp"
+#include <boost/filesystem_fwd.hpp>
 
 #define PARSER_BENCH 0
 

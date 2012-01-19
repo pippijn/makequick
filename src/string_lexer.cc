@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include <boost/algorithm/string/trim.hpp>
-#include "fs/path.hpp"
+#include <boost/filesystem/path.hpp>
 
 static fs::path const string_file ("<string>");
 

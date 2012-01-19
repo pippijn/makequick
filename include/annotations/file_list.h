@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "fs/fwd.hpp"
+#include <boost/filesystem_fwd.hpp>
 
 struct file_list
   : annotation

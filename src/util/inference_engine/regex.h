@@ -19,7 +19,7 @@ inline bool
 inference_engine::prerequisite::file_t<boost::regex>::stem (fs::path const &file, std::string &stem) const
 {
   boost::smatch matches;
-  bool matched = regex_match (native (file), matches, data);
+  bool matched = regex_match (file.native (), matches, data);
   if (matched)
     stem = matches.str (1);
   return matched;

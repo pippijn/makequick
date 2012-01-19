@@ -18,7 +18,7 @@ template<>
 inline bool
 inference_engine::prerequisite::file_t<std::string>::stem (fs::path const &file, std::string &stem) const
 {
-  std::string const &str = native (file);
+  std::string const &str = file.native ();
   if (str == data)
     {
       stem = str;

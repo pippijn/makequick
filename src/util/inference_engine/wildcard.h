@@ -23,7 +23,7 @@ inference_engine::prerequisite::file_t<wildcard>::stem (fs::path const &file, st
   std::string::const_iterator p = data.wc.begin ();
   std::string::const_iterator end = data.wc.end ();
 
-  char const *f = c_str (file);
+  char const *f = file.c_str ();
   char const *stem_begin = f;
   char const *stem_end = f;
   while (p != end)

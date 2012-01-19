@@ -10,7 +10,7 @@
 #include <numeric>
 
 #include <boost/regex.hpp>
-#include "fs/path.hpp"
+#include <boost/filesystem/path.hpp>
 
 struct resolve_wildcards
   : visitor
@@ -126,14 +126,14 @@ struct regex_matcher
 
   bool operator () (fs::path const &p) const
   {
-    if (!starts_with (native (p), CURDIR))
+    if (!starts_with (p.native (), CURDIR))
       return false;
     if (find (source_files.begin (), source_files.end (), p) != source_files.end ())
       return false;
 #if 0
     printf ("\"%s\" =~ /%s/\n", p.c_str (), re.str ().c_str ());
 #endif
-    bool matched = regex_match (c_str (p), re);
+    bool matched = regex_match (p.c_str (), re);
 #if WARN_WILDCARD
     if (matched)
       errors.add<warning> (node, "wildcard matched file: " + C::filename (p));
@@ -157,7 +157,7 @@ struct add_file
 
   void operator () (fs::path const &file)
   {
-    members->add (make_filename (members->loc, native (file)));
+    members->add (make_filename (members->loc, file.native ()));
   }
 
   t_sources_members_ptr members;
@@ -183,7 +183,7 @@ resolve_wildcards::visit (t_sources_members &n)
   printf ("%lu wildcards, %lu source files\n", wildcards.size (), source_files.size ());
 #endif
 
-  std::string CURDIR = native (parent_path (*n.loc.file));
+  std::string CURDIR = n.loc.file->parent_path ().native ();
 
   std::string regex;
   if (!CURDIR.empty ())
@@ -191,7 +191,7 @@ resolve_wildcards::visit (t_sources_members &n)
   regex += '(';
   foreach (generic_node_ptr const &wc, wildcards)
     {
-      assert (starts_with (native (parent_path (*wc->loc.file)), CURDIR));
+      assert (starts_with (wc->loc.file->parent_path ().native (), CURDIR));
       regex += accumulate (wc->list.begin (),
                            wc->list.end (),
                            std::string (),

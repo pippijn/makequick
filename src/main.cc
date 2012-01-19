@@ -16,9 +16,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "fs/path.hpp"
-
-namespace bfs = boost::filesystem;
+#include <boost/filesystem/path.hpp>
 
 static char const *const all_phases[] = {
   "audit",
@@ -41,12 +39,12 @@ static char const *const all_phases[] = {
   //"sx",
 };
 
-static bfs::path
-resolve (bfs::path const &p)
+static fs::path
+resolve (fs::path const &p)
 {
-  bfs::path result;
+  fs::path result;
 
-  for (bfs::path::iterator it = p.begin ();
+  for (fs::path::iterator it = p.begin ();
        it != p.end ();
        ++it)
     {
@@ -75,7 +73,7 @@ resolve (bfs::path const &p)
 }
 
 static void
-collect (bfs::path const &path, std::vector<fs::path> &files)
+collect (fs::path const &path, std::vector<fs::path> &files)
 {
   if (is_directory (path) && path.filename ().c_str ()[0] != '.')
     for_each (fs::directory_iterator (path),
@@ -85,24 +83,18 @@ collect (bfs::path const &path, std::vector<fs::path> &files)
     files.push_back (fs::path (path));
 }
 
-static void
-collect (fs::path const &path, std::vector<fs::path> &files)
-{
-  return collect (path.data (), files);
-}
-
 struct unbase
 {
   unbase (fs::path const &base)
-    : base (native (base))
+    : base (base.native ())
   {
   }
 
   void operator () (fs::path &path)
   {
-    std::string const &n = native (path);
-    assert (native (path).substr (0, base.length ()) == base);
-    path = fs::path (n.substr (base.length () + 1));
+    std::string const &n = path.native ();
+    assert (n.substr (0, base.length ()) == base);
+    path = n.substr (base.length () + 1);
   }
 
   std::string base;
@@ -174,7 +166,7 @@ try
       return EXIT_FAILURE;
     }
 
-  fs::path const path (resolve (absolute (bfs::path (argv[0]))));
+  fs::path const path (resolve (absolute (fs::path (argv[0]))));
   if (!exists (path))
     {
       puts ("path does not exist");

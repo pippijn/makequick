@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "fs/fwd.hpp"
+#include <boost/filesystem_fwd.hpp>
 
 struct rule_info
   : annotation

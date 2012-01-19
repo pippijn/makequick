@@ -7,14 +7,26 @@
 #include <boost/range.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 #include <boost/thread.hpp>
+#include <boost/filesystem/path.hpp>
 
-#include "fs/path.hpp"
 #include "util/inference_engine.h"
 #include "util/foreach.h"
 #include "util/timer.h"
 
 
 #define THREADED_PARTIALS 0
+
+
+namespace std { namespace tr1 {
+
+  template<>
+  size_t
+  hash<fs::path>::operator () (fs::path path) const
+  {
+    return std::tr1::hash<std::string> () (path.native ());
+  }
+
+} }
 
 
 typedef inference_engine::rule rule;
@@ -119,7 +131,7 @@ class inference_engine::engine
                     {
                       // instantiate rule
                       rule instance = r;
-                      instance.prereqs[&p - &r.prereqs.front ()] = native (f);
+                      instance.prereqs[&p - &r.prereqs.front ()] = f.native ();
 
                       map[stem].push_back (instance);
                     }
@@ -402,5 +414,3 @@ rule::print () const
   if (!stem.empty ())
     std::cout << " ($* = " << stem << ")";
 }
-
-#include "inline_path.h"

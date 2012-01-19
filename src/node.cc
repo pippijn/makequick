@@ -7,7 +7,7 @@
 
 #include <cstdio>
 
-#include "fs/path.hpp"
+#include <boost/filesystem/path.hpp>
 
 static fs::path const generated_file ("<generated>");
 location const location::generated = { &generated_file, 0, 0, 0, 0 };

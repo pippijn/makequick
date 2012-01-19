@@ -1,10 +1,13 @@
 #include "phase.h"
 
 #include "annotations/error_log.h"
+#include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/make_filename.h"
 #include "util/symbol_visitor.h"
+
+#include <boost/filesystem/path.hpp>
 
 struct resolve_shortvars
   : symbol_visitor
@@ -89,8 +92,8 @@ modify (node_ptr const &n, char modifier, bool builddir)
           : NULL;
   assert (pred != NULL);
 
-  std::string const &orig = fn[0]->as<token> ().string;
-  return make_filename (fn.loc, add_builddir (pred (orig), orig, builddir));
+  fs::path orig (fn[0]->as<token> ().string);
+  return make_filename (fn.loc, add_builddir (pred (orig), orig.native (), builddir));
 }
 
 void

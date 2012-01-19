@@ -7,7 +7,7 @@
 #include <climits>
 #include <stdexcept>
 
-#include "fs/path.hpp"
+#include <boost/filesystem/path.hpp>
 
 file_lexer::file_lexer (file_list const &files)
   : lexer ("parsing")
@@ -38,7 +38,7 @@ file_lexer::close_file ()
 static bool
 is_rule_file (fs::path const &file)
 {
-  return extension (file) == ".mq";
+  return file.extension () == ".mq";
 }
 
 int
@@ -60,9 +60,9 @@ file_lexer::wrap ()
   if (cur == files.end)
     return 1;
 
-  FILE *fh = fopen (c_str (files.absolute (*cur)), "r");
+  FILE *fh = fopen (files.absolute (*cur).c_str (), "r");
   if (!fh)
-    throw std::runtime_error ("Could not open " + native (*cur) + " for reading");
+    throw std::runtime_error ("Could not open " + cur->native () + " for reading");
   ++cur;
 
   yyset_in (fh, yyscanner);

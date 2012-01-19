@@ -8,7 +8,7 @@
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
-#include "fs/path.hpp"
+#include <boost/filesystem/path.hpp>
 
 struct insert_vardecl_syms
   : symbol_visitor
@@ -61,7 +61,7 @@ node_type_to_symbol_type (node_type type)
 void
 insert_vardecl_syms::visit (t_target_definition &n)
 {
-  if (!symtab.insert (T_VARIABLE, "CURDIR", make_var (native (parent_path (*n.loc.file)))))
+  if (!symtab.insert (T_VARIABLE, "CURDIR", make_var (n.loc.file->parent_path ().native ())))
     throw std::runtime_error ("unable to add $(TARGET) variable");
 
   symbol_visitor::visit (n);

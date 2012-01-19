@@ -4,15 +4,18 @@ makepp_SOURCES +=		\
 	default_prereq.cc	\
 	flatten_filenames.cc	\
 	flatten_vars.cc		\
+	infer_target_objects.cc	\
 	inference.cc		\
 	inheritance.cc		\
 	insert_target_syms.cc	\
 	insert_varadd_syms.cc	\
 	insert_vardecl_syms.cc	\
+	instantiate_rules.cc	\
 	merge_blocks.cc		\
 	multirule.cc		\
 	remove_templates.cc	\
 	reparse_vars.cc		\
+	resolve_shortvars.cc	\
 	resolve_sources.cc	\
 	resolve_vars.cc		\
 	resolve_wildcards.cc	\

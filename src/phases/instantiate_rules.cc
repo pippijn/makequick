@@ -7,6 +7,8 @@
 #include "util/foreach.h"
 #include "util/make_filename.h"
 
+#include <boost/filesystem/path.hpp>
+
 struct instantiate_rules
   : visitor
 {
@@ -47,7 +49,11 @@ struct instantiate_rules
 #endif
 };
 
-static phase<instantiate_rules> thisphase ("instantiate_rules", "infer_target_objects", "inference", "resolve_wildcards", "default_prereq");
+static phase<instantiate_rules> thisphase ("instantiate_rules",
+                                           "infer_target_objects",
+                                           "inference",
+                                           "resolve_wildcards",
+                                           "default_prereq");
 
 struct resolve_stem
   : visitor
@@ -122,9 +128,9 @@ instantiate_rules::instantiate (t_target_definition &n,
 {
   foreach (PrereqT const &obj, targets)
     {
-      if (find (rules.files.begin (),
-                rules.files.end (),
-                obj) == rules.files.end ())
+      if (std::find (rules.files.begin (),
+                     rules.files.end (),
+                     obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));
           continue;

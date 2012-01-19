@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "fs/fwd.hpp"
+#include <boost/filesystem_fwd.hpp>
 
 struct error_log
   : annotation
