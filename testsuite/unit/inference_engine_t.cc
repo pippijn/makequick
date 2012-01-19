@@ -1,9 +1,10 @@
 #include "util/inference_engine.h"
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
+typedef fs::path P;
 typedef std::string S;
 typedef boost::regex R;
 
@@ -12,7 +13,7 @@ main ()
 {
   inference_engine dag;
 
-  dag.add_file ("yacc/cow.y.in");
+  dag.add_file (P ("yacc/cow.y.in"));
   dag.add_rule ("%", R ("(.+)\\.in"));
   dag.add_rule ("src/%.c", R ("yacc/(.+).y"));
   dag.add_rule ("inc/%.h", R ("yacc/(.+).y"));
@@ -21,16 +22,16 @@ main ()
   dag.add_rule ("%.c", R ("(.+).as"));
   dag.add_rule ("testsuite/%.c", R ("testsuite/(.+).as"));
 
-  dag.add_file ("aldor.as");
-  dag.add_file ("testsuite/aldor-test.as");
+  dag.add_file (P ("aldor.as"));
+  dag.add_file (P ("testsuite/aldor-test.as"));
 
-  dag.add_file ("/usr/bin/gcc");
+  dag.add_file (P ("/usr/bin/gcc"));
 #if 1
   int const FILES = 2;
   for (int i = 0; i < FILES; i++)
-    dag.add_file ("src/foo" + boost::lexical_cast<std::string> (i) + ".c");
+    dag.add_file (P ("src/foo" + boost::lexical_cast<std::string> (i) + ".c"));
   for (int i = 0; i < FILES; i++)
-    dag.add_file ("inc/foo" + boost::lexical_cast<std::string> (i) + ".h");
+    dag.add_file (P ("inc/foo" + boost::lexical_cast<std::string> (i) + ".h"));
 #endif
 
   dag.add_rule ("%.o", S ("/usr/bin/gcc"), R ("src/(.+)\\.c"), R ("inc/(.+)\\.h"));

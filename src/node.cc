@@ -7,9 +7,9 @@
 
 #include <cstdio>
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
-static fs::path const generated_file = "<generated>";
+static fs::path const generated_file ("<generated>");
 location const location::generated = { &generated_file, 0, 0, 0, 0 };
 location const location::invalid = { 0, 0, 0, 0, 0 };
 
@@ -318,6 +318,19 @@ namespace nodes
   {
     assert (n.parent () == this);
     replace (n.parent_index (), list);
+  }
+
+  void
+  node_list::replace (size_t index, node_ptr p)
+  {
+    replace (index, node_vec::const_iterator (&p), node_vec::const_iterator (&p) + 1);
+  }
+
+  void
+  node_list::replace (node &n, node_ptr p)
+  {
+    assert (n.parent () == this);
+    replace (n.parent_index (), p);
   }
 
   bool

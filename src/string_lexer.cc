@@ -6,9 +6,9 @@
 #include <stdexcept>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
-static fs::path const string_file = "<string>";
+static fs::path const string_file ("<string>");
 
 string_lexer::string_lexer (std::string const &s)
   : lexer ("string parsing")

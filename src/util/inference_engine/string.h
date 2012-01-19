@@ -22,8 +22,14 @@ inference_engine::prerequisite::file_t<std::string>::matches (fs::path const &fi
 }
 
 template<>
-inline std::string
-inference_engine::prerequisite::file_t<std::string>::stem (fs::path const &file) const
+inline bool
+inference_engine::prerequisite::file_t<std::string>::stem (fs::path const &file, std::string &stem) const
 {
-  return file == data ? file.native () : "";
+  std::string const &str = native (file);
+  if (str == data)
+    {
+      stem = str;
+      return true;
+    }
+  return false;
 }

@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-#include <boost/filesystem_fwd.hpp>
+#include "fs/fwd.hpp"
 
 struct target_objects
   : annotation

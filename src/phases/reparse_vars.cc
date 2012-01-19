@@ -55,7 +55,7 @@ reparse_vars::visit (t_vardecl_body &n)
           if (node_ptr result = parser (lex, errors) ())
             parent->replace (n, result->as<t_filename> ().list);
         }
-      else
+      else if (n.parent () && (parent = n.parent ()->is<t_filename> ()))
         {
           string_lexer lex (extract_string (n));
           lex.push_state (yy::FILENAME);

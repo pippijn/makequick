@@ -5,7 +5,6 @@
 #include <cstdio>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 struct error_log::pimpl
@@ -57,7 +56,7 @@ error_log::print (fs::path const &path, char const *base) const
           break;
         }
       std::string what = e.what ();
-      boost::replace_all (what, path.native (), base);
+      boost::replace_all (what, native (path), base);
       puts (what.c_str ());
     }
 }

@@ -8,7 +8,7 @@
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
-#include <boost/filesystem/operations.hpp>
+#include "fs/path.hpp"
 
 
 template<typename ForwardIterator>
@@ -18,7 +18,7 @@ is_sorted (ForwardIterator it, ForwardIterator et)
   ForwardIterator prev = it;
   while (++it != et)
     {
-      if (*prev > *it)
+      if (*it < *prev)
         return false;
       prev = it;
     }
@@ -44,7 +44,6 @@ struct resolve_sources
     , errors (annots.get ("errors"))
   {
     assert (is_sorted (files.begin, files.end));
-    assert (is_sorted (rule_info.files.begin (), rule_info.files.end ()));
   }
 };
 
@@ -53,16 +52,16 @@ static phase<resolve_sources> thisphase ("resolve_sources", "inference");
 
 static bool
 try_resolve (file_list const &files,
-             std::vector<fs::path> const &buildable,
+             file_set const &buildable,
              std::string &file, fs::path const &dir = fs::path ())
 {
-  fs::path const &path = file[0] == '/' ? file.c_str () + 1 : dir / file;
+  fs::path const &path = file[0] == '/' ? fs::path (file.c_str () + 1) : dir / file;
 #if 0
   std::cout << "looking for " << path << "\n";
 #endif
-  if (exists (path) || binary_search (buildable.begin (), buildable.end (), path))
+  if (exists (path) || buildable.find (path) != buildable.end ())
     {
-      file = (dir / file).native ();
+      file = native (dir / file);
       return true;
     }
 
@@ -72,7 +71,7 @@ try_resolve (file_list const &files,
 static location
 proper_loc (node &n)
 {
-  if (n.loc.file->c_str ()[0] != '<')
+  if (c_str (*n.loc.file)[0] != '<')
     return n.loc;
   assert (n.parent ());
   return proper_loc (*n.parent ());
@@ -87,14 +86,14 @@ resolve_sources::visit (t_filename &n)
       if (n.size () == 1)
         {
           token &t = n[0]->as<token> ();
-          fs::path file = t.string;
+          fs::path file (t.string);
 #if 0
           std::cout << "resolving " << file << "\n";
 #endif
 
-          fs::path CURDIR = proper_loc (n).file->parent_path ();
+          fs::path CURDIR = parent_path (*proper_loc (n).file);
           if (generic_node_ptr curdir = symtab.lookup (T_VARIABLE, "CURDIR"))
-            CURDIR = (*curdir)[0]->as<token> ().string;
+            CURDIR = fs::path ((*curdir)[0]->as<token> ().string);
 
           bool absolute = t.mutable_string[0] == '/';
 

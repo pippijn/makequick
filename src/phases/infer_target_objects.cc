@@ -4,8 +4,6 @@
 #include "util/colours.h"
 #include "util/foreach.h"
 
-#include <boost/filesystem/path.hpp>
-
 struct infer_target_objects
   : visitor
 {

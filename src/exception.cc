@@ -6,8 +6,6 @@
 
 #include <sstream>
 
-#include <boost/filesystem/path.hpp>
-
 enum severity_level
 {
   WARNING,
@@ -33,7 +31,7 @@ severity (severity_level level)
 static std::ostream &
 operator << (std::ostream &os, location const &loc)
 {
-  os << loc.file->native () << ":"
+  os << native (*loc.file) << ":"
      << loc.first_line << ":"
      << loc.first_column << ": ";
   return os;

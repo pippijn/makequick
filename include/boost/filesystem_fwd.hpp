@@ -8,4 +8,8 @@ namespace boost
   }
 }
 
-namespace fs = boost::filesystem3;
+namespace fs
+{
+  using namespace boost::filesystem3;
+  struct path;
+}

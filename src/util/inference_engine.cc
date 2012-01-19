@@ -1,28 +1,28 @@
 #include <cstdio>
 #include <set>
+#include <tr1/unordered_map>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/range.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 #include <boost/thread.hpp>
 
+#include "fs/path.hpp"
 #include "util/inference_engine.h"
 #include "util/foreach.h"
 #include "util/timer.h"
 
 
-#define THREADED_PARTIALS 1
+#define THREADED_PARTIALS 0
 
 
 typedef inference_engine::rule rule;
 
-
 void
 inference_engine::add_file (fs::path const &file)
 {
-  info.files.push_back (file);
+  info.files.insert (file);
 }
 
 void
@@ -34,7 +34,7 @@ inference_engine::add_rule (std::string const &target,
 
   if (prereqs.empty ())
     {
-      info.files.push_back (target);
+      info.files.insert (fs::path (target));
       info.rules.push_back (r);
     }
   else
@@ -70,74 +70,93 @@ class inference_engine::engine
     }
   };
 
-  template<typename T>
-  struct deref_less
-  {
-    bool operator () (T const *a, T const *b)
-    {
-      return *a < *b;
-    }
-  };
-
-  typedef std::map<std::string, std::vector<rule> > partial_map;
+  typedef std::tr1::unordered_map<std::string, std::vector<rule> > partial_map;
   typedef std::vector<partial_map> partial_vec;
   typedef std::multiset<rule, target_less> rule_set;
 
   struct inferred
   {
     rule_set rules;
-    std::vector<fs::path> files;
+    file_set files;
   };
 
-  template<bool DoLock>
   struct partial_inference
   {
-    void operator () (size_t from, size_t to)
+    /** \brief Worker implementation for \ref infer_partials.
+     *
+     * For each file, we check if a rule exists that depends on that file. If so,
+     * we copy that rule and replace the matching prerequisite with the actual
+     * file name. Each stem (\ref prerequisite::file_base::stem) has its own
+     * instance set. The copied rule is added to this instance set. The \ref
+     * resolve_partial function is responsible for merging these partial rules.
+     */
+    void operator () (size_t partition = 0)
     {
-      typedef boost::iterator_range<std::vector<fs::path>::const_iterator> sub_range;
+      typedef boost::iterator_range<std::vector<rule>::const_iterator> sub_range;
 
-      foreach (fs::path const &f, sub_range (files.begin () + from, files.begin () + to))
-        foreach (rule const &r, rules)
-          {
-            ptrdiff_t ridx = &r - &rules.front ();
-            foreach (prerequisite const &p, r.prereqs)
-              if (p->matches (f))
+      size_t from = rules.size () *  partition      / partitions;
+      size_t to   = rules.size () * (partition + 1) / partitions;
+
+      assert (rules.begin () + from <= rules.end ());
+      assert (rules.begin () +   to <= rules.end ());
+
+      foreach (rule const &r, sub_range (rules.begin () + from, rules.begin () + to))
+        {
+          ptrdiff_t const ridx = &r - &rules.front ();
+#if THREADED_PARTIALS
+          if (lock) lock->lock ();
+#endif
+          partial_map &map = partials[ridx];
+#if THREADED_PARTIALS
+          if (lock) lock->unlock ();
+#endif
+          foreach (fs::path const &f, files)
+            {
+              foreach (prerequisite const &p, r.prereqs)
                 {
-                  // instantiate rule
-                  rule instance = r;
-                  instance.prereqs[&p - &r.prereqs.front ()] = f.native ();
+                  std::string stem;
+                  if (p->stem (f, stem))
+                    {
+                      // instantiate rule
+                      rule instance = r;
+                      instance.prereqs[&p - &r.prereqs.front ()] = native (f);
 
-                  if (DoLock) lock->lock ();
-                  partials[ridx][p->stem (f)].push_back (instance);
-                  if (DoLock) lock->unlock ();
+                      map[stem].push_back (instance);
+                    }
                 }
-          }
+            }
+        }
     }
 
     partial_inference (std::vector<rule> const &rules,
-                       std::vector<fs::path> const &files,
+                       file_set const &files,
                        partial_vec &partials,
+                       size_t partitions,
                        boost::mutex &lock)
       : rules (rules)
       , files (files)
+      , partitions (partitions)
       , partials (partials)
       , lock (&lock)
     {
     }
 
     partial_inference (std::vector<rule> const &rules,
-                       std::vector<fs::path> const &files,
+                       file_set const &files,
                        partial_vec &partials)
       : rules (rules)
       , files (files)
+      , partitions (1)
       , partials (partials)
+      , lock (NULL)
     {
     }
 
     std::vector<rule> const &rules;
-    std::vector<fs::path> const &files;
+    file_set const &files;
+    size_t const partitions;
     partial_vec &partials;
-    boost::mutex *lock;
+    boost::mutex *const lock;
   };
 
   /** \brief Infer partial rules from patterns.
@@ -153,35 +172,30 @@ class inference_engine::engine
    * dependent on the number of prerequisites each rule has. This is considered
    * to be relatively constant, though.
    *
-   * <h3>Implementation</h3>
-   * For each file, we check if a rule exists that depends on that file. If so,
-   * we copy that rule and replace the matching prerequisite with the actual
-   * file name. Each stem (\ref prerequisite::file_base::stem) has its own
-   * instance set. The copied rule is added to this instance set. The \ref
-   * resolve_partial function is responsible for merging these partial rules.
+   * This function will start a maximum of 10 threads that can concurrently
+   * handle rules.
    */
   static void infer_partials (std::vector<rule> const &rules,
-                              std::vector<fs::path> const &files,
+                              file_set const &files,
                               partial_vec &partials)
   {
 #if THREADED_PARTIALS
-    unsigned long operations = files.size () * rules.size ();
+    unsigned long const operations = files.size () * rules.size ();
     if (operations > 160000)
       {
-        size_t partitions = std::min (10lu, operations / 80000);
-#if 0
-        printf ("doing %ld operations => splitting in %ld partitions\n", operations, partitions);
+        size_t const partitions = std::min (10lu, operations / 80000);
+#if 1
+        printf ("%%%% doing %ld matchings => %ld parallel partitions\n",
+                operations, partitions);
 #endif
 
         boost::mutex lock;
+        partial_inference const partition (rules, files, partials, partitions, lock);
+
         boost::ptr_vector<boost::thread> threads;
         // start workers
         for (size_t i = 0; i < partitions; i++)
-          threads.push_back (
-            new boost::thread (
-              partial_inference<true> (rules, files, partials, lock),
-              files.size () *  i      / partitions,
-              files.size () * (i + 1) / partitions));
+          threads.push_back (new boost::thread (partition, i));
 
         // wait for each to finish
         foreach (boost::thread &thread, threads)
@@ -190,7 +204,7 @@ class inference_engine::engine
     else
 #endif
       {
-        partial_inference<false> (rules, files, partials) (0, files.size ());
+        partial_inference (rules, files, partials) ();
       }
   }
 
@@ -240,7 +254,7 @@ class inference_engine::engine
                 if (std::find_if (mainrule.prereqs.begin (),
                                   mainrule.prereqs.end (),
                                   bind (&prerequisite::matches, arg1,
-                                        mainrule.target))
+                                        fs::path (mainrule.target)))
                     != mainrule.prereqs.end ())
                   if (mainrule.stem == mainrule.target)
                     throw std::runtime_error ("target " +
@@ -250,7 +264,7 @@ class inference_engine::engine
                     continue;
 
                 inferred.rules.insert (mainrule);
-                inferred.files.push_back (mainrule.target);
+                inferred.files.insert (fs::path (mainrule.target));
 
                 complete.push_back (mainrule.stem);
               }
@@ -280,20 +294,6 @@ class inference_engine::engine
         }
   }
 
-  /** \brief Sort and unique a range.
-   * 
-   * This function ensures that the passed vector is sorted and has no
-   * duplicate elements. It is used to compress the file list after inference,
-   * as there may be many rules for a single file.
-   */
-  template<typename T>
-  static void
-  compact (std::vector<T> &range)
-  {
-    sort (range.begin (), range.end ());
-    range.erase (unique (range.begin (), range.end ()), range.end ());
-  }
-
 public:
   /** \brief Main entry point for the inference algorithm.
    *
@@ -308,8 +308,6 @@ public:
    * again. After each pass, the inferred files are added to the total file
    * list, but this list is not used in any pass except the first.
    *
-   * Finally, the list of inferred files is compacted (see \ref compact).
-   *
    * \param baserules The rules added via \ref add_rule.
    * \param rules Where the inferred rules are stored.
    * \param files The input file list. Inferred files will be added to this
@@ -317,7 +315,7 @@ public:
    */
   static void infer (std::vector<rule> const &baserules,
                      std::vector<rule> &rules,
-                     std::vector<fs::path> &files)
+                     file_set &files)
   {
     partial_vec partials (baserules.size ());
 
@@ -329,8 +327,7 @@ public:
         infer_partials (baserules, inferred.files, partials);
         inferred.files.clear ();
         resolve_partial (partials, inferred);
-        files.insert (files.end (),
-                      inferred.files.begin (),
+        files.insert (inferred.files.begin (),
                       inferred.files.end ());
       }
 
@@ -355,21 +352,20 @@ public:
     rules.insert (rules.end (),
                   inferred.rules.begin (),
                   inferred.rules.end ());
-
-    compact (files);
   }
 };
 
 void
 inference_engine::infer ()
 {
-#if 0
+#if 1
   timer T ("inference");
-  printf ("running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
+  sleep (5);
+  printf ("%%%% running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
 #endif
   engine::infer (info.baserules, info.rules, info.files);
-#if 0
-  printf ("inferred %lu rules; we now have %lu files\n", info.rules.size (), info.files.size ());
+#if 1
+  printf ("%%%% inferred %lu rules; we now have %lu files\n", info.rules.size (), info.files.size ());
 #endif
 }
 
@@ -406,3 +402,5 @@ rule::print () const
   if (!stem.empty ())
     std::cout << " ($* = " << stem << ")";
 }
+
+#include "inline_path.h"

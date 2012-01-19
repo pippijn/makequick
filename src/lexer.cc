@@ -8,8 +8,6 @@
 #include <climits>
 #include <stdexcept>
 
-#include <boost/filesystem/path.hpp>
-
 char const *
 lexer::STRSTATE (int state)
 {

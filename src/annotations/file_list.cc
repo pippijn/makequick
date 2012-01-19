@@ -1,12 +1,12 @@
 #include "annotations/file_list.h"
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
 void
 file_list::print () const
 {
   for (vector::const_iterator it = begin; it != end; ++it)
-    std::cout << '{' << base.native () << "/}" << it->native () << '\n';
+    std::cout << '{' << native (base) << "/}" << native (*it) << '\n';
 }
 
 fs::path

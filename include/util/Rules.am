@@ -4,6 +4,7 @@ EXTRA_DIST +=			\
 	foreach.h		\
 	inference_engine.h	\
 	local.h			\
+	make_filename.h		\
 	make_var.h		\
 	move.h			\
 	regex_escape.h		\

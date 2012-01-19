@@ -7,7 +7,7 @@
 #include "util/symbol_visitor.h"
 #include "util/unique_visitor.h"
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
 struct resolve_vars
   : symbol_visitor
@@ -34,32 +34,32 @@ static struct function_calls
   typedef std::map<std::string, function_type> function_map;
 
   // path query functions
-  template<bool (fs::path::*func) () const>
+  template<bool func (fs::path const &)>
   static generic_node_ptr path_function (generic_node &n)
   {
     if (t_vardecl_body_ptr body = n.is<t_vardecl_body> ())
       {
         // TODO: add semantic_error
         assert (body->size () == 1);
-        return make_var ((fs::path (extract_string (*body)).*func) () ? "1" : "0");
+        return make_var (func (fs::path (extract_string (*body))) ? "1" : "0");
       }
     return NULL;
   }
 
   // path decomposition functions
-  template<fs::path (fs::path::*func) () const>
+  template<fs::path func (fs::path const &)>
   static generic_node_ptr path_function (generic_node &n)
   {
     if (t_vardecl_body_ptr body = n.is<t_vardecl_body> ())
       {
         // TODO: add semantic_error
         assert (body->size () == 1);
-        return make_var ((fs::path (extract_string (*body)).*func) ().native ());
+        return make_var (native (func (fs::path (extract_string (*body)))));
       }
     return NULL;
   }
 
-#define FS_FUNC(name) static generic_node_ptr name (generic_node &n) { return path_function<&fs::path::name> (n); }
+#define FS_FUNC(name) static generic_node_ptr name (generic_node &n) { return path_function<fs::name> (n); }
   // decomposition
   FS_FUNC (root_name)
   FS_FUNC (root_directory)

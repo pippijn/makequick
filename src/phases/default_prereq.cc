@@ -1,6 +1,6 @@
 #include "phase.h"
 
-#include "util/foreach.h"
+#include "annotations/symbol_table.h"
 #include "util/make_filename.h"
 #include "util/symbol_visitor.h"
 
@@ -25,7 +25,7 @@ struct default_prereq
   }
 };
 
-static phase<default_prereq> thisphase ("default_prereq", "insert_syms");
+static phase<default_prereq> thisphase ("default_prereq", "inheritance");
 
 
 void
@@ -33,14 +33,14 @@ default_prereq::visit (t_filenames &n)
 {
   if (state == S_RULE)
     {
-      generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
+      generic_node_ptr TARGET = symtab.lookup (T_PROGRAM, "TARGET");
       if (!TARGET)
         return;
 
       generic_node &target = TARGET->as<generic_node> ();
       std::string const &name = target[0]->as<token> ().string;
 
-      n.add (make_filename (location::generated, name));
+      n.add (make_filename (name));
     }
 }
 

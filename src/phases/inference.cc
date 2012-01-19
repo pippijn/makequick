@@ -6,7 +6,7 @@
 #include "util/inference_engine.h"
 #include "util/regex_escape.h"
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 #include <boost/range/iterator_range.hpp>
 #include <boost/regex.hpp>
 #include <boost/spirit/home/phoenix.hpp>
@@ -231,7 +231,7 @@ inference::visit (t_rule &n)
 void
 inference::visit (t_target_definition &n)
 {
-  engine.add_file (n.name ()->as<token> ().string);
+  engine.add_file (fs::path (n.name ()->as<token> ().string));
   visitor::visit (n);
 }
 

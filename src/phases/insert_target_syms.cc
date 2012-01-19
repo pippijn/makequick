@@ -60,5 +60,8 @@ insert_target_syms::visit (t_target_definition &n)
       return;
     }
 
+  if (!symtab.insert (type, "TARGET", &n))
+    throw std::runtime_error ("unable to add $(TARGET) variable");
+
   symbol_visitor::visit (n);
 }

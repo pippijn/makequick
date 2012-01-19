@@ -1,5 +1,7 @@
 makepp_SOURCES +=		\
 	audit.cc		\
+	default_destdir.cc	\
+	default_prereq.cc	\
 	flatten_filenames.cc	\
 	flatten_vars.cc		\
 	inference.cc		\
@@ -8,6 +10,7 @@ makepp_SOURCES +=		\
 	insert_varadd_syms.cc	\
 	insert_vardecl_syms.cc	\
 	merge_blocks.cc		\
+	multirule.cc		\
 	remove_templates.cc	\
 	reparse_vars.cc		\
 	resolve_sources.cc	\

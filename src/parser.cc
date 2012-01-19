@@ -3,8 +3,6 @@
 #include "annotations/error_log.h"
 #include "exception.h"
 
-#include <boost/filesystem/path.hpp>
-
 parser::parser (lexer &lex, error_log &errors)
   : lex (lex)
   , errors (errors)

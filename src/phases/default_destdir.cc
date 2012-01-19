@@ -1,16 +1,11 @@
 #include "phase.h"
 
-#include "util/foreach.h"
-
 struct default_destdir
   : visitor
 {
   void visit (t_target_definition &n);
   void visit (t_program &n);
   void visit (t_library &n);
-
-  t_destination_ptr bindir;
-  t_destination_ptr libdir;
 
   enum visit_state
   {
@@ -25,13 +20,11 @@ struct default_destdir
   }
 
   default_destdir (annotation_map &annots)
-    : bindir (make_dest ("bin"))
-    , libdir (make_dest ("lib"))
   {
   }
 };
 
-static phase<default_destdir> thisphase ("default_destdir", "audit");
+static phase<default_destdir> thisphase ("default_destdir", "inheritance");
 
 
 void
@@ -40,22 +33,24 @@ default_destdir::visit (t_target_definition &n)
   if (!n.dest ())
     {
       if (state == S_PROGRAM)
-        n.dest (bindir);
+        n.dest (make_dest ("bin"));
       else if (state == S_LIBRARY)
-        n.dest (libdir);
+        n.dest (make_dest ("lib"));
     }
 }
 
 void
 default_destdir::visit (t_program &n)
 {
-  local (state) = S_PROGRAM;
+  state = S_PROGRAM;
   visitor::visit (n);
+  state = S_NONE;
 }
 
 void
 default_destdir::visit (t_library &n)
 {
-  local (state) = S_LIBRARY;
+  state = S_LIBRARY;
   visitor::visit (n);
+  state = S_NONE;
 }

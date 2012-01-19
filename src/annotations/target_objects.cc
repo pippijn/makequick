@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
 void
 target_objects::print () const

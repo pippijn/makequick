@@ -3,9 +3,8 @@
 #include "annotations/error_log.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/make_filename.h"
 #include "util/symbol_visitor.h"
-
-#include <boost/filesystem/path.hpp>
 
 struct resolve_shortvars
   : symbol_visitor
@@ -91,10 +90,7 @@ modify (node_ptr const &n, char modifier, bool builddir)
   assert (pred != NULL);
 
   std::string const &orig = fn[0]->as<token> ().string;
-  return new t_filename (fn.loc,
-           new token (fn[0]->loc,
-             TK_CODE,
-             add_builddir (pred (orig), orig, builddir)));
+  return make_filename (fn.loc, add_builddir (pred (orig), orig, builddir));
 }
 
 void

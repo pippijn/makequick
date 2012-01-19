@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
 
 #include <google/protobuf/text_format.h>
 
@@ -39,7 +39,7 @@ namespace nodes
   static void
   store_loc (Location &sloc, location const &loc)
   {
-    sloc.set_file (loc.file->native ());
+    sloc.set_file (native (*loc.file));
     sloc.set_first_line (loc.first_line);
     sloc.set_first_column (loc.first_column);
     sloc.set_last_line (loc.last_line);

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem_fwd.hpp>
+#include "fs/fwd.hpp"
 
 struct rule_info
   : annotation
@@ -21,6 +21,6 @@ struct rule_info
 
   rule const *find (std::string const &target) const;
 
-  std::vector<fs::path> files;
+  file_set files;
   std::vector<rule> rules;
 };

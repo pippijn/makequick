@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <boost/filesystem_fwd.hpp>
+#include "fs/fwd.hpp"
 #include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -50,7 +50,7 @@ struct inference_engine
        * For pattern rules, it is the matched "%", for plain files, it is the
        * file name itself.
        */
-      virtual std::string stem (fs::path const &file) const = 0;
+      virtual bool stem (fs::path const &file, std::string &stem) const = 0;
 
       virtual bool operator == (file_base const &other) const = 0;
     };
@@ -64,7 +64,7 @@ struct inference_engine
       virtual void print () const;
       virtual bool final () const;
       virtual bool matches (fs::path const &file) const;
-      virtual std::string stem (fs::path const &file) const;
+      virtual bool stem (fs::path const &file, std::string &stem) const;
 
       virtual bool operator == (file_base const &other) const
       {
@@ -126,7 +126,7 @@ struct inference_engine
 
   struct knowledge
   {
-    std::vector<fs::path> files;
+    file_set files;
     std::vector<rule> baserules;
     std::vector<rule> rules;
   };

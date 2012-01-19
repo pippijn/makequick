@@ -3,6 +3,7 @@ include inference_engine/Rules.am
 libmakepp_a_SOURCES +=		\
 	extract_string.cc	\
 	inference_engine.cc	\
+	path.cc			\
 	regex_escape.cc		\
 	symbol_visitor.cc	\
 	timer.cc

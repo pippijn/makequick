@@ -4,8 +4,6 @@
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
-#include <boost/filesystem/path.hpp>
-
 struct resolve_tools
   : symbol_visitor
 {

@@ -16,32 +16,37 @@
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include "fs/path.hpp"
+
+namespace bfs = boost::filesystem;
 
 static char const *const all_phases[] = {
   "audit",
   "insert_target_syms",
   "inheritance",
   "remove_templates",
+  "default_prereq",
+  "default_destdir",
   "insert_vardecl_syms",
   "insert_varadd_syms",
   "resolve_vars",
   "flatten_vars",
   "reparse_vars",
+  "multirule",
   "inference",
   "flatten_filenames",
   "resolve_sources",
   "resolve_wildcards",
   "merge_blocks",
-  "sx",
+  //"sx",
 };
 
-fs::path
-resolve (fs::path const &p)
+static bfs::path
+resolve (bfs::path const &p)
 {
-  fs::path result;
+  bfs::path result;
 
-  for (fs::path::iterator it = p.begin ();
+  for (bfs::path::iterator it = p.begin ();
        it != p.end ();
        ++it)
     {
@@ -70,28 +75,34 @@ resolve (fs::path const &p)
 }
 
 static void
-collect (fs::path const &path, std::vector<fs::path> &files)
+collect (bfs::path const &path, std::vector<fs::path> &files)
 {
   if (is_directory (path) && path.filename ().c_str ()[0] != '.')
     for_each (fs::directory_iterator (path),
               fs::directory_iterator (),
               bind (collect, _1, boost::ref (files)));
   else if (is_regular_file (path))
-    files.push_back (path);
+    files.push_back (fs::path (path));
+}
+
+static void
+collect (fs::path const &path, std::vector<fs::path> &files)
+{
+  return collect (path.data (), files);
 }
 
 struct unbase
 {
   unbase (fs::path const &base)
-    : base (base.native ())
+    : base (native (base))
   {
   }
 
   void operator () (fs::path &path)
   {
-    std::string const &native = path.native ();
-    assert (path.native ().substr (0, base.length ()) == base);
-    path = native.substr (base.length () + 1);
+    std::string const &n = native (path);
+    assert (native (path).substr (0, base.length ()) == base);
+    path = fs::path (n.substr (base.length () + 1));
   }
 
   std::string base;
@@ -163,7 +174,7 @@ try
       return EXIT_FAILURE;
     }
 
-  fs::path const path (resolve (absolute (fs::path (argv[0]))));
+  fs::path const path (resolve (absolute (bfs::path (argv[0]))));
   if (!exists (path))
     {
       puts ("path does not exist");

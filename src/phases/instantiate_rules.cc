@@ -5,8 +5,7 @@
 #include "annotations/target_objects.h"
 #include "util/colours.h"
 #include "util/foreach.h"
-
-#include <boost/filesystem/path.hpp>
+#include "util/make_filename.h"
 
 struct instantiate_rules
   : visitor
@@ -90,9 +89,7 @@ make_prereq (std::vector<std::string> const &files)
 {
   t_filenames_ptr prereq = new t_filenames (location::generated);
   foreach (std::string const &file, files)
-    prereq->add (new t_filename (location::generated,
-                   new token (location::generated,
-                     TK_FILENAME, file)));
+    prereq->add (make_filename (file));
   return prereq;
 }
 
@@ -103,9 +100,7 @@ instantiate_rules::instantiate (rule_info::rule const &r)
   if (r.code)
     {
       node_ptr target = (new t_filenames (location::generated))->add (
-                           new t_filename (location::generated,
-                             new token (location::generated,
-                               TK_FILENAME, r.target)));
+                           make_filename (r.target));
       node_ptr prereq = make_prereq (r.prereq);
 
       t_rule_ptr rule = new t_rule (location::generated, target, prereq,

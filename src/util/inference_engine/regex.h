@@ -18,14 +18,16 @@ template<>
 inline bool
 inference_engine::prerequisite::file_t<boost::regex>::matches (fs::path const &file) const
 {
-  return regex_match (file.native (), data);
+  return regex_match (native (file), data);
 }
 
 template<>
-inline std::string
-inference_engine::prerequisite::file_t<boost::regex>::stem (fs::path const &file) const
+inline bool
+inference_engine::prerequisite::file_t<boost::regex>::stem (fs::path const &file, std::string &stem) const
 {
   boost::smatch matches;
-  regex_match (file.native (), matches, data);
-  return matches.str (1);
+  bool matched = regex_match (native (file), matches, data);
+  if (matched)
+    stem = matches.str (1);
+  return matched;
 }

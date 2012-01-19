@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <boost/filesystem_fwd.hpp>
+#include "fs/fwd.hpp"
 
 struct location
 {
@@ -92,6 +92,8 @@ namespace nodes
     void replace (node &n, node_vec::const_iterator it, node_vec::const_iterator et);
     void replace (size_t index, node_vec const &list);
     void replace (node &n, node_vec const &list);
+    void replace (size_t index, node_ptr p);
+    void replace (node &n, node_ptr p);
 
     void clear ();
 
