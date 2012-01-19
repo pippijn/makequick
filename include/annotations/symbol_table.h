@@ -46,11 +46,11 @@ private:
   std::vector<type_map *> stack;
   scope_map scopes;
 
-  static symbol_table::node_map &get_scope (symbol_table::type_map &map, symbol_type type);
+  static node_map &get_scope (type_map &map, symbol_type type);
   static bool insert (node_map &scope, std::string const &name, node_ptr const &sym);
 
-  static void print (symbol_table::node_map const &type, char const *type_name);
-  static void print (symbol_table::scope_map::value_type const &scope);
+  static void print (node_map const &type, char const *type_name);
+  static void print (scope_map::value_type const &scope);
 
   symbol_table (symbol_table const &other);
 

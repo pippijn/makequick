@@ -70,15 +70,21 @@ struct inference
       {
         using namespace boost::phoenix;
         using namespace boost::phoenix::arg_names;
-        rules.rules.push_back (rule_info::rule ());
-        rule_info::rule &ri = rules.rules.back ();
-        ri.target = r.target;
+
+        std::vector<fs::path> prereq;
+        prereq.reserve (r.prereqs.size ());
+#if 1
+        foreach (inference_engine::prerequisite const &pr, r.prereqs)
+          prereq.push_back (pr.str ());
+#else
         transform (r.prereqs.begin (),
                    r.prereqs.end (),
-                   back_inserter (ri.prereq),
+                   back_inserter (prereq),
                    bind (&inference_engine::prerequisite::str, arg1));
-        ri.stem = r.stem;
-        ri.code = r.code;
+#endif
+        assert (prereq.size () == r.prereqs.size ());
+
+        rules.rules.push_back (rule_info::rule (r.target, prereq, r.stem, r.code));
       }
   }
 };

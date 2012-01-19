@@ -413,4 +413,6 @@ rule::print () const
     }
   if (!stem.empty ())
     std::cout << " ($* = " << stem << ")";
+  if (code)
+    std::cout << " {" << code << "}";
 }

@@ -65,7 +65,7 @@ struct merge_blocks
   merger<t_test, &t_test::sources, t_sources_members> test_merger;
 };
 
-static phase<merge_blocks> thisphase ("merge_blocks", "resolve_vars");
+static phase<merge_blocks> thisphase ("merge_blocks", "expand_vars");
 
 
 void

@@ -26,7 +26,7 @@ struct multirule
   }
 };
 
-static phase<multirule> thisphase ("multirule", "resolve_vars");
+static phase<multirule> thisphase ("multirule", "expand_vars");
 
 
 template<typename T>

@@ -14,7 +14,7 @@ struct concat_sources
   }
 };
 
-static phase<concat_sources> thisphase ("concat_sources", "resolve_vars");
+static phase<concat_sources> thisphase ("concat_sources", "expand_vars");
 
 
 static bool

@@ -62,7 +62,7 @@ void
 insert_vardecl_syms::visit (t_target_definition &n)
 {
   if (!symtab.insert (T_VARIABLE, "CURDIR", make_var (n.loc.file->parent_path ().native ())))
-    throw std::runtime_error ("unable to add $(TARGET) variable");
+    throw std::runtime_error ("unable to add $(CURDIR) variable");
 
   symbol_visitor::visit (n);
 }

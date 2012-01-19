@@ -323,7 +323,7 @@ namespace nodes
   void
   node_list::replace (size_t index, node_ptr p)
   {
-    replace (index, node_vec::const_iterator (&p), node_vec::const_iterator (&p) + 1);
+    set (index, p);
   }
 
   void

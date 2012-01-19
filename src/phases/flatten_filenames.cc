@@ -22,7 +22,7 @@ struct flatten_filenames
 };
 
 //static phase<flatten_filenames> thisphase ("flatten_filenames", "inference", "resolve_sources");
-static phase<flatten_filenames> thisphase ("flatten_filenames", "resolve_vars");
+static phase<flatten_filenames> thisphase ("flatten_filenames", "expand_vars");
 
 static bool
 cant_flatten (node_ptr const &n)

@@ -27,7 +27,7 @@ static char const *const all_phases[] = {
   "default_destdir",
   "insert_vardecl_syms",
   "insert_varadd_syms",
-  "resolve_vars",
+  "expand_vars",
   "flatten_vars",
   "reparse_vars",
   "multirule",
@@ -35,8 +35,11 @@ static char const *const all_phases[] = {
   "flatten_filenames",
   "resolve_sources",
   "resolve_wildcards",
-  "merge_blocks",
-  //"sx",
+  "infer_target_objects",
+  "instantiate_rules",
+  "squarevars",
+  //"merge_blocks",
+  "sx",
 };
 
 static fs::path

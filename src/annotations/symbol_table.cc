@@ -38,7 +38,7 @@ symbol_table::leave_scope ()
 }
 
 symbol_table::node_map &
-symbol_table::get_scope (symbol_table::type_map &map, symbol_type type)
+symbol_table::get_scope (type_map &map, symbol_type type)
 {
   if (map.size () <= type)
     map.resize (type + 1);
@@ -140,12 +140,12 @@ symbol_type_name (size_t type)
 using nodes::node_type_name;
 
 void
-symbol_table::print (symbol_table::node_map const &type, char const *type_name)
+symbol_table::print (node_map const &type, char const *type_name)
 {
   if (!type.empty ())
     {
       printf ("    type %s\n", type_name);
-      foreach (symbol_table::node_map::value_type const &sym, type)
+      foreach (node_map::value_type const &sym, type)
         {
           printf ("      sym %s (%s[%d])\n", sym.first.c_str (), node_type_name[sym.second->type], sym.second->index ());
         }
@@ -155,17 +155,17 @@ symbol_table::print (symbol_table::node_map const &type, char const *type_name)
 static char const *
 node_type_name_opt (symbol_table::node_ptr const &p)
 {
-  return nodes::node_type_name[p->type];
+  return p ? nodes::node_type_name[p->type] : "<global>";
 }
 
 void
-symbol_table::print (symbol_table::scope_map::value_type const &scope)
+symbol_table::print (scope_map::value_type const &scope)
 {
   if (scope.first)
     printf ("  scope for %s[%d]\n", node_type_name[scope.first->type], scope.first->index ());
   else
     printf ("  global scope\n");
-  foreach (symbol_table::node_map const &type, scope.second)
+  foreach (node_map const &type, scope.second)
     print (type, symbol_type_name (scope.second.size () - (&scope.second.back () - &type) - 1));
 }
 
@@ -181,7 +181,7 @@ void
 symbol_table::print_stack () const
 {
   int indent = 0;
-  foreach (symbol_table::type_map const *s, stack)
+  foreach (type_map const *s, stack)
     {
       foreach (scope_map::value_type const &scope, scopes)
         if (&scope.second == s)

@@ -13,10 +13,11 @@ struct instantiate_rules
   : visitor
 {
   void instantiate (rule_info::rule const &r);
-  template<typename PrereqT>
-  void instantiate (t_target_definition &n, std::vector<PrereqT> const &targets, bool accept_existing);
+  void instantiate (t_target_definition &n, std::vector<fs::path> const &targets, bool accept_existing);
 
   virtual void visit (t_target_members &n);
+  virtual void visit (t_toplevel_declarations &n);
+
   virtual void visit (t_target_definition &n);
   virtual void visit (t_library &n);
   virtual void visit (t_program &n);
@@ -31,7 +32,7 @@ struct instantiate_rules
   error_log &errors;
   rule_info const &rules;
   target_objects const &objs;
-  t_target_members_ptr members;
+  generic_node_ptr members;
 
   instantiate_rules (annotation_map &annots)
     : errors (annots.get ("errors"))
@@ -58,11 +59,11 @@ static phase<instantiate_rules> thisphase ("instantiate_rules",
 struct resolve_stem
   : visitor
 {
-  token_ptr stem;
+  std::string const &stem;
   bool replace;
 
   explicit resolve_stem (std::string const &stem)
-    : stem (new token (location::generated, TK_FILENAME, stem))
+    : stem (stem)
     , replace (false)
   {
   }
@@ -71,7 +72,7 @@ struct resolve_stem
 
   virtual void visit (t_shortvar &n)
   {
-    if (n.var ()->as<token> ().string[0] == '*')
+    if (n.var ()->as<token> ().string == "*")
       replace = true;
   }
 
@@ -82,8 +83,7 @@ struct resolve_stem
         resume (p);
         if (replace)
           {
-            phases::run ("print", p);
-            p = stem;
+            n.replace (*p, new token (location::generated, TK_CODE, stem));
             replace = false;
           }
       }
@@ -91,11 +91,11 @@ struct resolve_stem
 };
 
 static node_ptr
-make_prereq (std::vector<std::string> const &files)
+make_prereq (std::vector<fs::path> const &files)
 {
   t_filenames_ptr prereq = new t_filenames (location::generated);
-  foreach (std::string const &file, files)
-    prereq->add (make_filename (file));
+  foreach (fs::path const &file, files)
+    prereq->add (make_filename (file.native ()));
   return prereq;
 }
 
@@ -117,26 +117,20 @@ instantiate_rules::instantiate (rule_info::rule const &r)
 }
 
 
-static std::string const &native (fs::path    const &path) { return path.native (); }
-static std::string const &native (std::string const &path) { return path;           }
-
-template<typename PrereqT>
 void
 instantiate_rules::instantiate (t_target_definition &n,
-                                std::vector<PrereqT> const &targets,
-                                bool accept_existing)
+                                std::vector<fs::path> const &targets,
+                                bool accept_existing = false)
 {
-  foreach (PrereqT const &obj, targets)
+  foreach (fs::path const &obj, targets)
     {
-      if (std::find (rules.files.begin (),
-                     rules.files.end (),
-                     obj) == rules.files.end ())
+      if (rules.files.find (obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));
           continue;
         }
 
-      rule_info::rule const *r = rules.find (native (obj));
+      rule_info::rule const *r = rules.find (obj.native ());
       // no rule, but file found => file already exists
       if (!r)
         {
@@ -156,12 +150,24 @@ instantiate_rules::instantiate (t_target_definition &n,
 void
 instantiate_rules::visit (t_target_members &n)
 {
+  assert (!members);
   members = &n;
 }
 
 void
+instantiate_rules::visit (t_toplevel_declarations &n)
+{
+  assert (!members);
+  members = &n;
+  visitor::visit (n);
+}
+
+
+void
 instantiate_rules::visit (t_target_definition &n)
 {
+  local (members) = NULL;
+
   visitor::visit (n);
 
   std::string name = n.name ()->as<token> ().string;
@@ -171,7 +177,7 @@ instantiate_rules::visit (t_target_definition &n)
   target_objects::target_map::const_iterator target = objs.targets.find (name);
   assert (target != objs.targets.end ());
 
-  instantiate (n, target->second, false);
+  instantiate (n, target->second);
 }
 
 void

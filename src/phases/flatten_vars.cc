@@ -19,7 +19,7 @@ struct flatten_vars
   }
 };
 
-static phase<flatten_vars> thisphase ("flatten_vars", "resolve_vars");
+static phase<flatten_vars> thisphase ("flatten_vars", "expand_vars");
 
 
 void

@@ -2,10 +2,11 @@ makepp_SOURCES +=		\
 	audit.cc		\
 	default_destdir.cc	\
 	default_prereq.cc	\
+	expand_vars.cc		\
 	flatten_filenames.cc	\
 	flatten_vars.cc		\
-	infer_target_objects.cc	\
 	inference.cc		\
+	infer_target_objects.cc	\
 	inheritance.cc		\
 	insert_target_syms.cc	\
 	insert_varadd_syms.cc	\
@@ -17,7 +18,7 @@ makepp_SOURCES +=		\
 	reparse_vars.cc		\
 	resolve_shortvars.cc	\
 	resolve_sources.cc	\
-	resolve_vars.cc		\
 	resolve_wildcards.cc	\
+	squarevars.cc		\
 	sx.cc			\
 	xml.cc

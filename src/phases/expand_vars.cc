@@ -9,7 +9,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-struct resolve_vars
+struct expand_vars
   : symbol_visitor
   , unique_visitor
 {
@@ -19,13 +19,13 @@ struct resolve_vars
 
   generic_node_ptr sym;
 
-  resolve_vars (annotation_map &annots)
+  expand_vars (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
   {
   }
 };
 
-static phase<resolve_vars> thisphase ("resolve_vars", "insert_vardecl_syms", "insert_varadd_syms");
+static phase<expand_vars> thisphase ("expand_vars", "insert_vardecl_syms", "insert_varadd_syms");
 
 
 static struct function_calls
@@ -140,14 +140,14 @@ id (node_ptr const &n)
 }
 
 void
-resolve_vars::visit (t_callvar &n)
+expand_vars::visit (t_callvar &n)
 {
   visitor::visit (n);
   sym = call (id (n.name ()), n.arg ()->as<generic_node> ());
 }
 
 void
-resolve_vars::visit (t_roundvar &n)
+expand_vars::visit (t_roundvar &n)
 {
   std::string const &name = id (n.name ());
   sym = symtab.lookup (T_VARIABLE, name);
@@ -155,7 +155,7 @@ resolve_vars::visit (t_roundvar &n)
 
 
 bool
-resolve_vars::override (generic_node &n)
+expand_vars::override (generic_node &n)
 {
   if (done (n))
     return true;
