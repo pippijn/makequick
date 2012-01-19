@@ -44,13 +44,13 @@ struct inference_engine
     {
       virtual void print () const = 0;
       virtual bool final () const = 0;
-      virtual bool matches (fs::path const &file) const = 0;
       /** \brief The match stem.
        *
        * For pattern rules, it is the matched "%", for plain files, it is the
        * file name itself.
        */
       virtual bool stem (fs::path const &file, std::string &stem) const = 0;
+      virtual bool matches (fs::path const &file) const = 0;
 
       virtual bool operator == (file_base const &other) const = 0;
     };
@@ -63,7 +63,6 @@ struct inference_engine
 
       virtual void print () const;
       virtual bool final () const;
-      virtual bool matches (fs::path const &file) const;
       virtual bool stem (fs::path const &file, std::string &stem) const;
 
       virtual bool operator == (file_base const &other) const
@@ -71,6 +70,12 @@ struct inference_engine
         if (dynamic_cast<file_t const *> (&other) == NULL)
           return false;
         return data == static_cast<file_t const &> (other).data;
+      }
+
+      virtual bool matches (fs::path const &file) const
+      {
+        std::string stem;
+        return file_t::stem (file, stem);
       }
 
       file_t (T const &data);

@@ -16,13 +16,6 @@ inference_engine::prerequisite::file_t<boost::regex>::final () const
 
 template<>
 inline bool
-inference_engine::prerequisite::file_t<boost::regex>::matches (fs::path const &file) const
-{
-  return regex_match (native (file), data);
-}
-
-template<>
-inline bool
 inference_engine::prerequisite::file_t<boost::regex>::stem (fs::path const &file, std::string &stem) const
 {
   boost::smatch matches;

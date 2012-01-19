@@ -360,7 +360,7 @@ inference_engine::infer ()
 {
 #if 1
   timer T ("inference");
-  sleep (5);
+  //sleep (5);
   printf ("%%%% running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
 #endif
   engine::infer (info.baserules, info.rules, info.files);

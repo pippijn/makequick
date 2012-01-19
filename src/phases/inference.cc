@@ -11,6 +11,8 @@
 #include <boost/regex.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
+#define EXPERIMENTAL_WILDCARD_CODE 0
+
 struct inference
   : visitor
 {
@@ -110,7 +112,11 @@ struct make_prerequisite
   static bool needs_regex (node_ptr const &n)
   {
     int tok = n->as<token> ().tok;
-    return tok != TK_FILENAME;// && tok != TK_FN_PERCENT;
+#if EXPERIMENTAL_WILDCARD_CODE
+    return tok != TK_FILENAME && tok != TK_FN_PERCENT;
+#else
+    return tok != TK_FILENAME;
+#endif
   }
 
   static bool needs_wildcard (node_ptr const &n)
