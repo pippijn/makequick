@@ -27,7 +27,7 @@ flatten_vars::visit (t_vardecl_body &n)
 {
   visitor::visit (n);
   if (t_vardecl_body_ptr parent = n.parent ()->is<t_vardecl_body> ())
-    parent->replace (n.parent_index (), n.list.begin (), n.list.end ());
+    parent->replace (n, n.list);
 
   node_vec const &body = unlink_all (n.list);
 

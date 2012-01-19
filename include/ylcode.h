@@ -11,10 +11,7 @@
 
 #include "node.h"
 
-struct YYLTYPE
-  : location
-{
-};
+typedef location YYLTYPE;
 #define YYLTYPE_IS_DECLARED 1
 #define YYLTYPE_IS_TRIVIAL 1
 

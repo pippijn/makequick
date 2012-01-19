@@ -13,7 +13,6 @@
 #include "yystate.h"
 
 union YYSTYPE;
-struct YYLTYPE;
 static int
 yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
 {
@@ -138,6 +137,7 @@ using namespace nodes;
 %token<token> TK_ERROR			"invalid character"
 
 %token R_FILENAME
+%token R_SOURCES
 
 %type<node> sources headers mans data target_definition
 %type<node> program library template target_members toplevel_declarations toplevel_declaration
@@ -165,6 +165,8 @@ document
 	: toplevel_declarations
 		{ self->doc = make_node<n_document> (@$, $1); }
 	| R_FILENAME filename
+		{ self->doc = $2; }
+	| R_SOURCES sources_members
 		{ self->doc = $2; }
 	;
 

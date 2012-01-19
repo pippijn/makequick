@@ -19,6 +19,9 @@ struct lexer
 
   int next (YYSTYPE *yylval, YYLTYPE *yylloc);
 
+  void init_token (int tok);
+  void push_state (int state);
+
   virtual fs::path const &current_file () const = 0;
 
   tokens::token const *curtok () const;
@@ -34,7 +37,6 @@ protected:
 
 private:
   friend int yyparse (parser *parse);
-  void push_state (int state);
   void switch_state (int state);
   void pop_state ();
 

@@ -298,6 +298,26 @@ namespace nodes
     assert (audit_list ());
   }
 
+  void
+  node_list::replace (node &n, node_vec::const_iterator it, node_vec::const_iterator et)
+  {
+    assert (n.parent () == this);
+    replace (n.parent_index (), it, et);
+  }
+
+  void
+  node_list::replace (size_t index, node_vec const &list)
+  {
+    replace (index, list.begin (), list.end ());
+  }
+
+  void
+  node_list::replace (node &n, node_vec const &list)
+  {
+    assert (n.parent () == this);
+    replace (n.parent_index (), list);
+  }
+
   bool
   node_list::audit_list () const
   {

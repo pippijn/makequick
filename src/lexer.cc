@@ -147,6 +147,12 @@ lexer::pimpl::get_deferred (YYSTYPE *lval, YYLTYPE *lloc)
   return tok;
 }
 
+void
+lexer::init_token (int tok)
+{
+  char const text[] = "initial token";
+  impl->push_keyword (tok, NULL, &location::generated, text, sizeof text - 1);
+}
 
 #define LEXER_VERBOSE 0
 

@@ -65,6 +65,7 @@ namespace nodes
 
     bool has_prev_sibling () const;
     bool has_next_sibling () const;
+    bool has_sibling () const { return has_prev_sibling () || has_next_sibling (); }
 
     void unlink ();
 
@@ -88,6 +89,9 @@ namespace nodes
 
     bool audit_list () const;
     void replace (size_t index, node_vec::const_iterator it, node_vec::const_iterator et);
+    void replace (node &n, node_vec::const_iterator it, node_vec::const_iterator et);
+    void replace (size_t index, node_vec const &list);
+    void replace (node &n, node_vec const &list);
 
     node_list (location const &loc);
     ~node_list ();
