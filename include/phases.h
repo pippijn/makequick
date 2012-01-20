@@ -2,7 +2,7 @@
 
 #include "node.h"
 
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 
 struct annotation_map;
 
@@ -33,7 +33,7 @@ protected:
   void add_dependency (char const *dependency);
 
   struct pimpl;
-  std::auto_ptr<pimpl> const self;
+  boost::scoped_ptr<pimpl> const self;
 };
 
 struct noauto_tag { };

@@ -3,10 +3,8 @@
 #include "util/timer.h"
 #include "ylcode.h"
 
-#include <memory>
-#include <vector>
-
 #include <boost/filesystem_fwd.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #define PARSER_BENCH 0
 
@@ -47,5 +45,5 @@ private:
   virtual int wrap () = 0;
 
   struct pimpl;
-  std::auto_ptr<pimpl> const impl;
+  boost::scoped_ptr<pimpl> const impl;
 };

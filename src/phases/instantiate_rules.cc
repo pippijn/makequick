@@ -13,7 +13,7 @@ struct instantiate_rules
   : visitor
 {
   void instantiate (rule_info::rule const &r);
-  void instantiate (t_target_definition &n, std::vector<fs::path> const &targets, bool accept_existing);
+  void instantiate (t_target_definition &n, file_vec const &targets, bool accept_existing);
 
   virtual void visit (t_target_members &n);
   virtual void visit (t_toplevel_declarations &n);
@@ -119,7 +119,7 @@ instantiate_rules::instantiate (rule_info::rule const &r)
 
 void
 instantiate_rules::instantiate (t_target_definition &n,
-                                std::vector<fs::path> const &targets,
+                                file_vec const &targets,
                                 bool accept_existing = false)
 {
   foreach (fs::path const &obj, targets)

@@ -2,15 +2,12 @@
 
 #include "annotation.h"
 
-#include <vector>
-
 #include <boost/filesystem_fwd.hpp>
 
 struct file_list
   : annotation
 {
-  typedef std::vector<fs::path> vector;
-  typedef vector::const_iterator iterator;
+  typedef file_vec::const_iterator iterator;
 
   fs::path const &base;
   iterator const begin;

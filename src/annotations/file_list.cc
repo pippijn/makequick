@@ -5,7 +5,7 @@
 void
 file_list::print () const
 {
-  for (vector::const_iterator it = begin; it != end; ++it)
+  for (iterator it = begin; it != end; ++it)
     std::cout << '{' << base.native () << "/}" << it->native () << '\n';
 }
 

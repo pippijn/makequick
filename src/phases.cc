@@ -2,7 +2,6 @@
 
 #include "annotations/error_log.h"
 #include "annotation_map.h"
-#include "sighandler.h"
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/timer.h"
@@ -66,6 +65,7 @@ phases::run (std::string const &name, node_ptr const &doc, annotation_map &annot
     throw std::invalid_argument ("phase " + C::filename (name) + " does not exist");
 
   printf ("%%%% phase \"%s\"\n", name.c_str ());
+  timer T (name.c_str ());
   phase->run1 (doc, annots);
 }
 
@@ -123,8 +123,6 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
     errors = &annots->get<error_log> ("errors");
   foreach (Vertex const &v, sorted)
     {
-      if (should_terminate)
-        return;
       if (v)
         {
           if (errors && errors->has_diagnostics ())

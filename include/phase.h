@@ -7,7 +7,6 @@
 #include "phase.h"
 #include "phases.h"
 #include "rule_init.h"
-#include "sighandler.h"
 #include "util/local.h"
 #include "visitor.h"
 #include "ylcode.h"

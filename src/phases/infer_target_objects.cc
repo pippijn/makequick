@@ -30,7 +30,7 @@ struct infer_target_objects
     S_SOURCES
   } state;
 
-  std::vector<fs::path> objects;
+  file_vec objects;
   target_objects &objs;
 
   infer_target_objects (annotation_map &annots)

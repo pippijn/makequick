@@ -9,6 +9,8 @@
    mans => ['cond', 'dest', 'sources'],
    data => ['cond', 'dest', 'sources'],
 
+   flag_import => ['tool', 'target'],
+
    dir => ['name', 'dir'],
    ac_check => ['checks'],
    arg_enable => ['id', 'dflt', 'desc', 'body'],

@@ -3,12 +3,12 @@
 #include "annotation.h"
 
 #include <iosfwd>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 
 struct annotation_map
 {
   struct pimpl;
-  std::auto_ptr<pimpl> self;
+  boost::scoped_ptr<pimpl> self;
 
   annotation_map ();
   ~annotation_map ();

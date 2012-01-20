@@ -3,15 +3,14 @@
 #include "annotation.h"
 #include "exception.h"
 
-#include <memory>
-
 #include <boost/filesystem_fwd.hpp>
+#include <boost/scoped_ptr.hpp>
 
 struct error_log
   : annotation
 {
   struct pimpl;
-  std::auto_ptr<pimpl> const self;
+  boost::scoped_ptr<pimpl> const self;
 
   error_log ();
   ~error_log ();

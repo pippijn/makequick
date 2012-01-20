@@ -4,14 +4,13 @@
 
 #include <string>
 #include <map>
-#include <vector>
 
 #include <boost/filesystem_fwd.hpp>
 
 struct target_objects
   : annotation
 {
-  typedef std::map<std::string, std::vector<fs::path> > target_map;
+  typedef std::map<std::string, file_vec> target_map;
 
   void print () const;
 

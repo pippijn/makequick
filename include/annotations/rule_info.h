@@ -30,8 +30,12 @@ struct rule_info
     }
   };
 
+  typedef std::tr1::unordered_set<rule> rule_set;
+
   rule const *find (std::string const &target) const;
 
   file_set files;
-  std::vector<rule> rules;
+  rule_set rules;
 };
+
+bool operator == (rule_info::rule const &a, rule_info::rule const &b);

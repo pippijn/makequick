@@ -3,18 +3,13 @@
 #include <tr1/unordered_map>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/range.hpp>
-#include <boost/spirit/home/phoenix.hpp>
-#include <boost/thread.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/spirit/home/phoenix.hpp>
 
 #include "util/inference_engine.h"
 #include "util/foreach.h"
 #include "util/timer.h"
-
-
-#define THREADED_PARTIALS 0
 
 
 namespace std { namespace tr1 {
@@ -92,85 +87,6 @@ class inference_engine::engine
     file_set files;
   };
 
-  struct partial_inference
-  {
-    /** \brief Worker implementation for \ref infer_partials.
-     *
-     * For each file, we check if a rule exists that depends on that file. If so,
-     * we copy that rule and replace the matching prerequisite with the actual
-     * file name. Each stem (\ref prerequisite::file_base::stem) has its own
-     * instance set. The copied rule is added to this instance set. The \ref
-     * resolve_partial function is responsible for merging these partial rules.
-     */
-    void operator () (size_t partition = 0)
-    {
-      typedef boost::iterator_range<std::vector<rule>::const_iterator> sub_range;
-
-      size_t from = rules.size () *  partition      / partitions;
-      size_t to   = rules.size () * (partition + 1) / partitions;
-
-      assert (rules.begin () + from <= rules.end ());
-      assert (rules.begin () +   to <= rules.end ());
-
-      foreach (rule const &r, sub_range (rules.begin () + from, rules.begin () + to))
-        {
-          ptrdiff_t const ridx = &r - &rules.front ();
-#if THREADED_PARTIALS
-          if (lock) lock->lock ();
-#endif
-          partial_map &map = partials[ridx];
-#if THREADED_PARTIALS
-          if (lock) lock->unlock ();
-#endif
-          foreach (fs::path const &f, files)
-            {
-              foreach (prerequisite const &p, r.prereqs)
-                {
-                  std::string stem;
-                  if (p->stem (f, stem))
-                    {
-                      // instantiate rule
-                      rule instance = r;
-                      instance.prereqs[&p - &r.prereqs.front ()] = f.native ();
-
-                      map[stem].push_back (instance);
-                    }
-                }
-            }
-        }
-    }
-
-    partial_inference (std::vector<rule> const &rules,
-                       file_set const &files,
-                       partial_vec &partials,
-                       size_t partitions,
-                       boost::mutex &lock)
-      : rules (rules)
-      , files (files)
-      , partitions (partitions)
-      , partials (partials)
-      , lock (&lock)
-    {
-    }
-
-    partial_inference (std::vector<rule> const &rules,
-                       file_set const &files,
-                       partial_vec &partials)
-      : rules (rules)
-      , files (files)
-      , partitions (1)
-      , partials (partials)
-      , lock (NULL)
-    {
-    }
-
-    std::vector<rule> const &rules;
-    file_set const &files;
-    size_t const partitions;
-    partial_vec &partials;
-    boost::mutex *const lock;
-  };
-
   /** \brief Infer partial rules from patterns.
    *
    * The first step of the algorithm is to infer rules from pattern rules. It
@@ -191,33 +107,42 @@ class inference_engine::engine
                               file_set const &files,
                               partial_vec &partials)
   {
-#if THREADED_PARTIALS
-    unsigned long const operations = files.size () * rules.size ();
-    if (operations > 160000)
-      {
-        size_t const partitions = std::min (10lu, operations / 80000);
+    size_t const operations  = files.size () * rules.size ();
+    size_t const min_threads = 7;
+    size_t const max_threads = 30;
+    size_t const divisor     = 90000;
+    size_t const partitions  = std::min (rules.size (),
+                                 std::max (min_threads,
+                                   std::min (max_threads, operations / divisor)));
+
 #if 1
-        printf ("%%%% doing %ld matchings => %ld parallel partitions\n",
-                operations, partitions);
+    timer T ("parallel infer_partials");
+    printf ("%%%% doing %ld matchings => %ld parallel partitions\n",
+            operations, partitions);
 #endif
 
-        boost::mutex lock;
-        partial_inference const partition (rules, files, partials, partitions, lock);
+#pragma omp parallel for num_threads(partitions)
+      for (size_t i = 0; i < rules.size (); i++)
+        {
+          rule const &r = rules[i];
+          partial_map &map = partials[i];
 
-        boost::ptr_vector<boost::thread> threads;
-        // start workers
-        for (size_t i = 0; i < partitions; i++)
-          threads.push_back (new boost::thread (partition, i));
+          foreach (fs::path const &f, files)
+            {
+              foreach (prerequisite const &p, r.prereqs)
+                {
+                  std::string stem;
+                  if (p->stem (f, stem))
+                    {
+                      // instantiate rule
+                      rule instance = r;
+                      instance.prereqs[&p - &r.prereqs.front ()] = f.native ();
 
-        // wait for each to finish
-        foreach (boost::thread &thread, threads)
-          thread.join ();
-      }
-    else
-#endif
-      {
-        partial_inference (rules, files, partials) ();
-      }
+                      map[stem].push_back (instance);
+                    }
+                }
+            }
+        }
   }
 
   /** \brief Merge partial rules into complete instances.
@@ -371,7 +296,6 @@ void
 inference_engine::infer ()
 {
 #if 1
-  timer T ("inference");
   //sleep (5);
   printf ("%%%% running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
 #endif

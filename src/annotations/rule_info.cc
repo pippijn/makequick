@@ -4,28 +4,31 @@
 #include "annotations/rule_info.h"
 #include "util/foreach.h"
 
-struct target_eq
+
+bool
+operator == (rule_info::rule const &a, rule_info::rule const &b)
 {
-  target_eq (std::string const &target)
-    : target (target)
+  return a.target == b.target;
+}
+
+namespace std { namespace tr1 {
+
+  template<>
+  size_t
+  hash<rule_info::rule>::operator () (rule_info::rule rule) const
   {
+    return hash<std::string> () (rule.target);
   }
 
-  bool operator () (rule_info::rule const &a)
-  {
-    return a.target == target;
-  }
+} }
 
-  std::string const &target;
-};
 
 rule_info::rule const *
 rule_info::find (std::string const &target) const
 {
-  std::vector<rule>::const_iterator found = find_if (rules.begin (), rules.end (), target_eq (target));
+  rule_set::const_iterator found = rules.find (rule (target, std::vector<fs::path> (), std::string (), NULL));
   if (found != rules.end ())
     return &*found;
-
   return NULL;
 }
 

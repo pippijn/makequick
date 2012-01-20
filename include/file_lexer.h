@@ -16,5 +16,5 @@ struct file_lexer
   virtual fs::path const &current_file () const;
 
   file_list const &files;
-  std::vector<fs::path>::const_iterator cur;
+  file_vec::const_iterator cur;
 };

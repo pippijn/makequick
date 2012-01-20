@@ -18,14 +18,14 @@
 %x VAR_INIT VAR_RBODY VAR_SQBODY
 %x RULE_INIT RULE_CODE RULE_LINES RULE_CONT
 %x VARDECL_INIT VARDECL_NAME VARDECL_CODE VARDECL VARDECL_LINE
-%x FILENAME RULE_FILENAME MULTIFILE IMPORT EXCLUDE LINK FLAGS
+%x FILENAME RULE_FILENAME MULTIFILE IMPORT EXCLUDE LINK FLAGS FLAGS_IMPORT
 
 /* Whitespace */
 SPACE	[ \t\v\f]
 WS	[ \t\v\f\n\r]
 IGNORED	({WS}+|"#".*)+
 /* Tool flags */
-FLAG	[^ \t\v\f\n\r}#$]
+FLAG	[^ \t\v\f\n\r}#$"'`]
 /* Filenames */
 FN	[^ \t\v\f\n\r{}%*:;?$#<>!]
 /* Identifiers */
@@ -167,8 +167,8 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	"*"				{ RetToken (TK_FN_STAR); }
 	"**"				{ RetToken (TK_FN_STARSTAR); }
 	"{".				{ PUSH (MULTIFILE); BACKTRACK (1); RetToken (TK_FN_LBRACE); }
-	"sources"{SPACE}*"("		{ PUSH (IMPORT); BACKTRACK (0); }
-	"exclude"{SPACE}*"{"		{ PUSH (EXCLUDE); BACKTRACK (0); }
+	"sources ("			{ PUSH (IMPORT); BACKTRACK (0); }
+	"exclude {"			{ PUSH (EXCLUDE); BACKTRACK (0); }
 	.				{ POP (); BACKTRACK (0); }
 }
 <MULTIFILE>{
@@ -194,7 +194,16 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 <FLAGS>{
 	{IGNORED}			{ RetKeyword (TK_WHITESPACE); }
 	{FLAG}+				{ RetToken (TK_FLAG); }
+	{STRING}			{ RetToken (TK_STRING); }
+	[a-z]+"flags ("			{ BACKTRACK (0); SWITCH (FLAGS_IMPORT); }
 	"}"				{ RetKeyword (TK_RBRACE); }
+}
+<FLAGS_IMPORT>{
+	{IGNORED}			{ }
+	"("				{ RetKeyword (TK_LBRACK); }
+	[a-z]+flags			{ RetToken (TK_FLAGS_ID); }
+	[a-z]+				{ RetToken (TK_IDENTIFIER); }
+	")"				{ SWITCH (FLAGS); RetKeyword (TK_RBRACK); }
 }
 
 <VARDECL>{

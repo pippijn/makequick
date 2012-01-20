@@ -59,6 +59,7 @@ yylex.cc: $(CURDIR)/yylex.ll
 		| grep -v '^    \({\|},\|} ;\)$$'	\
 		| grep -v '^ *-\?[0-9]\+,'		\
 		| grep -v '^$$'				\
+		| grep -v '^#line'			\
 		> ${@:.cc=.h}.tmp
 	@test -z "`diff ${@:.cc=.h} ${@:.cc=.h}.tmp 2>&1`"	\
 		|| (echo "Updating ${@:.cc=.h}" && mv ${@:.cc=.h}.tmp ${@:.cc=.h})

@@ -513,8 +513,14 @@ flag
 flag_part
 	: TK_FLAG
 		{ $$ = $1; }
+	| TK_STRING
+		{ $$ = $1; }
 	| variable
 		{ $$ = $1; }
+	| TK_FLAGS_ID "(" ")"
+		{ $$ = make_node<n_flag_import> (@$, $1,  0); }
+	| TK_FLAGS_ID "(" TK_IDENTIFIER ")"
+		{ $$ = make_node<n_flag_import> (@$, $1, $3); }
 	;
 
 /****************************************************************************

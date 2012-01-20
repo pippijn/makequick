@@ -84,7 +84,7 @@ struct inference
 #endif
         assert (prereq.size () == r.prereqs.size ());
 
-        rules.rules.push_back (rule_info::rule (r.target, prereq, r.stem, r.code));
+        rules.rules.insert (rule_info::rule (r.target, prereq, r.stem, r.code));
       }
   }
 };

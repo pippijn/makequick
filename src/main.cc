@@ -7,7 +7,6 @@
 #include "annotation_map.h"
 #include "parseutil.h"
 #include "phases.h"
-#include "sighandler.h"
 #include "util/foreach.h"
 #include "util/timer.h"
 
@@ -53,7 +52,7 @@ static char const *const all_phases[] = {
 
   "squarevars",
   //"merge_blocks",
-  "sx",
+  //"sx",
 };
 
 static fs::path
@@ -265,7 +264,7 @@ try
   char const *const mem_high = (char const *)sbrk (0);
   printf ("%%%% memory used: %ld MiB\n", (mem_high - mem_low) / 1024 / 1024);
 
-  return should_terminate;
+  return EXIT_SUCCESS;
 }
 catch (std::exception const &e)
 {

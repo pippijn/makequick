@@ -4,7 +4,6 @@
 
 #include <exception>
 #include <string>
-#include <vector>
 
 struct semantic_error
   : std::exception

@@ -1,29 +1,21 @@
-#include "sighandler.h"
-
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 
-bool should_terminate = false;
-
-static void
-maybe_exit (int signum)
-{
-  if (should_terminate)
-    {
-      puts ("second interrupt caught - exiting");
-      exit (1);
-    }
-  puts ("interrupt caught - terminating");
-  should_terminate = true;
-}
-
 static void
 throw_signal (int signum)
 {
   throw std::runtime_error (strsignal (signum));
+}
+
+static void
+maybe_exit (int signum)
+{
+  puts ("\ninterrupt caught - terminating");
+  signal (signum, SIG_DFL);
+  exit (EXIT_FAILURE);
 }
 
 static bool
