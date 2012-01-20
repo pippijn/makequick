@@ -1,16 +1,11 @@
 #include "phase.h"
 
-#include "annotations/error_log.h"
-
 struct remove_patrules
   : visitor
 {
   virtual void visit (t_rule &n);
 
-  error_log &errors;
-
   remove_patrules (annotation_map &annots)
-    : errors (annots.get ("errors"))
   {
   }
 };
