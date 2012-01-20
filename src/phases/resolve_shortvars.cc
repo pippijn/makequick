@@ -92,7 +92,7 @@ modify (node_ptr const &n, char modifier, bool builddir)
           : NULL;
   assert (pred != NULL);
 
-  fs::path orig (fn[0]->as<token> ().string);
+  fs::path orig (id (fn[0]));
   return make_filename (fn.loc, add_builddir (pred (orig), orig.native (), builddir));
 }
 
@@ -145,7 +145,7 @@ resolve_shortvars::visit (t_intvar &n)
   if (var == 0)
     {
       generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
-      std::string const &tname = TARGET->as<generic_node> ()[0]->as<token> ().string;
+      std::string const &tname = id (TARGET->as<generic_node> ()[0]);
       replacement = new token (n.loc, TK_CODE, "$(builddir)/" + tname + "$(EXEEXT)");
       return;
     }

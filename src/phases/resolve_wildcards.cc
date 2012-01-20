@@ -61,7 +61,7 @@ resolve_wildcards::visit (t_filename &n)
       if (n.list.size () > 1)
         wildcards.push_back (&n);
       else
-        source_files.push_back (fs::path (n.list.front ()->as<token> ().string));
+        source_files.push_back (fs::path (id (n.list.front ())));
     }
 }
 

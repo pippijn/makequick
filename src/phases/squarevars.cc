@@ -56,18 +56,14 @@ normalise (char c)
 void
 squarevars::visit (t_squarevar &n)
 {
-  symtab.print_stack ();
   symbol_type type;
   generic_node_ptr TARGET = symtab.lookup (type = T_PROGRAM, "TARGET");
   if (!TARGET)     TARGET = symtab.lookup (type = T_LIBRARY, "TARGET");
-
-  if (!TARGET)
-    return;
-  puts ("YEP");
+  assert (TARGET);
 
   t_target_definition &target = TARGET->as<t_target_definition> ();
-  std::string const &tname = target.name ()->as<token> ().string;
-  std::string const &vname = n.name ()->as<token> ().string;
+  std::string const &tname = id (target.name ());
+  std::string const &vname = id (n.name ());
 
   replacement.push_back (make_var (n.loc, "AM_" + vname));
   replacement.push_back (make_space (n.loc));

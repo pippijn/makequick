@@ -72,7 +72,7 @@ struct resolve_stem
 
   virtual void visit (t_shortvar &n)
   {
-    if (n.var ()->as<token> ().string == "*")
+    if (id (n.var ()) == "*")
       replace = true;
   }
 
@@ -170,7 +170,7 @@ instantiate_rules::visit (t_target_definition &n)
 
   visitor::visit (n);
 
-  std::string name = n.name ()->as<token> ().string;
+  std::string name = id (n.name ());
   if (target == T_LIBRARY)
     name = "lib" + name + ".la";
 

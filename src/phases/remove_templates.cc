@@ -23,7 +23,7 @@ void
 remove_templates::visit (t_template &n)
 {
   t_target_definition &defn = n.defn ()->as<t_target_definition> ();
-  symtab.remove (T_TEMPLATE, defn.name ()->as<token> ().string, &defn);
+  symtab.remove (T_TEMPLATE, id (defn.name ()), &defn);
   n.unlink ();
 
   symbol_visitor::visit (n);

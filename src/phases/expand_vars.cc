@@ -133,12 +133,6 @@ static struct function_calls
 } const call;
 
 
-static std::string const &
-id (node_ptr const &n)
-{
-  return n->as<token> ().string;
-}
-
 void
 expand_vars::visit (t_callvar &n)
 {

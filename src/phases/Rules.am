@@ -8,12 +8,17 @@ makepp_SOURCES +=		\
 	inference.cc		\
 	infer_target_objects.cc	\
 	inheritance.cc		\
+				\
+	insert_global_syms.cc	\
 	insert_target_syms.cc	\
+	insert_this_syms.cc	\
 	insert_varadd_syms.cc	\
 	insert_vardecl_syms.cc	\
+				\
 	instantiate_rules.cc	\
 	merge_blocks.cc		\
 	multirule.cc		\
+	remove_patrules.cc	\
 	remove_templates.cc	\
 	reparse_vars.cc		\
 	resolve_shortvars.cc	\

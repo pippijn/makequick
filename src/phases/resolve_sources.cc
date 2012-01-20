@@ -94,7 +94,7 @@ resolve_sources::visit (t_filename &n)
 
           fs::path CURDIR = proper_loc (n).file->parent_path ();
           if (generic_node_ptr curdir = symtab.lookup (T_VARIABLE, "CURDIR"))
-            CURDIR = fs::path ((*curdir)[0]->as<token> ().string);
+            CURDIR = fs::path (id ((*curdir)[0]));
 
           bool absolute = t.mutable_string[0] == '/';
 

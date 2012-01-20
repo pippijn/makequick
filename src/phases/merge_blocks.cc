@@ -11,8 +11,8 @@ struct if_compare
     if (!a && !b) return false;
     if (!a) return true;
     if (!b) return false;
-    return a->cond ()->as<token> ().string
-         < b->cond ()->as<token> ().string
+    return id (a->cond ())
+         < id (b->cond ())
          ;
   }
 };

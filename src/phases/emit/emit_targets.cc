@@ -97,7 +97,7 @@ next:
 void
 emit_targets::visit (t_if &n)
 {
-  cond = n.cond () ? n.cond ()->as<token> ().string : "";
+  cond = n.cond () ? id (n.cond ()) : "";
 }
 
 void
@@ -106,8 +106,8 @@ emit_targets::visit (t_destination &n)
   generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
   assert (TARGET);
   generic_node &name_node = TARGET->as<generic_node> ();
-  std::string const &name = name_node[0]->as<token> ().string;
-  std::string const &dir  = n.dir ()->as<token> ().string;
+  std::string const &name = id (name_node[0]);
+  std::string const &dir  = id (n.dir ());
 
   if (state == S_PROGRAM)
     programs[dir].push_back (target (name, cond));

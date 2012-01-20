@@ -225,3 +225,9 @@ namespace tokens
     std::string const &string;
   };
 }
+
+static inline std::string const &
+id (node_ptr const &n)
+{
+  return n->as<tokens::token> ().string;
+}

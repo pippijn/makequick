@@ -2,18 +2,33 @@
 
 #include "annotation.h"
 
-#include "node_ptr.h"
+#include "node.h"
 
 #include <map>
+#include <stdexcept>
 
 
 enum symbol_type
 {
-  T_VARIABLE,
-  T_PROGRAM,
-  T_LIBRARY,
-  T_TEMPLATE
+  T_VARIABLE = 1 << 0,
+  T_PROGRAM  = 1 << 1,
+  T_LIBRARY  = 1 << 2,
+  T_TEMPLATE = 1 << 3,
+  T_LAST
 };
+
+static inline symbol_type
+node_type_to_symbol_type (nodes::node_type type)
+{
+  switch (type)
+    {
+    case nodes::n_program : return T_PROGRAM;
+    case nodes::n_library : return T_LIBRARY;
+    case nodes::n_template: return T_TEMPLATE;
+    }
+  throw std::runtime_error ("invalid state in target_definition");
+}
+
 
 struct symbol_table
   : annotation

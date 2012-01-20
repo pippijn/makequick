@@ -44,7 +44,7 @@ inheritance::visit (t_target_definition &n)
   if (!n.derive ())
     return;
 
-  std::string const &name = n.derive ()->as<t_inheritance> ().base ()->as<token> ().string;
+  std::string const &name = id (n.derive ()->as<t_inheritance> ().base ());
 
   // find referenced template
   generic_node_ptr base = lookup (name);

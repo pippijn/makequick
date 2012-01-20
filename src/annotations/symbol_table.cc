@@ -40,6 +40,11 @@ symbol_table::leave_scope ()
 symbol_table::node_map &
 symbol_table::get_scope (type_map &map, symbol_type type)
 {
+  assert (type == T_VARIABLE
+          || type == T_PROGRAM
+          || type == T_LIBRARY
+          || type == T_TEMPLATE);
+
   if (map.size () <= type)
     map.resize (type + 1);
   return map[type];
@@ -103,9 +108,6 @@ symbol_table::remove (symbol_type type, std::string const &name, node_ptr const 
   assert (!stack.empty ());
 
   size_t scope = stack.size ();
-#if 0
-  printf ("lookup: %d scopes for %s\n", scope, name.c_str ());
-#endif
 
   do
     {

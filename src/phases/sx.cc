@@ -56,6 +56,8 @@ sx::visit (token &n)
     printf (" (loc "YELLOW"%d:%d"R" "YELLOW"%d:%d"R")",
             n.loc.first_line, n.loc.first_column,
             n.loc.last_line, n.loc.last_column);
+  else
+    printf (" (loc "GREEN"generated"R")");
   printf (" \""WHITE"%s"R"\")", escape (n.string).c_str ());
 }
 

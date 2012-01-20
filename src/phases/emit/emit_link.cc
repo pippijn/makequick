@@ -41,7 +41,7 @@ emit_link::visit (t_link_body &n)
   generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
   assert (TARGET);
   generic_node &name = TARGET->as<generic_node> ();
-  fprintf (out.Makefile, "%s =", canonical (name[0]->as<token> ().string, state).c_str ());
+  fprintf (out.Makefile, "%s =", canonical (id (name[0]), state).c_str ());
   visitor::visit (n);
   fprintf (out.Makefile, "\n\n");
 }

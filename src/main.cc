@@ -1,8 +1,9 @@
 #include "config.h"
 
-#include "annotations/output_file.h"
-#include "annotations/file_list.h"
 #include "annotations/error_log.h"
+#include "annotations/file_list.h"
+#include "annotations/output_file.h"
+#include "annotations/symbol_table.h"
 #include "annotation_map.h"
 #include "parseutil.h"
 #include "phases.h"
@@ -20,23 +21,36 @@
 
 static char const *const all_phases[] = {
   "audit",
-  "insert_target_syms",
+
+  "insert_this_syms",
+  "expand_vars",
+
+  "insert_global_syms",
   "inheritance",
   "remove_templates",
   "default_prereq",
   "default_destdir",
+
   "insert_vardecl_syms",
   "insert_varadd_syms",
-  "expand_vars",
-  "flatten_vars",
-  "reparse_vars",
+    "expand_vars",
+    "flatten_vars",
+    "reparse_vars",
+
   "multirule",
   "inference",
+  "remove_patrules",
   "flatten_filenames",
   "resolve_sources",
   "resolve_wildcards",
   "infer_target_objects",
   "instantiate_rules",
+
+  "insert_target_syms",
+    "expand_vars",
+    "flatten_vars",
+    "reparse_vars",
+
   "squarevars",
   //"merge_blocks",
   "sx",
@@ -210,6 +224,7 @@ try
       annots.put ("output", new output_file ((path / ".project" / "makepp.am").c_str (), "configure.out"));
 #endif
       annots.put ("errors", errors.release ());
+      annots.put ("symtab", new symbol_table);
 
       error_log &errors = annots.get ("errors");
 

@@ -90,7 +90,7 @@ emit_SOURCES::visit (t_sources_members &n)
       generic_node &name = TARGET->as<generic_node> ();
       fprintf (out.Makefile, "%s%s_SOURCES =",
                sstate == SS_NODIST_SOURCES ? "nodist_" : "",
-               canonical (name[0]->as<token> ().string, state).c_str ());
+               canonical (id (name[0]), state).c_str ());
     }
   else
     {

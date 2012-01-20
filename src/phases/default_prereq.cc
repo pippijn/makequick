@@ -38,7 +38,7 @@ default_prereq::visit (t_filenames &n)
         return;
 
       generic_node &target = TARGET->as<generic_node> ();
-      std::string const &name = target[0]->as<token> ().string;
+      std::string const &name = id (target[0]);
 
       n.add (make_filename (name));
     }

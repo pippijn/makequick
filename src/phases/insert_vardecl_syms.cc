@@ -39,24 +39,12 @@ static phase<insert_vardecl_syms> thisphase ("insert_vardecl_syms", "inheritance
 void
 insert_vardecl_syms::visit (t_vardecl &n)
 {
-  std::string const &name = n.var ()->as<token> ().string;
+  std::string const &name = id (n.var ());
   generic_node_ptr sym = &n.body ()->as<t_vardecl_body> ();
   if (!symtab.insert (T_VARIABLE, name, sym))
     errors.add<semantic_error> (&n, "variable " + C::quoted (name) + " already defined in this scope");
 }
 
-
-static symbol_type
-node_type_to_symbol_type (node_type type)
-{
-  switch (type)
-    {
-    case n_program : return T_PROGRAM;
-    case n_library : return T_LIBRARY;
-    case n_template: return T_TEMPLATE;
-    }
-  throw std::runtime_error ("invalid state in target_definition");
-}
 
 void
 insert_vardecl_syms::visit (t_target_definition &n)

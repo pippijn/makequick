@@ -57,7 +57,7 @@ infer_target_objects::visit (t_filename &n)
 {
   if (state == S_SOURCES)
     {
-      fs::path path (n[0]->as<token> ().string);
+      fs::path path (id (n[0]));
       switch (target)
         {
         case T_LIBRARY:
@@ -94,7 +94,7 @@ infer_target_objects::visit (t_target_definition &n)
   visitor::visit (n);
   assert (!objects.empty ());
 
-  std::string name = n.name ()->as<token> ().string;
+  std::string name = id (n.name ());
 
   if (target == T_LIBRARY)
     name = "lib" + name + ".la";

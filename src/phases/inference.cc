@@ -243,7 +243,7 @@ inference::visit (t_rule &n)
 void
 inference::visit (t_target_definition &n)
 {
-  engine.add_file (fs::path (n.name ()->as<token> ().string));
+  engine.add_file (fs::path (id (n.name ())));
   visitor::visit (n);
 }
 
