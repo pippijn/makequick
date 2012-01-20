@@ -208,7 +208,7 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 	{SPACE}*"+="			{ SWITCH (VARDECL_LINE); RetKeyword (TK_PLUSEQ); }
 }
 <VARDECL_LINE>{
-	[^\n$]+				{ RetToken (TK_CODE); }
+	[^\n$]+				{ while (isspace (*yytext)) { yytext++, yyleng--; } if (yyleng) RetToken (TK_CODE); }
 	\n				{ POP (); RetKeyword (TK_WHITESPACE); }
 }
 <VARDECL_CODE>{

@@ -10,12 +10,15 @@
 
 static fs::path const string_file ("<string>");
 
+extern void yyset_column (int column_no, yyscan_t yyscanner);
+
 string_lexer::string_lexer (std::string const &s)
   : lexer ("string parsing")
   , str (boost::trim_copy (s))
 {
   yy_scan_bytes (str.data (), str.length (), yyscanner);
   yyset_lineno (1, yyscanner);
+  yyset_column (0, yyscanner);
 }
 
 string_lexer::~string_lexer ()
