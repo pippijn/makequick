@@ -160,7 +160,7 @@ resolve_shortvars::visit (t_rule &n)
   target = &n.target ()->as<t_filenames> ()[0]->as<t_filename> ();
   prereq = &n.prereq ()->as<t_filenames> ();
 
-  visitor::visit (n);
+  symbol_visitor::visit (n);
 
   prereq = 0;
   target = 0;

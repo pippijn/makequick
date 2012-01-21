@@ -27,7 +27,6 @@ static char const *const all_phases[] = {
   "insert_global_syms",
   "inheritance",
   "resolve_flagsref",
-  "remove_templates",
   "default_prereq",
   "default_destdir",
 
@@ -50,13 +49,16 @@ static char const *const all_phases[] = {
   "resolve_shortvars",
 
   "insert_target_syms",
+  "expand_filtervars",
     "expand_vars",
     "flatten_vars",
     "reparse_vars",
 
   "squarevars",
   "flatten_rules",
-  //"merge_blocks",
+  "remove_templates",
+  "merge_blocks",
+  "emit",
   "sx",
 };
 
@@ -148,12 +150,6 @@ usage ()
   phases::print ();
 }
 
-static void
-SX (node &n)
-{
-  phases::run ("sx", &n);
-}
-
 int
 main (int argc, char *argv[])
 try
@@ -224,9 +220,8 @@ try
 
       annotation_map annots;
       annots.put ("files", files.release ());
-#if 0
-      annots.put ("output", new output_file ((path / ".project" / "makepp.am").c_str (), "configure.out"));
-#endif
+      annots.put ("output", new output_file ((path / "Rules.am").c_str (),
+                                             (path / "configure.ac").c_str ()));
       annots.put ("errors", errors.release ());
       annots.put ("symtab", new symbol_table);
 
@@ -285,4 +280,10 @@ catch (char const *s)
 {
   printf ("\e[1;31m%%%% runtime error\e[0m: %s\n", s);
   return EXIT_FAILURE;
+}
+
+void
+SX (node &n)
+{
+  phases::run ("sx", &n);
 }

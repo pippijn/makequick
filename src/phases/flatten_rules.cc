@@ -77,7 +77,15 @@ flatten_rules::visit (t_rule_line &n)
 
   std::string code;
   foreach (node_ptr const &p, n.list)
-    code += id (p);
+    {
+      std::string const &frag = id (p);
+      if (frag.empty ())
+        continue;
+
+      code += frag;
+      if (frag[0] == '\t')
+        code.end ()[-frag.size ()] = ' ';
+    }
 
   unlink_all (n.list);
   n.add (make_code (n.loc, code));

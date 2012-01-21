@@ -21,6 +21,7 @@ struct instantiate_rules
   virtual void visit (t_target_definition &n);
   virtual void visit (t_library &n);
   virtual void visit (t_program &n);
+  virtual void visit (t_template &n) { /* ignore */ }
 
   enum target_type
   {
@@ -124,6 +125,7 @@ instantiate_rules::instantiate (t_target_definition &n,
 {
   foreach (fs::path const &obj, targets)
     {
+      //printf ("rule for %s\n", obj.c_str ());
       if (rules.files.find (obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));
@@ -139,6 +141,8 @@ instantiate_rules::instantiate (t_target_definition &n,
                                           + " in source directory without rule to rebuild it");
           continue;
         }
+
+      assert (r->target == obj);
 
       instantiate (*r);
 

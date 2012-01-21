@@ -23,14 +23,14 @@ struct emit
 #endif
 };
 
-static phase<emit> thisphase ("emit", "instantiate_rules", "resolve_shortvars");
+static phase<emit> thisphase ("emit", "merge_blocks");
 
 
 void
 emit::visit (t_document &n)
 {
   phases::run ("emit_targets", &n, annots);
-  phases::run ("emit_SOURCES", &n, annots);
   phases::run ("emit_link", &n, annots);
+  phases::run ("emit_SOURCES", &n, annots);
   phases::run ("emit_rules", &n, annots);
 }

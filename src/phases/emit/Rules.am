@@ -1,4 +1,5 @@
 makepp_SOURCES +=		\
+	canonical.h		\
 	emit_SOURCES.cc		\
 	emit_link.cc		\
 	emit_rules.cc		\

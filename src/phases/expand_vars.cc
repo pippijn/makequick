@@ -136,7 +136,7 @@ static struct function_calls
 void
 expand_vars::visit (t_callvar &n)
 {
-  visitor::visit (n);
+  symbol_visitor::visit (n);
   sym = call (id (n.name ()), n.arg ()->as<generic_node> ());
 }
 

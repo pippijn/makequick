@@ -3,17 +3,12 @@
 #include "annotations/output_file.h"
 #include "util/colours.h"
 #include "util/foreach.h"
-#include "../print.h"
 
 #include <stdexcept>
 
 struct emit_rules
   : visitor
 {
-  virtual void visit (t_shortvar &n);
-  virtual void visit (t_intvar &n);
-  virtual void visit (t_roundvar &n);
-  virtual void visit (t_squarevar &n);
   virtual void visit (t_rule_line &n);
   virtual void visit (t_rule &n);
 
@@ -22,43 +17,17 @@ struct emit_rules
   bool in_rule;
   bool in_prereq;
   output_file const &out;
-  print p;
 
   emit_rules (annotation_map &annots)
     : in_rule (false)
     , in_prereq (false)
     , out (annots.get ("output"))
-    , p (out.Makefile)
   {
   }
 };
 
-static phase<emit_rules> thisphase ("emit_rules", noauto);
+static phase<emit_rules> thisphase ("emit_rules", "emit");
 
-
-void
-emit_rules::visit (t_shortvar &n)
-{
-  p.visit (n);
-}
-
-void
-emit_rules::visit (t_intvar &n)
-{
-  p.visit (n);
-}
-
-void
-emit_rules::visit (t_squarevar &n)
-{
-  p.visit (n);
-}
-
-void
-emit_rules::visit (t_roundvar &n)
-{
-  p.visit (n);
-}
 
 void
 emit_rules::visit (t_rule_line &n)
@@ -74,8 +43,8 @@ emit_rules::visit (t_rule &n)
   // size == 1 => instantiated rule
   // code != NULL => has rule body (no import)
 
-  generic_node const &targets = n.target ()->as<generic_node> ();
-  generic_node const &target_file = targets[0]->as<generic_node> ();
+  t_filenames const &targets = n.target ()->as<t_filenames> ();
+  t_filename  const &target_file = targets[0]->as<t_filename> ();
 
   if (target_file.size () == 1 && n.code ())
     {

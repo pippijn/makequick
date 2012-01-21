@@ -1,5 +1,6 @@
 #include "phase.h"
 
+#include "util/ancestor.h"
 #include "util/foreach.h"
 
 #include <map>
@@ -52,7 +53,11 @@ struct merge_blocks
   : visitor
 {
   void visit (t_target_definition &n);
+
   void visit (t_link &n);
+  void visit (t_sources &n);
+  void visit (t_tool_flags &n);
+
   void visit (t_extra_dist &n);
   void visit (t_test &n);
 
@@ -61,6 +66,9 @@ struct merge_blocks
   }
 
   merger<t_link, &t_link::items, t_link_body> link_merger;
+  merger<t_sources, &t_sources::sources, t_sources_members> sources_merger;
+  std::map<std::string, merger<t_tool_flags, &t_tool_flags::flags, t_flag> > tool_flags_mergers;
+
   merger<t_extra_dist, &t_extra_dist::sources, t_sources_members> extra_dist_merger;
   merger<t_test, &t_test::sources, t_sources_members> test_merger;
 };
@@ -73,14 +81,38 @@ merge_blocks::visit (t_target_definition &n)
 {
   // extra_dist and test are not reset, as they are global
   link_merger.clear ();
+  sources_merger.clear ();
+  tool_flags_mergers.clear ();
   visitor::visit (n);
 }
+
 
 void
 merge_blocks::visit (t_link &n)
 {
   link_merger.visit (n);
 }
+
+void
+merge_blocks::visit (t_sources &n)
+{
+  sources_merger.visit (n);
+}
+
+void
+merge_blocks::visit (t_tool_flags &n)
+{
+  // TODO: move this elsewhere
+  if (!n.flags ())
+    {
+      n.unlink ();
+      return;
+    }
+  assert (n.flags ());
+  if (ancestor<t_target_definition> (n))
+    tool_flags_mergers[id (n.keyword ())].visit (n);
+}
+
 
 void
 merge_blocks::visit (t_extra_dist &n)

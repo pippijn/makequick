@@ -1,24 +1,18 @@
 #include "phase.h"
 
 #include "annotations/output_file.h"
+#include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
 
+#include "canonical.h"
+
 struct emit_SOURCES
   : symbol_visitor
 {
-  static std::string canonical (std::string const &name, visit_state state)
-  {
-    if (state == S_PROGRAM)
-      return name;
-    if (state == S_LIBRARY)
-      return "lib" + name + "_la";
-    throw std::invalid_argument ("invalid state in target " + C::quoted (name));
-  }
-
   virtual void visit (t_sources &n);
   virtual void visit (t_nodist_sources &n);
   virtual void visit (t_extra_dist &n);
@@ -29,47 +23,47 @@ struct emit_SOURCES
 
   virtual void visit (token &n);
 
-  enum source_state
+  enum state
   {
-    SS_NONE,
-    SS_SOURCES,
-    SS_NODIST_SOURCES,
-    SS_EXTRA_DIST,
-  } sstate;
+    S_NONE,
+    S_SOURCES,
+    S_NODIST_SOURCES,
+    S_EXTRA_DIST,
+  } state;
 
   bool in_filename;
   output_file const &out;
 
   emit_SOURCES (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
-    , sstate (SS_NONE)
+    , state (S_NONE)
     , in_filename (false)
     , out (annots.get ("output"))
   {
   }
 };
 
-static phase<emit_SOURCES> thisphase ("emit_SOURCES", noauto);
+static phase<emit_SOURCES> thisphase ("emit_SOURCES", "emit");
 
 void
 emit_SOURCES::visit (t_sources &n)
 {
-  local (sstate) = SS_SOURCES;
-  visitor::visit (n);
+  local (state) = S_SOURCES;
+  symbol_visitor::visit (n);
 }
 
 void
 emit_SOURCES::visit (t_nodist_sources &n)
 {
-  local (sstate) = SS_NODIST_SOURCES;
-  visitor::visit (n);
+  local (state) = S_NODIST_SOURCES;
+  symbol_visitor::visit (n);
 }
 
 void
 emit_SOURCES::visit (t_extra_dist &n)
 {
-  local (sstate) = SS_EXTRA_DIST;
-  visitor::visit (n);
+  local (state) = S_EXTRA_DIST;
+  symbol_visitor::visit (n);
 }
 
 
@@ -77,26 +71,32 @@ void
 emit_SOURCES::visit (t_filename &n)
 {
   local (in_filename) = true;
-  visitor::visit (n);
+  symbol_visitor::visit (n);
 }
 
 void
 emit_SOURCES::visit (t_sources_members &n)
 {
-  if (sstate != SS_EXTRA_DIST)
+  char const *nodist_opt = "";
+  switch (state)
     {
-      generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
-      assert (TARGET);
-      generic_node &name = TARGET->as<generic_node> ();
-      fprintf (out.Makefile, "%s%s_SOURCES =",
-               sstate == SS_NODIST_SOURCES ? "nodist_" : "",
-               canonical (id (name[0]), state).c_str ());
+    case S_NODIST_SOURCES:
+      nodist_opt = "nodist_";
+    case S_SOURCES:
+      {
+        t_target_definition &target = symtab.lookup<t_target_definition> (T_PROGRAM, T_LIBRARY, "TARGET");
+        fprintf (out.Makefile, "%s%s_SOURCES =",
+                 nodist_opt, canonical (id (target.name ()), current_symtype).c_str ());
+        break;
+      }
+    case S_EXTRA_DIST:
+      fprintf (out.Makefile, "EXTRA_DIST =");
+      break;
+
+    default:
+      return;
     }
-  else
-    {
-      fprintf (out.Makefile, "EXTRA_DIST +=");
-    }
-  visitor::visit (n);
+  symbol_visitor::visit (n);
   fprintf (out.Makefile, "\n\n");
 }
 
@@ -110,6 +110,6 @@ emit_SOURCES::visit (t_rule &n)
 void
 emit_SOURCES::visit (token &n)
 {
-  if (in_filename)
+  if (in_filename && state != S_NONE)
     fprintf (out.Makefile, "\t\\\n\t%s", n.string.c_str ());
 }

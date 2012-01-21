@@ -16,6 +16,7 @@ struct infer_target_objects
   virtual void visit (t_target_definition &n);
   virtual void visit (t_library &n);
   virtual void visit (t_program &n);
+  virtual void visit (t_template &n) { /* ignore */ }
 
   enum target_type
   {
@@ -61,10 +62,12 @@ infer_target_objects::visit (t_filename &n)
       switch (target)
         {
         case T_LIBRARY:
-          objects.push_back (path.filename ().replace_extension (".lo"));
+          // XXX: this generates for %.lo: %.c, which is not what automake does
+          // (unless subdir-rules is on)
+          objects.push_back (path.replace_extension (".lo"));
           break;
         case T_PROGRAM:
-          objects.push_back (path.filename ().replace_extension (".o"));
+          objects.push_back (path.replace_extension (".o"));
           break;
         default:
           throw std::runtime_error ("invalid sources container");

@@ -1,9 +1,13 @@
+include emit/Rules.am
+
 makepp_SOURCES +=		\
 	audit.cc		\
 	default_destdir.cc	\
 	default_prereq.cc	\
+	emit.cc			\
 	exclude.cc		\
 	expand_vars.cc		\
+	expand_filtervars.cc	\
 	flatten_filenames.cc	\
 	flatten_rules.cc	\
 	flatten_vars.cc		\

@@ -107,5 +107,5 @@ squarevars::visit (t_rule &n)
     if (target[0]->as<generic_node> ().size () != 1)
       return;
   }
-  visitor::visit (n);
+  symbol_visitor::visit (n);
 }

@@ -48,6 +48,10 @@ struct symbol_table
   node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type = NULL) const;
   node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, symbol_type type4, std::string const &name, symbol_type *type = NULL) const;
 
+  template<typename T> T &lookup (symbol_type type1, symbol_type type2, std::string const &name, symbol_type *type = NULL) const { return lookup (type1, type2, name, type)->as<T> (); }
+  template<typename T> T &lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type = NULL) const { return lookup (type1, type2, type3, name, type)->as<T> (); }
+  template<typename T> T &lookup (symbol_type type1, symbol_type type2, symbol_type type3, symbol_type type4, std::string const &name, symbol_type *type = NULL) const { return lookup (type1, type2, type3, type4, name, type)->as<T> (); }
+
   void clear () { assert (stack.empty ()); scopes.clear (); }
   void print () const;
   void print_stack () const;

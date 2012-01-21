@@ -29,6 +29,7 @@ is_sorted (ForwardIterator it, ForwardIterator et)
 struct resolve_sources
   : symbol_visitor
 {
+  void visit (t_template &n) { /* ignore */ }
   void visit (t_filename &n);
   void visit (t_sources_members &n);
 
