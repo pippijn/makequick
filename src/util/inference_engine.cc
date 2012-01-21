@@ -5,6 +5,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/regex.hpp>
 #include <boost/spirit/home/phoenix.hpp>
 
 #include "util/inference_engine.h"
@@ -297,11 +298,26 @@ inference_engine::infer ()
 {
 #if 1
   //sleep (5);
-  printf ("%%%% running inference with %lu rules and %lu files\n", info.baserules.size (), info.files.size ());
+  size_t pattern_rules = 0;
+  size_t normal_rules = 0;
+  foreach (rule const &r, info.baserules)
+    {
+      bool has_pattern = false;
+      foreach (prerequisite const &p, r.prereqs)
+        if (dynamic_cast<prerequisite::file_t<boost::regex> *> (p.file.get ()))
+          {
+            has_pattern = true;
+            break;
+          }
+      pattern_rules +=  has_pattern;
+      normal_rules  += !has_pattern;
+    }
+  printf ("%%%% running inference with %lu pattern rules, %lu direct rules and %lu files\n",
+          pattern_rules, normal_rules, info.files.size ());
 #endif
   engine::infer (info.baserules, info.rules, info.files);
 #if 1
-  printf ("%%%% inferred %lu rules; we now have %lu files\n", info.rules.size (), info.files.size ());
+  printf ("%%%% inferred %lu rules; we now have %lu (buildable or existing) files\n", info.rules.size (), info.files.size ());
 #endif
 }
 

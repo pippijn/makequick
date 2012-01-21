@@ -10,11 +10,10 @@
 
 enum symbol_type
 {
-  T_VARIABLE = 1 << 0,
-  T_PROGRAM  = 1 << 1,
-  T_LIBRARY  = 1 << 2,
-  T_TEMPLATE = 1 << 3,
-  T_LAST
+  T_VARIABLE,
+  T_PROGRAM,
+  T_LIBRARY,
+  T_TEMPLATE
 };
 
 static inline symbol_type
@@ -44,6 +43,10 @@ struct symbol_table
   bool insert_global (symbol_type type, std::string const &name, node_ptr const &sym);
   node_ptr lookup (symbol_type type, std::string const &name) const;
   bool remove (symbol_type type, std::string const &name, node_ptr const &sym);
+
+  node_ptr lookup (symbol_type type1, symbol_type type2, std::string const &name, symbol_type *type = NULL) const;
+  node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type = NULL) const;
+  node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, symbol_type type4, std::string const &name, symbol_type *type = NULL) const;
 
   void clear () { assert (stack.empty ()); scopes.clear (); }
   void print () const;

@@ -1,9 +1,12 @@
 EXTRA_DIST +=			\
+	ancestor.h		\
 	colours.h		\
 	extract_string.h	\
 	foreach.h		\
+	grep.h			\
 	inference_engine.h	\
 	local.h			\
+	make_code.h		\
 	make_filename.h		\
 	make_var.h		\
 	move.h			\

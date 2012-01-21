@@ -99,7 +99,7 @@ symbol_table::lookup (symbol_type type, std::string const &name) const
     }
   while (scope);
 
-  return 0;
+  return NULL;
 }
 
 bool
@@ -124,6 +124,42 @@ symbol_table::remove (symbol_type type, std::string const &name, node_ptr const 
 
   return false;
 }
+
+template<typename T>
+static T optset (T value, T *pointer)
+{
+  if (pointer)
+    *pointer = value;
+  return value;
+}
+
+symbol_table::node_ptr
+symbol_table::lookup (symbol_type type1, symbol_type type2, std::string const &name, symbol_type *type) const
+{
+  if (node_ptr node = lookup (optset (type1, type), name)) return node;
+  if (node_ptr node = lookup (optset (type2, type), name)) return node;
+  return NULL;
+}
+
+symbol_table::node_ptr
+symbol_table::lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type) const
+{
+  if (node_ptr node = lookup (optset (type1, type), name)) return node;
+  if (node_ptr node = lookup (optset (type2, type), name)) return node;
+  if (node_ptr node = lookup (optset (type3, type), name)) return node;
+  return NULL;
+}
+
+symbol_table::node_ptr
+symbol_table::lookup (symbol_type type1, symbol_type type2, symbol_type type3, symbol_type type4, std::string const &name, symbol_type *type) const
+{
+  if (node_ptr node = lookup (optset (type1, type), name)) return node;
+  if (node_ptr node = lookup (optset (type2, type), name)) return node;
+  if (node_ptr node = lookup (optset (type3, type), name)) return node;
+  if (node_ptr node = lookup (optset (type4, type), name)) return node;
+  return NULL;
+}
+
 
 static char const *
 symbol_type_name (size_t type)

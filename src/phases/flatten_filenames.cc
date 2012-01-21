@@ -3,7 +3,6 @@
 #include "phase.h"
 
 #include "annotations/error_log.h"
-#include "annotations/symbol_table.h"
 #include "util/foreach.h"
 #include "util/move.h"
 #include "util/unlink.h"
@@ -25,7 +24,7 @@ struct flatten_filenames
 static phase<flatten_filenames> thisphase ("flatten_filenames", "expand_vars");
 
 static bool
-cant_flatten (node_ptr const &n)
+cannot_flatten (node_ptr const &n)
 {
   token_ptr tok = n->is<token> ();
   return !tok || tok->tok != TK_FILENAME;
@@ -34,7 +33,7 @@ cant_flatten (node_ptr const &n)
 void
 flatten_filenames::visit (t_filename &n)
 {
-  if (find_if (n.list.begin (), n.list.end (), cant_flatten) != n.list.end ())
+  if (find_if (n.list.begin (), n.list.end (), cannot_flatten) != n.list.end ())
     return;
 
   node_vec const &body = unlink_all (n.list);

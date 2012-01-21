@@ -39,8 +39,7 @@ SVAR	[@*<^+$]
 MULTI	"{"[^}\n\r]+"}"
 RLSTART	.+":".+[;{]
 /* Numbers */
-DIGIT	[0-9]
-INTEGER	{DIGIT}+
+INTEGER	[1-9][0-9]*
 /* Strings */
 SSTRING	'(\\.|[^\\'])+'
 DSTRING	\"(\\.|[^\\"])+\"

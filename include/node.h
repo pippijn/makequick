@@ -231,3 +231,9 @@ id (node_ptr const &n)
 {
   return n->as<tokens::token> ().string;
 }
+
+static inline std::string const &
+id (node &n)
+{
+  return id (&n);
+}

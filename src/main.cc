@@ -26,6 +26,7 @@ static char const *const all_phases[] = {
 
   "insert_global_syms",
   "inheritance",
+  "resolve_flagsref",
   "remove_templates",
   "default_prereq",
   "default_destdir",
@@ -42,8 +43,11 @@ static char const *const all_phases[] = {
   "flatten_filenames",
   "resolve_sources",
   "resolve_wildcards",
+  "resolve_sourcesref",
+  "exclude",
   "infer_target_objects",
   "instantiate_rules",
+  "resolve_shortvars",
 
   "insert_target_syms",
     "expand_vars",
@@ -51,8 +55,9 @@ static char const *const all_phases[] = {
     "reparse_vars",
 
   "squarevars",
+  "flatten_rules",
   //"merge_blocks",
-  //"sx",
+  "sx",
 };
 
 static fs::path

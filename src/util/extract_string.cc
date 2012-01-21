@@ -10,11 +10,6 @@ struct string_extractor
     s += n.string;
   }
 
-  virtual void visit (generic_node &n)
-  {
-    resume_list ();
-  }
-
   std::string s;
 };
 
@@ -31,6 +26,6 @@ extract_string (t_vardecl_body const &n)
 {
   std::string body;
   foreach (node_ptr const &p, n.list)
-    body += p->as<token> ().string;
+    body += id (p);
   return body;
 }

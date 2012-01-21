@@ -20,14 +20,6 @@ struct resolve_shortvars
 
   error_log &errors;
 
-  enum parse_state
-  {
-    S_NONE,
-    S_FILENAME,
-    S_MULTIFILE
-  };
-
-  parse_state state;
   node_ptr replacement;
   t_filename_ptr target;
   t_filenames_ptr prereq;
@@ -35,7 +27,6 @@ struct resolve_shortvars
   resolve_shortvars (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
     , errors (annots.get ("errors"))
-    , state (S_NONE)
   {
   }
 
@@ -87,10 +78,8 @@ modify (node_ptr const &n, char modifier, bool builddir)
       ? filename
       : modifier == 'D'
         ? dirname
-        : modifier == 0
-          ? identity
-          : NULL;
-  assert (pred != NULL);
+        : identity;
+  assert (modifier != '\0' || pred == identity);
 
   fs::path orig (id (fn[0]));
   return make_filename (fn.loc, add_builddir (pred (orig), orig.native (), builddir));
@@ -111,7 +100,7 @@ resolve_shortvars::visit (t_shortvar &n)
   char const *name = tok.string.c_str ();
 
   bool builddir = false;
-  char modifier = 0;
+  char modifier = '\0';
   if (name[0] == '(')
     {
       modifier = name[2];
@@ -142,14 +131,6 @@ resolve_shortvars::visit (t_intvar &n)
   token &tok = n.num ()->as<token> ();
   long var = strtol (tok.string.c_str (), 0, 10);
 
-  if (var == 0)
-    {
-      generic_node_ptr TARGET = symtab.lookup (T_VARIABLE, "TARGET");
-      std::string const &tname = id (TARGET->as<generic_node> ()[0]);
-      replacement = new token (n.loc, TK_CODE, "$(builddir)/" + tname + "$(EXEEXT)");
-      return;
-    }
-
   if (prereq->size () < var)
     {
       errors.add<semantic_error> (&n, "prerequisite index out of bounds: $" + tok.string);
@@ -167,7 +148,7 @@ resolve_shortvars::visit (t_rule_line &n)
       resume (p);
       if (replacement)
         {
-          swap (p, replacement);
+          p->parent ()->replace (*p, replacement);
           replacement = 0;
         }
     }
@@ -183,6 +164,4 @@ resolve_shortvars::visit (t_rule &n)
 
   prereq = 0;
   target = 0;
-
-  //phases::run ("print", &n);
 }

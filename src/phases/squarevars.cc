@@ -57,8 +57,7 @@ void
 squarevars::visit (t_squarevar &n)
 {
   symbol_type type;
-  generic_node_ptr TARGET = symtab.lookup (type = T_PROGRAM, "TARGET");
-  if (!TARGET)     TARGET = symtab.lookup (type = T_LIBRARY, "TARGET");
+  generic_node_ptr TARGET = symtab.lookup (T_PROGRAM, T_LIBRARY, "TARGET", &type);
   assert (TARGET);
 
   t_target_definition &target = TARGET->as<t_target_definition> ();

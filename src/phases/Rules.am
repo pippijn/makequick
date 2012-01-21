@@ -2,8 +2,10 @@ makepp_SOURCES +=		\
 	audit.cc		\
 	default_destdir.cc	\
 	default_prereq.cc	\
+	exclude.cc		\
 	expand_vars.cc		\
 	flatten_filenames.cc	\
+	flatten_rules.cc	\
 	flatten_vars.cc		\
 	inference.cc		\
 	infer_target_objects.cc	\
@@ -21,7 +23,9 @@ makepp_SOURCES +=		\
 	remove_patrules.cc	\
 	remove_templates.cc	\
 	reparse_vars.cc		\
+	resolve_flagsref.cc	\
 	resolve_shortvars.cc	\
+	resolve_sourcesref.cc	\
 	resolve_sources.cc	\
 	resolve_wildcards.cc	\
 	squarevars.cc		\

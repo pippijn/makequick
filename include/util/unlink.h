@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.h"
+#include "foreach.h"
 
 static inline nodes::node_vec
 unlink_all (nodes::node_vec &v)
