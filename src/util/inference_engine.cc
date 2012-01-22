@@ -342,7 +342,6 @@ public:
 void
 inference_engine::infer ()
 {
-  print ();
 #if 1
   size_t string_rules = 0;
   size_t pattern_rules = 0;

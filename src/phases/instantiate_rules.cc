@@ -140,7 +140,7 @@ instantiate_rules::instantiate (node &n,
 {
   foreach (fs::path const &obj, targets)
     {
-      //printf ("rule for %s\n", obj.c_str ());
+      printf ("rule for %s\n", obj.c_str ());
       if (rules.files.find (obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));

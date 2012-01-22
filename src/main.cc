@@ -37,12 +37,14 @@ static char const *const all_phases[] = {
     "reparse_vars",
 
   "multirule",
-  "inference",
-  "remove_patrules",
   "flatten_filenames",
-  "resolve_sources",
-  "resolve_wildcards",
+  "resolve_sources_fs",
   "resolve_sourcesref",
+  "resolve_wildcards",
+  "inference",
+  "resolve_sources",
+  "resolve_sourcesref",
+  "remove_patrules",
   "exclude",
   "insert_target_syms",
   "infer_target_objects",
@@ -52,7 +54,7 @@ static char const *const all_phases[] = {
   "resolve_shortvars",
 
   "expand_filtervars",
-    // expand TARGET, now
+    // expand $(TARGET), now
     "expand_vars",
     "flatten_vars",
     "reparse_vars",

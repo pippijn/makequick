@@ -210,7 +210,7 @@ make_prereq (node_vec const &list)
 void
 inference::visit (t_filename &n)
 {
-  std::string o;
+  symbol_type type;
   switch (state)
     {
     case S_NONE:
@@ -223,15 +223,22 @@ inference::visit (t_filename &n)
       break;
 
     case S_PROGRAM | S_SOURCES:
-      o = object_name (T_PROGRAM, current_target, make_target (n.list));
+      type = T_PROGRAM;
 
       if (false)
     case S_LIBRARY | S_SOURCES:
-      o = object_name (T_LIBRARY, current_target, make_target (n.list));
+      type = T_LIBRARY;
+      {
+        std::string const &source = make_target (n.list);
+        std::string const &o = object_name (type, current_target, source);
 
-      engine.add_file (o);
-      engine.add_rule (o, prereq_vec (), NULL);
-      break;
+        prereq_vec prereq;
+        prereq.push_back (source);
+
+        engine.add_file (o);
+        engine.add_rule (o, prereq, NULL);
+        break;
+      }
     }
 }
 

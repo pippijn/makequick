@@ -15,13 +15,13 @@ struct rule_info
   struct rule
   {
     std::string target;
-    std::vector<fs::path> prereq;
+    file_vec prereq;
     std::string stem;
     node_ptr code;
 
     void print () const;
 
-    rule (std::string const &target, std::vector<fs::path> const &prereq, std::string const &stem, node_ptr code)
+    rule (std::string const &target, file_vec const &prereq, std::string const &stem, node_ptr code)
       : target (target)
       , prereq (prereq)
       , stem (stem)
