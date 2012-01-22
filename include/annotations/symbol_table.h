@@ -41,12 +41,15 @@ struct symbol_table
 
   bool insert (symbol_type type, std::string const &name, node_ptr const &sym);
   bool insert_global (symbol_type type, std::string const &name, node_ptr const &sym);
-  node_ptr lookup (symbol_type type, std::string const &name) const;
   bool remove (symbol_type type, std::string const &name, node_ptr const &sym);
+
+  node_ptr lookup (symbol_type type, std::string const &name) const;
 
   node_ptr lookup (symbol_type type1, symbol_type type2, std::string const &name, symbol_type *type = NULL) const;
   node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type = NULL) const;
   node_ptr lookup (symbol_type type1, symbol_type type2, symbol_type type3, symbol_type type4, std::string const &name, symbol_type *type = NULL) const;
+
+  template<typename T> T &lookup (symbol_type type, std::string const &name) const { return lookup (type, name)->as<T> (); }
 
   template<typename T> T &lookup (symbol_type type1, symbol_type type2, std::string const &name, symbol_type *type = NULL) const { return lookup (type1, type2, name, type)->as<T> (); }
   template<typename T> T &lookup (symbol_type type1, symbol_type type2, symbol_type type3, std::string const &name, symbol_type *type = NULL) const { return lookup (type1, type2, type3, name, type)->as<T> (); }

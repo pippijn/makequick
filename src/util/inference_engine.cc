@@ -1,5 +1,11 @@
+#define USE_UNORDERED_SET 0
+
 #include <cstdio>
-#include <set>
+#if USE_UNORDERED_SET
+#  include <tr1/unordered_set>
+#else
+#  include <set>
+#endif
 #include <tr1/unordered_map>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -12,6 +18,16 @@
 #include "util/foreach.h"
 #include "util/timer.h"
 
+#include <valgrind/callgrind.h>
+
+
+template<typename T>
+static inline size_t
+hash (T const &v)
+{
+  return std::tr1::hash<T const &> () (v);
+}
+
 
 namespace std { namespace tr1 {
 
@@ -19,7 +35,7 @@ namespace std { namespace tr1 {
   size_t
   hash<fs::path>::operator () (fs::path path) const
   {
-    return std::tr1::hash<std::string> () (path.native ());
+    return ::hash (path.native ());
   }
 
 } }
@@ -57,7 +73,7 @@ inference_engine::add_rule (std::string const &target,
  */
 class inference_engine::engine
 {
-  struct target_less
+  struct rule_less
   {
     bool operator () (rule const &a, rule const &b)
     {
@@ -69,10 +85,27 @@ class inference_engine::engine
     }
   };
 
+  struct rule_hash
+  {
+    size_t operator () (rule const &r) const
+    {
+      return ::hash (r.target);
+    }
+  };
+
+  struct rule_eq
+  {
+    bool operator () (rule const &a, rule const &b) const
+    {
+      return a.target  == b.target
+          && a.prereqs == b.prereqs;
+    }
+  };
+
   struct stem_size_less
   {
     // a rule is smaller than another rule if it matched more precisely
-    bool operator () (rule const &a, rule const &b)
+    bool operator () (rule const &a, rule const &b) const
     {
       return a.stem.size () < b.stem.size ();
     }
@@ -80,7 +113,11 @@ class inference_engine::engine
 
   typedef std::tr1::unordered_map<std::string, std::vector<rule> > partial_map;
   typedef std::vector<partial_map> partial_vec;
-  typedef std::multiset<rule, target_less> rule_set;
+#if USE_UNORDERED_SET
+  typedef std::tr1::unordered_multiset<rule, rule_hash, rule_eq> rule_set;
+#else
+  typedef std::multiset<rule, rule_less> rule_set;
+#endif
 
   struct inferred
   {
@@ -120,9 +157,10 @@ class inference_engine::engine
     timer T ("parallel infer_partials");
     printf ("%%%% doing %ld matchings => %ld parallel partitions\n",
             operations, partitions);
-#endif
-
 #pragma omp parallel for num_threads(partitions)
+#else
+    timer T ("serial infer_partials");
+#endif
       for (size_t i = 0; i < rules.size (); i++)
         {
           rule const &r = rules[i];
@@ -166,16 +204,14 @@ class inference_engine::engine
         foreach (partial_map::value_type &rules, map)
           {
             if (rules.second.empty ())
-              throw std::runtime_error ("stem `" +
-                                        rules.first +
-                                        "' has no rules");
+              throw std::runtime_error ("stem `" + rules.first + "' has no rules");
 
             rule &mainrule = rules.second[0];
 
             foreach (rule const &r, rules.second)
               foreach (prerequisite const &p, r.prereqs)
                 if (p->final ())
-                  mainrule.prereqs[&p - &*r.prereqs.begin ()] = p;
+                  mainrule.prereqs[&p - &r.prereqs.front ()] = p;
 
             using namespace boost::phoenix;
             using namespace boost::phoenix::arg_names;
@@ -195,9 +231,7 @@ class inference_engine::engine
                                         fs::path (mainrule.target)))
                     != mainrule.prereqs.end ())
                   if (mainrule.stem == mainrule.target)
-                    throw std::runtime_error ("target " +
-                                              mainrule.target +
-                                              " directly depends on itself");
+                    throw std::runtime_error ("target " + mainrule.target + " directly depends on itself");
                   else
                     continue;
 
@@ -275,8 +309,19 @@ public:
       rule_set::iterator et = inferred.rules.end ();
       while (it != et)
         {
+#if USE_UNORDERED_SET
+          std::pair<rule_set::iterator, rule_set::iterator> range = inferred.rules.equal_range (*it);
+          if (std::distance (range.first, range.second) > 1)
+            {
+              std::vector<rule> rules (range.first, range.second);
+              sort (rules.begin (), rules.end (), stem_size_less ());
+              inferred.rules.erase (range.first, range.second);
+              inferred.rules.insert (rules.front ());
+            }
+          it = range.second;
+#else
           rule_set::iterator ubound = inferred.rules.upper_bound (*it);
-          if (distance (it, ubound) > 1)
+          if (std::distance (it, ubound) > 1)
             {
               std::vector<rule> range (it, ubound);
               sort (range.begin (), range.end (), stem_size_less ());
@@ -284,6 +329,7 @@ public:
               inferred.rules.insert (range.front ());
             }
           it = ubound;
+#endif
         }
     }
 
@@ -296,26 +342,35 @@ public:
 void
 inference_engine::infer ()
 {
+  print ();
 #if 1
-  //sleep (5);
+  size_t string_rules = 0;
   size_t pattern_rules = 0;
-  size_t normal_rules = 0;
+  size_t regex_rules = 0;
   foreach (rule const &r, info.baserules)
     {
-      bool has_pattern = false;
+      size_t *rules = &string_rules;
       foreach (prerequisite const &p, r.prereqs)
-        if (dynamic_cast<prerequisite::file_t<boost::regex> *> (p.file.get ()))
-          {
-            has_pattern = true;
-            break;
-          }
-      pattern_rules +=  has_pattern;
-      normal_rules  += !has_pattern;
+        {
+          if (dynamic_cast<prerequisite::file_t<boost::regex> const *> (p.file.get ()))
+            {
+              rules = &regex_rules;
+              break;
+            }
+          if (dynamic_cast<prerequisite::file_t<wildcard> const *> (p.file.get ()))
+            {
+              rules = &pattern_rules;
+              break;
+            }
+        }
+      ++*rules;
     }
-  printf ("%%%% running inference with %lu pattern rules, %lu direct rules and %lu files\n",
-          pattern_rules, normal_rules, info.files.size ());
+  printf ("%%%% running inference with %lu pattern, %lu regex and %lu string rules with %lu files\n",
+          pattern_rules, regex_rules, string_rules, info.files.size ());
 #endif
+  CALLGRIND_START_INSTRUMENTATION;
   engine::infer (info.baserules, info.rules, info.files);
+  CALLGRIND_STOP_INSTRUMENTATION;
 #if 1
   printf ("%%%% inferred %lu rules; we now have %lu (buildable or existing) files\n", info.rules.size (), info.files.size ());
 #endif

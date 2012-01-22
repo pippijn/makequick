@@ -15,11 +15,13 @@ struct emit_rules
   virtual void visit (token &n);
 
   bool in_rule;
+  bool in_first_line;
   bool in_prereq;
   output_file const &out;
 
   emit_rules (annotation_map &annots)
     : in_rule (false)
+    , in_first_line (false)
     , in_prereq (false)
     , out (annots.get ("output"))
   {
@@ -29,12 +31,31 @@ struct emit_rules
 static phase<emit_rules> thisphase ("emit_rules", "emit");
 
 
+static bool
+has_code (t_rule_line &n)
+{
+  return n.size () && !id (n[0]).empty ();
+}
+
 void
 emit_rules::visit (t_rule_line &n)
 {
+  bool empty = !has_code (n);
+  if (in_first_line)
+    // TODO: do this somewhere else
+    if (empty)
+      fprintf (out.Makefile, "\t@:\n");
+    else
+      fprintf (out.Makefile, "\t@$(MKDIR_P) `dirname $@`\n");
+
+  if (empty)
+    return;
+
   fprintf (out.Makefile, "\t");
   visitor::visit (n);
   fprintf (out.Makefile, "\n");
+
+  in_first_line = false;
 }
 
 void
@@ -57,6 +78,7 @@ emit_rules::visit (t_rule &n)
         in_prereq = false;
       }
       fprintf (out.Makefile, "\n");
+      in_first_line = true;
       resume (n.code ());
       fprintf (out.Makefile, "\n");
       in_rule = false;

@@ -18,6 +18,20 @@ struct if_compare
   }
 };
 
+template<typename T>
+static t_if_ptr
+get_cond (T &n)
+{
+  return n.cond () ? &n.cond ()->as<t_if> () : NULL;
+}
+
+template<>
+t_if_ptr
+get_cond<t_built_sources> (t_built_sources &n)
+{
+  return NULL;
+}
+
 template<typename NodeT, node_ptr const &(NodeT::*items) () const, typename BodyT>
 struct merger
 {
@@ -26,7 +40,7 @@ struct merger
 
   void visit (NodeT &n)
   {
-    t_if_ptr cond = n.cond () ? &n.cond ()->as<t_if> () : 0;
+    t_if_ptr cond = get_cond (n);
     if (node_t_ptr block = blocks[cond])
       {
         BodyT &body = ((*block).*items) ()->as<BodyT> ();
@@ -59,6 +73,7 @@ struct merge_blocks
   void visit (t_tool_flags &n);
 
   void visit (t_extra_dist &n);
+  void visit (t_built_sources &n);
   void visit (t_test &n);
 
   merge_blocks (annotation_map &annots)
@@ -70,6 +85,7 @@ struct merge_blocks
   std::map<std::string, merger<t_tool_flags, &t_tool_flags::flags, t_flag> > tool_flags_mergers;
 
   merger<t_extra_dist, &t_extra_dist::sources, t_sources_members> extra_dist_merger;
+  merger<t_built_sources, &t_built_sources::sources, t_sources_members> built_sources_merger;
   merger<t_test, &t_test::sources, t_sources_members> test_merger;
 };
 
@@ -79,7 +95,7 @@ static phase<merge_blocks> thisphase ("merge_blocks", "expand_vars");
 void
 merge_blocks::visit (t_target_definition &n)
 {
-  // extra_dist and test are not reset, as they are global
+  // extra_dist, built_sources and test are not reset, as they are global
   link_merger.clear ();
   sources_merger.clear ();
   tool_flags_mergers.clear ();
@@ -118,6 +134,12 @@ void
 merge_blocks::visit (t_extra_dist &n)
 {
   extra_dist_merger.visit (n);
+}
+
+void
+merge_blocks::visit (t_built_sources &n)
+{
+  built_sources_merger.visit (n);
 }
 
 void

@@ -21,6 +21,6 @@ static phase<insert_this_syms> thisphase ("insert_this_syms");
 void
 insert_this_syms::visit (t_target_definition &n)
 {
-  if (!symtab.insert (T_VARIABLE, "THIS", make_var (id (n.name ()))))
+  if (!symtab.insert (T_VARIABLE, "THIS", make_var ("$(builddir)/" + id (n.name ()) + "$(EXEEXT)")))
     throw std::runtime_error ("unable to add $(THIS) variable");
 }

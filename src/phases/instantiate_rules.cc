@@ -13,7 +13,7 @@ struct instantiate_rules
   : visitor
 {
   void instantiate (rule_info::rule const &r);
-  void instantiate (t_target_definition &n, file_vec const &targets, bool accept_existing);
+  void instantiate (node &n, file_vec const &targets, bool accept_existing = false);
 
   virtual void visit (t_target_members &n);
   virtual void visit (t_toplevel_declarations &n);
@@ -22,6 +22,13 @@ struct instantiate_rules
   virtual void visit (t_library &n);
   virtual void visit (t_program &n);
   virtual void visit (t_template &n) { /* ignore */ }
+
+  virtual void visit (t_built_sources &n);
+  virtual void visit (t_data &n);
+
+  void instantiate (t_sources_members &n, bool accept_existing = false);
+
+  std::tr1::unordered_set<std::string> done;
 
   enum target_type
   {
@@ -103,6 +110,12 @@ make_prereq (std::vector<fs::path> const &files)
 void
 instantiate_rules::instantiate (rule_info::rule const &r)
 {
+  if (done.find (r.target) != done.end ())
+    {
+      printf ("RULE %s\n", r.target.c_str ());
+      return;
+    }
+
   // if r.code is NULL, this is an import rule
   if (r.code)
     {
@@ -115,13 +128,15 @@ instantiate_rules::instantiate (rule_info::rule const &r)
 
       members->add (rule);
     }
+
+  done.insert (r.target);
 }
 
 
 void
-instantiate_rules::instantiate (t_target_definition &n,
+instantiate_rules::instantiate (node &n,
                                 file_vec const &targets,
-                                bool accept_existing = false)
+                                bool accept_existing)
 {
   foreach (fs::path const &obj, targets)
     {
@@ -144,6 +159,7 @@ instantiate_rules::instantiate (t_target_definition &n,
 
       assert (r->target == obj);
 
+      printf ("instantiate rule for %s\n", obj.c_str ());
       instantiate (*r);
 
       instantiate (n, r->prereq, true);
@@ -156,6 +172,7 @@ instantiate_rules::visit (t_target_members &n)
 {
   assert (!members);
   members = &n;
+  visitor::visit (n);
 }
 
 void
@@ -196,4 +213,32 @@ instantiate_rules::visit (t_program &n)
 {
   local (target) = T_PROGRAM;
   visitor::visit (n);
+}
+
+
+void
+instantiate_rules::visit (t_built_sources &n)
+{
+  instantiate (n.sources ()->as<t_sources_members> ());
+}
+
+void
+instantiate_rules::visit (t_data &n)
+{
+  instantiate (n.sources ()->as<t_sources_members> (), true);
+}
+
+
+void
+instantiate_rules::instantiate (t_sources_members &n, bool accept_existing)
+{
+  file_vec targets;
+
+  foreach (node_ptr const &file, n.list)
+    {
+      std::string const &src = id (file->as<t_filename> ()[0]);
+      targets.push_back (src);
+    }
+
+  instantiate (n, targets, accept_existing);
 }

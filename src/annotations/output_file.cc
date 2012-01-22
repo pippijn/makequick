@@ -30,11 +30,11 @@ output_file::output_file (char const *mname, char const *cname)
   , configure (open_if_mine (cname))
 {
   assert (Makefile);
-  assert (configure);
+  //assert (configure);
 }
 
 output_file::~output_file ()
 {
-  fclose (configure);
+  //fclose (configure);
   fclose (Makefile);
 }

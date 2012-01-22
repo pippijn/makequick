@@ -20,34 +20,45 @@ template<>
 inline bool
 inference_engine::prerequisite::file_t<wildcard>::stem (fs::path const &file, std::string &stem) const
 {
-  std::string::const_iterator p = data.wc.begin ();
-  std::string::const_iterator end = data.wc.end ();
+  typedef std::string::const_iterator iterator;
+  typedef std::string::const_reverse_iterator reverse_iterator;
 
-  char const *f = file.c_str ();
-  char const *stem_begin = f;
-  char const *stem_end = f;
+  std::string const &fname = file.native ();
+
+  iterator p   = data.wc.begin ();
+  iterator end = data.wc.end ();
+
+  iterator f = fname.begin ();
+
   while (p != end)
     {
-      switch (char c = *p)
+      // when we find a wildcard, we start looking from the back
+      if (*p == '%')
         {
-        case '%':
-          // TODO: fails to match moo.cow.c with %.c
-          c = *++p;
-          stem_begin = f;
-          while (*f && *f != c)
-            f++;
-          stem_end = f;
-          break;
-        default:
-          if (*f != c)
-            return false;
-          break;
+          reverse_iterator rp   = data.wc.rbegin ();
+          reverse_iterator rend = rp + (end - p) - 1;
+
+          reverse_iterator rf = fname.rbegin ();
+
+          while (rp != rend)
+            {
+              if (*rf != *rp)
+                return false;
+
+              ++rf;
+              ++rp;
+            }
+
+          stem.assign (f, fname.begin () + (fname.rend () - rf));
+          return true;
         }
+
+      if (*f != *p)
+        return false;
+
       ++f;
       ++p;
     }
 
-  stem.assign (stem_begin, stem_end);
-
-  return !*f;
+  return f == fname.end ();
 }

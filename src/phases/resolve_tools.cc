@@ -1,5 +1,6 @@
 #include "phase.h"
 
+#include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
@@ -45,11 +46,10 @@ resolve_tools::visit (t_filename &n)
     return;
   assert (n.size () == 1);
 
-  token const &t = n[0]->as<token> ();
-  std::string const &file = t.string;
+  std::string const &file = id (n[0]);
 
   if (generic_node_ptr sym = symtab.lookup (T_PROGRAM, file))
-    n[0] = new token (t.loc, t.tok, t.string + "$(EXEEXT)");
+    n.replace (0, new token (n.loc, TK_FILENAME, file + "$(EXEEXT)"));
 }
 
 void

@@ -33,14 +33,15 @@ default_prereq::visit (t_filenames &n)
 {
   if (state == S_RULE)
     {
-      generic_node_ptr TARGET = symtab.lookup (T_PROGRAM, "TARGET");
-      if (!TARGET)
+      generic_node_ptr target = symtab.lookup (T_VARIABLE, "THIS");
+      if (!target)
         return;
 
-      generic_node &target = TARGET->as<generic_node> ();
-      std::string const &name = id (target[0]);
+      std::string const &name = id (target->as<t_vardecl_body> ()[0]);
 
-      n.add (make_filename (name));
+      size_t from = strlen ("$(builddir)/");
+      size_t to = name.size () - from - strlen ("$(EXEEXT)");
+      n.add (make_filename (name.substr (from, to)));
     }
 }
 

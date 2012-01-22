@@ -61,7 +61,7 @@ try_resolve (file_list const &files,
 #if 0
   std::cout << "looking for " << path << "\n";
 #endif
-  if (exists (path) || buildable.find (path) != buildable.end ())
+  if (buildable.find (path) != buildable.end () || exists (path))
     {
       file = (dir / file).native ();
       return true;

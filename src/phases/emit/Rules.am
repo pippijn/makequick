@@ -1,6 +1,8 @@
 makepp_SOURCES +=		\
-	canonical.h		\
 	emit_SOURCES.cc		\
+	emit_SUFFIXES.cc	\
+	emit_built_sources.cc	\
+	emit_flags.cc		\
 	emit_link.cc		\
 	emit_rules.cc		\
 	emit_targets.cc

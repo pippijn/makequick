@@ -4,6 +4,7 @@
 #include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/make_code.h"
 #include "util/make_filename.h"
 #include "util/symbol_visitor.h"
 
@@ -120,8 +121,11 @@ resolve_shortvars::visit (t_shortvar &n)
         }
       replacement = prereq->list[0];
       break;
+    case '$':
+      replacement = make_code (n.loc, "$$");
+      break;
     }
-  if (replacement)
+  if (replacement && name[0] != '$')
     replacement = modify (replacement, modifier, builddir);
 }
 

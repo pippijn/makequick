@@ -80,11 +80,11 @@ multirule::visit (t_filename &n)
   }
   ++option;
 
-  node_list *container = (&n)
-    ->parent () // filenames
-    ->parent () // rule
-    ->parent () // container of rule
-    ;
+  t_rule &origin = n.parent () // filenames
+                   ->parent () // rule
+                   ->as<t_rule> ();
+
+  node_list *container = origin.parent (); // container of rule
 
   for (node_vec::const_iterator it = option; it != rb; ++it)
     {
@@ -99,8 +99,8 @@ multirule::visit (t_filename &n)
       t_rule_ptr rule = new t_rule
         ( n.loc
         , (new t_filenames (n.loc))->add (make_filename (n.loc, instance))
-        , (new t_filenames (n.loc))->add (common_prereq->clone ())
-        , 0);
+        , origin.prereq ()->clone ()->as<t_filenames> ().add (common_prereq->clone ())
+        , origin.code () ? (new t_rule_lines ())->add (new t_rule_line) : NULL);
       container->add (rule);
     }
 

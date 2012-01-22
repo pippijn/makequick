@@ -5,13 +5,15 @@
 #include "util/foreach.h"
 #include "util/inference_engine.h"
 #include "util/regex_escape.h"
+#include "util/object_name.h"
+
+#include <numeric>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/regex.hpp>
-#include <boost/spirit/home/phoenix.hpp>
 
-#define EXPERIMENTAL_WILDCARD_CODE 0
+#define EXPERIMENTAL_WILDCARD_CODE 1
 
 struct inference
   : visitor
@@ -23,33 +25,32 @@ struct inference
   void visit (t_program &n);
   void visit (t_library &n);
 
-  enum rule_state
-  {
-    SR_NONE,
-    SR_TARGET,
-    SR_PREREQ
-  };
+  void visit (t_sources &n);
+  void visit (t_nodist_sources &n);
 
-  enum target_state
+  enum state
   {
-    ST_NONE,
-    ST_PROGRAM,
-    ST_LIBRARY
-  };
+    S_NONE    = 0x0,
+    S_TARGET  = 0x1,
+    S_PREREQ  = 0x2,
+    S_PROGRAM = 0x3,
+    S_LIBRARY = 0x4,
+    S_SOURCES = 0x8
+  } state;
+
+  typedef std::vector<inference_engine::prerequisite> prereq_vec;
 
   inference_engine engine;
   rule_info &rules;
 
-  rule_state rstate;
-  target_state tstate;
+  std::string current_target;
 
   std::string target;
-  std::vector<inference_engine::prerequisite> prereq;
+  prereq_vec prereq;
 
   inference (annotation_map &annots)
     : rules (annots.put ("rule_info", new rule_info))
-    , rstate (SR_NONE)
-    , tstate (ST_NONE)
+    , state (S_NONE)
   {
     file_list const &files = annots.get ("files");
     foreach (fs::path const &f, boost::make_iterator_range (files.begin, files.end))
@@ -68,20 +69,10 @@ struct inference
     swap (rules.files, engine.info.files);
     foreach (inference_engine::rule const &r, engine.info.rules)
       {
-        using namespace boost::phoenix;
-        using namespace boost::phoenix::arg_names;
-
         std::vector<fs::path> prereq;
         prereq.reserve (r.prereqs.size ());
-#if 1
         foreach (inference_engine::prerequisite const &pr, r.prereqs)
           prereq.push_back (pr.str ());
-#else
-        transform (r.prereqs.begin (),
-                   r.prereqs.end (),
-                   back_inserter (prereq),
-                   bind (&inference_engine::prerequisite::str, arg1));
-#endif
         assert (prereq.size () == r.prereqs.size ());
 
         rules.rules.insert (rule_info::rule (r.target, prereq, r.stem, r.code));
@@ -92,8 +83,14 @@ struct inference
 static phase<inference> thisphase ("inference", "reparse_vars");
 
 
+static enum inference::state &
+operator |= (enum inference::state &a, enum inference::state b)
+{
+  return a = (enum inference::state) (int (a) | int (b));
+}
+
 static std::string
-make_target (node_vec const &list)
+make_target (node_vec const &list, bool allow_wildcards = true)
 {
   std::string target;
   foreach (node_ptr const &n, list)
@@ -104,7 +101,8 @@ make_target (node_vec const &list)
         case TK_FILENAME:
         case TK_FN_PERCENT:
           target += t.string;
-          break;
+          if (t.tok != TK_FN_PERCENT || allow_wildcards)
+            break;
         default:
           throw semantic_error (n, "invalid token `" + t.string + "' of type " + tokname (t.tok));
         }
@@ -212,15 +210,27 @@ make_prereq (node_vec const &list)
 void
 inference::visit (t_filename &n)
 {
-  switch (rstate)
+  std::string o;
+  switch (state)
     {
-    case SR_NONE:
+    case S_NONE:
       break;
-    case SR_TARGET:
+    case S_TARGET:
       target = make_target (n.list);
       break;
-    case SR_PREREQ:
+    case S_PREREQ:
       prereq.push_back (make_prereq (n.list));
+      break;
+
+    case S_PROGRAM | S_SOURCES:
+      o = object_name (T_PROGRAM, current_target, make_target (n.list));
+
+      if (false)
+    case S_LIBRARY | S_SOURCES:
+      o = object_name (T_LIBRARY, current_target, make_target (n.list));
+
+      engine.add_file (o);
+      engine.add_rule (o, prereq_vec (), NULL);
       break;
     }
 }
@@ -228,11 +238,11 @@ inference::visit (t_filename &n)
 void
 inference::visit (t_rule &n)
 {
-  rstate = SR_TARGET;
+  local (state) = S_TARGET;
   n.target ()->accept (*this);
-  rstate = SR_PREREQ;
+  state = S_PREREQ;
   n.prereq ()->accept (*this);
-  rstate = SR_NONE;
+  state = S_NONE;
 
   engine.add_rule (target, prereq, n.code ());
   target.clear ();
@@ -243,20 +253,36 @@ inference::visit (t_rule &n)
 void
 inference::visit (t_target_definition &n)
 {
-  engine.add_file (fs::path (id (n.name ())));
+  current_target = id (n.name ());
+  engine.add_file (current_target);
   visitor::visit (n);
 }
 
 void
 inference::visit (t_program &n)
 {
-  tstate = ST_PROGRAM;
+  local (state) = S_PROGRAM;
   visitor::visit (n);
 }
 
 void
 inference::visit (t_library &n)
 {
-  tstate = ST_LIBRARY;
+  local (state) = S_LIBRARY;
+  visitor::visit (n);
+}
+
+
+void
+inference::visit (t_sources &n)
+{
+  local (state) |= S_SOURCES;
+  visitor::visit (n);
+}
+
+void
+inference::visit (t_nodist_sources &n)
+{
+  local (state) |= S_SOURCES;
   visitor::visit (n);
 }

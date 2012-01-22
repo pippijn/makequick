@@ -22,12 +22,12 @@ static char const *const all_phases[] = {
   "audit",
 
   "insert_this_syms",
+  "default_prereq",
   "expand_vars",
 
   "insert_global_syms",
   "inheritance",
   "resolve_flagsref",
-  "default_prereq",
   "default_destdir",
 
   "insert_vardecl_syms",
@@ -44,12 +44,15 @@ static char const *const all_phases[] = {
   "resolve_wildcards",
   "resolve_sourcesref",
   "exclude",
+  "insert_target_syms",
   "infer_target_objects",
   "instantiate_rules",
+  "resolve_tools",
+  "clean_rules",
   "resolve_shortvars",
 
-  "insert_target_syms",
   "expand_filtervars",
+    // expand TARGET, now
     "expand_vars",
     "flatten_vars",
     "reparse_vars",
@@ -96,7 +99,7 @@ resolve (fs::path const &p)
 }
 
 static void
-collect (fs::path const &path, std::vector<fs::path> &files)
+collect (fs::path const &path, file_vec &files)
 {
   if (is_directory (path) && path.filename ().c_str ()[0] != '.')
     for_each (fs::directory_iterator (path),
@@ -196,7 +199,7 @@ try
       return EXIT_FAILURE;
     }
 
-  std::vector<fs::path> filevec;
+  file_vec filevec;
   filevec.push_back (path / "Rules.mq");
   filevec.push_back (path / "configure.mq");
   collect (path / "extra", filevec);
@@ -234,7 +237,11 @@ try
       {
         if (!to_run.empty ())
           foreach (char const *phase, to_run)
-            phases::run (phase, doc, annots);
+            {
+              phases::run (phase, doc, annots);
+              if (errors.has_errors ())
+                break;
+            }
         else
           phases::run (doc, annots);
       }

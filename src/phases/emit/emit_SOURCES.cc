@@ -5,10 +5,10 @@
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
+#include "util/canonical.h"
 
 #include <stdexcept>
-
-#include "canonical.h"
+#include <tr1/unordered_set>
 
 struct emit_SOURCES
   : symbol_visitor
@@ -33,6 +33,7 @@ struct emit_SOURCES
 
   bool in_filename;
   output_file const &out;
+  std::tr1::unordered_set<std::string> seen[2];
 
   emit_SOURCES (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
@@ -49,7 +50,11 @@ void
 emit_SOURCES::visit (t_sources &n)
 {
   local (state) = S_SOURCES;
+  if (n.cond ())
+    fprintf (out.Makefile, "if %s\n", id (n.cond ()->as<t_if> ().cond ()).c_str ());
   symbol_visitor::visit (n);
+  if (n.cond ())
+    fprintf (out.Makefile, "endif\n");
 }
 
 void
@@ -85,8 +90,13 @@ emit_SOURCES::visit (t_sources_members &n)
     case S_SOURCES:
       {
         t_target_definition &target = symtab.lookup<t_target_definition> (T_PROGRAM, T_LIBRARY, "TARGET");
-        fprintf (out.Makefile, "%s%s_SOURCES =",
-                 nodist_opt, canonical (id (target.name ()), current_symtype).c_str ());
+        std::string const &name = canonical (id (target.name ()), current_symtype);
+        fprintf (out.Makefile, "%s%s_SOURCES ", nodist_opt, name.c_str ());
+        if (seen[!*nodist_opt].find (name) != seen[!*nodist_opt].end ())
+          fprintf (out.Makefile, "+");
+        else
+          seen[!*nodist_opt].insert (name);
+        fprintf (out.Makefile, "=");
         break;
       }
     case S_EXTRA_DIST:

@@ -6,6 +6,7 @@
 #include "util/foreach.h"
 #include "util/grep.h"
 #include "util/symbol_visitor.h"
+#include "util/uc.h"
 
 struct resolve_flagsref
   : symbol_visitor
@@ -28,15 +29,6 @@ struct resolve_flagsref
 
 static phase<resolve_flagsref> thisphase ("resolve_flagsref", "inheritance", "insert_global_syms");
 
-
-static std::string
-uc (std::string const &s)
-{
-  std::string uc;
-  uc.reserve (s.size ());
-  transform (s.begin (), s.end (), back_inserter (uc), toupper);
-  return uc;
-}
 
 void
 resolve_flagsref::visit (t_flag_import &n)

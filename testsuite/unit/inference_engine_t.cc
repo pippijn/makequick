@@ -6,6 +6,7 @@
 
 typedef std::string S;
 typedef boost::regex R;
+typedef inference_engine::wildcard W;
 
 int
 main ()
@@ -13,9 +14,9 @@ main ()
   inference_engine dag;
 
   dag.add_file ("yacc/cow.y.in");
-  dag.add_rule ("%", R ("(.+)\\.in"));
-  dag.add_rule ("src/%.c", R ("yacc/(.+).y"));
-  dag.add_rule ("inc/%.h", R ("yacc/(.+).y"));
+  dag.add_rule ("%", W ("%.in"));
+  dag.add_rule ("src/%.c", W ("yacc/%.y"));
+  dag.add_rule ("inc/%.h", W ("yacc/%.y"));
   dag.add_rule ("inc/moo.h", R ("yacc/cow.y"));
 
   dag.add_rule ("%.c", R ("(.+).as"));

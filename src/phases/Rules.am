@@ -2,6 +2,7 @@ include emit/Rules.am
 
 makepp_SOURCES +=		\
 	audit.cc		\
+	clean_rules.cc		\
 	default_destdir.cc	\
 	default_prereq.cc	\
 	emit.cc			\
@@ -31,6 +32,7 @@ makepp_SOURCES +=		\
 	resolve_shortvars.cc	\
 	resolve_sourcesref.cc	\
 	resolve_sources.cc	\
+	resolve_tools.cc	\
 	resolve_wildcards.cc	\
 	squarevars.cc		\
 	sx.cc			\

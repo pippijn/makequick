@@ -5,19 +5,21 @@
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
+#include "util/canonical.h"
 
 #include <stdexcept>
-
-#include "canonical.h"
+#include <tr1/unordered_set>
 
 struct emit_link
   : symbol_visitor
 {
+  virtual void visit (t_link &n);
   virtual void visit (t_link_body &n);
 
   virtual void visit (token &n);
 
   output_file const &out;
+  std::tr1::unordered_set<std::string> seen;
 
   emit_link (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
@@ -40,10 +42,26 @@ ldadd (node_type type)
 }
 
 void
+emit_link::visit (t_link &n)
+{
+  if (n.cond ())
+    fprintf (out.Makefile, "if %s\n", id (n.cond ()->as<t_if> ().cond ()).c_str ());
+  symbol_visitor::visit (n);
+  if (n.cond ())
+    fprintf (out.Makefile, "endif\n");
+}
+
+void
 emit_link::visit (t_link_body &n)
 {
   t_target_definition &target = symtab.lookup<t_target_definition> (T_PROGRAM, T_LIBRARY, "TARGET");
-  fprintf (out.Makefile, "%s_%s =", canonical (id (target.name ()), current_symtype).c_str (), ldadd (current_symtype));
+  std::string const &name = canonical (id (target.name ()), current_symtype);
+  fprintf (out.Makefile, "%s_%s ", name.c_str (), ldadd (current_symtype));
+  if (seen.find (name) != seen.end ())
+    fprintf (out.Makefile, "+");
+  else
+    seen.insert (name);
+  fprintf (out.Makefile, "=");
   symbol_visitor::visit (n);
   fprintf (out.Makefile, "\n\n");
 }

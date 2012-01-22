@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "util/colours.h"
+
 static char
 underscore (char c)
 {

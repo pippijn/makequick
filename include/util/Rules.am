@@ -1,5 +1,6 @@
 EXTRA_DIST +=			\
 	ancestor.h		\
+	canonical.h		\
 	colours.h		\
 	extract_string.h	\
 	foreach.h		\

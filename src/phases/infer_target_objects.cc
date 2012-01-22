@@ -1,13 +1,16 @@
 #include "phase.h"
 
+#include "annotations/symbol_table.h"
 #include "annotations/target_objects.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/symbol_visitor.h"
+#include "util/object_name.h"
 
 #include <boost/filesystem/path.hpp>
 
 struct infer_target_objects
-  : visitor
+  : symbol_visitor
 {
   virtual void visit (t_filename &n);
   virtual void visit (t_sources &n);
@@ -18,12 +21,7 @@ struct infer_target_objects
   virtual void visit (t_program &n);
   virtual void visit (t_template &n) { /* ignore */ }
 
-  enum target_type
-  {
-    T_NONE,
-    T_LIBRARY,
-    T_PROGRAM,
-  } target;
+  symbol_type target;
 
   enum parse_state
   {
@@ -35,7 +33,8 @@ struct infer_target_objects
   target_objects &objs;
 
   infer_target_objects (annotation_map &annots)
-    : state (S_NONE)
+    : symbol_visitor (annots.get<symbol_table> ("symtab"))
+    , state (S_NONE)
     , objs (annots.put ("target_objects", new target_objects))
   {
   }
@@ -59,19 +58,8 @@ infer_target_objects::visit (t_filename &n)
   if (state == S_SOURCES)
     {
       fs::path path (id (n[0]));
-      switch (target)
-        {
-        case T_LIBRARY:
-          // XXX: this generates for %.lo: %.c, which is not what automake does
-          // (unless subdir-rules is on)
-          objects.push_back (path.replace_extension (".lo"));
-          break;
-        case T_PROGRAM:
-          objects.push_back (path.replace_extension (".o"));
-          break;
-        default:
-          throw std::runtime_error ("invalid sources container");
-        }
+      std::string const &target_name = id (symtab.lookup<t_target_definition> (target, "TARGET").name ());
+      objects.push_back (object_name (target, target_name, path));
     }
 }
 
@@ -94,7 +82,7 @@ void
 infer_target_objects::visit (t_target_definition &n)
 {
   assert (objects.empty ());
-  visitor::visit (n);
+  symbol_visitor::visit (n);
   assert (!objects.empty ());
 
   std::string name = id (n.name ());
@@ -118,5 +106,5 @@ void
 infer_target_objects::visit (t_program &n)
 {
   local (target) = T_PROGRAM;
-  visitor::visit (n);
+  symbol_visitor::visit (n);
 }
