@@ -1,4 +1,6 @@
-#define USE_UNORDERED_SET 0
+#include "config.h"
+
+#define USE_UNORDERED_SET 1
 
 #include <cstdio>
 #if USE_UNORDERED_SET
@@ -18,7 +20,9 @@
 #include "util/foreach.h"
 #include "util/timer.h"
 
-#include <valgrind/callgrind.h>
+#if HAVE_VALGRIND_CALLGRIND_H
+#  include <valgrind/callgrind.h>
+#endif
 
 
 template<typename T>
@@ -367,9 +371,13 @@ inference_engine::infer ()
   printf ("%%%% running inference with %lu pattern, %lu regex and %lu string rules with %lu files\n",
           pattern_rules, regex_rules, string_rules, info.files.size ());
 #endif
+#ifdef CALLGRIND_START_INSTRUMENTATION
   CALLGRIND_START_INSTRUMENTATION;
+#endif
   engine::infer (info.baserules, info.rules, info.files);
+#ifdef CALLGRIND_STOP_INSTRUMENTATION
   CALLGRIND_STOP_INSTRUMENTATION;
+#endif
 #if 1
   printf ("%%%% inferred %lu rules; we now have %lu (buildable or existing) files\n", info.rules.size (), info.files.size ());
 #endif

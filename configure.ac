@@ -23,7 +23,7 @@ AC_PROG_YACC
 
 # TODO: check that lex and yacc are flex and bison
 
-AC_CHECK_HEADERS([boost/filesystem/path.hpp boost/scoped_ptr.hpp boost/regex.hpp boost/graph/adjacency_list.hpp])
+AC_CHECK_HEADERS([boost/filesystem/path.hpp boost/scoped_ptr.hpp boost/regex.hpp boost/graph/adjacency_list.hpp valgrind/callgrind.h])
 
 AP_PKG_CHECK([protobuf],[2.4.0])
 
