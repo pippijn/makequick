@@ -1,7 +1,7 @@
-EXTRA_DIST +=			\
-	error_log.h		\
-	file_list.h		\
-	output_file.h		\
-	rule_info.h		\
-	symbol_table.h		\
-	target_objects.h
+EXTRA_DIST +=					\
+	include/annotations/error_log.h		\
+	include/annotations/file_list.h		\
+	include/annotations/output_file.h	\
+	include/annotations/rule_info.h		\
+	include/annotations/symbol_table.h	\
+	include/annotations/target_objects.h

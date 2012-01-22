@@ -1,11 +1,14 @@
-include Sources.am
+include testsuite/unit/Sources.am
 
-$(SRCDIR)/Sources.am: $(wildcard $(SRCDIR)/*_t.cc) $(SRCDIR)/Rules.am
-	$(AM_V_GEN)(for i in $(SRCDIR)/*_t.cc; do		\
-		T=`echo $$i | sed -e 's|^$(SRCDIR)/||;s|\.cc$$||'`;	\
+UNITDIR = testsuite/unit
+UNITSRC = $(srcdir)/$(UNITDIR)
+
+$(UNITSRC)/Sources.am: $(wildcard $(UNITSRC)/*_t.cc) $(UNITSRC)/Rules.am
+	$(AM_V_GEN)(for i in $(UNITSRC)/*_t.cc; do		\
+		T=`echo $$i | sed -e 's|^$(UNITSRC)/||;s|\.cc$$||'`;	\
 		echo "check_PROGRAMS += $$T";			\
 		echo "TESTS += $$T";				\
-		echo "$${T}_SOURCES = $(CURDIR)/$$T.cc";	\
+		echo "$${T}_SOURCES = $(UNITDIR)/$$T.cc";	\
 		echo "$${T}_LDADD = libmakepp.a";		\
 		echo;						\
 	done) > $@

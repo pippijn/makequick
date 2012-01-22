@@ -1,9 +1,9 @@
-makepp_SOURCES +=		\
-	emit_SOURCES.cc		\
-	emit_SUFFIXES.cc	\
-	emit_built_sources.cc	\
-	emit_flags.cc		\
-	emit_link.cc		\
-	emit_rules.cc		\
-	emit_targets.cc		\
-	emit_tests.cc
+makepp_SOURCES +=				\
+	src/phases/emit/emit_SOURCES.cc		\
+	src/phases/emit/emit_SUFFIXES.cc	\
+	src/phases/emit/emit_built_sources.cc	\
+	src/phases/emit/emit_flags.cc		\
+	src/phases/emit/emit_link.cc		\
+	src/phases/emit/emit_rules.cc		\
+	src/phases/emit/emit_targets.cc		\
+	src/phases/emit/emit_tests.cc

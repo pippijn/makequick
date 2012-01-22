@@ -1,39 +1,39 @@
-include emit/Rules.am
+include src/phases/emit/Rules.am
 
-makepp_SOURCES +=		\
-	audit.cc		\
-	clean_rules.cc		\
-	default_destdir.cc	\
-	default_prereq.cc	\
-	emit.cc			\
-	exclude.cc		\
-	expand_vars.cc		\
-	expand_filtervars.cc	\
-	flatten_filenames.cc	\
-	flatten_rules.cc	\
-	flatten_vars.cc		\
-	inference.cc		\
-	infer_target_objects.cc	\
-	inheritance.cc		\
-				\
-	insert_global_syms.cc	\
-	insert_target_syms.cc	\
-	insert_this_syms.cc	\
-	insert_varadd_syms.cc	\
-	insert_vardecl_syms.cc	\
-				\
-	instantiate_rules.cc	\
-	merge_blocks.cc		\
-	multirule.cc		\
-	remove_patrules.cc	\
-	remove_templates.cc	\
-	reparse_vars.cc		\
-	resolve_flagsref.cc	\
-	resolve_shortvars.cc	\
-	resolve_sourcesref.cc	\
-	resolve_sources.cc	\
-	resolve_tools.cc	\
-	resolve_wildcards.cc	\
-	squarevars.cc		\
-	sx.cc			\
-	xml.cc
+makepp_SOURCES +=				\
+	src/phases/audit.cc			\
+	src/phases/clean_rules.cc		\
+	src/phases/default_destdir.cc		\
+	src/phases/default_prereq.cc		\
+	src/phases/emit.cc			\
+	src/phases/exclude.cc			\
+	src/phases/expand_vars.cc		\
+	src/phases/expand_filtervars.cc		\
+	src/phases/flatten_filenames.cc		\
+	src/phases/flatten_rules.cc		\
+	src/phases/flatten_vars.cc		\
+	src/phases/inference.cc			\
+	src/phases/infer_target_objects.cc	\
+	src/phases/inheritance.cc		\
+						\
+	src/phases/insert_global_syms.cc	\
+	src/phases/insert_target_syms.cc	\
+	src/phases/insert_this_syms.cc		\
+	src/phases/insert_varadd_syms.cc	\
+	src/phases/insert_vardecl_syms.cc	\
+						\
+	src/phases/instantiate_rules.cc		\
+	src/phases/merge_blocks.cc		\
+	src/phases/multirule.cc			\
+	src/phases/remove_patrules.cc		\
+	src/phases/remove_templates.cc		\
+	src/phases/reparse_vars.cc		\
+	src/phases/resolve_flagsref.cc		\
+	src/phases/resolve_shortvars.cc		\
+	src/phases/resolve_sourcesref.cc	\
+	src/phases/resolve_sources.cc		\
+	src/phases/resolve_tools.cc		\
+	src/phases/resolve_wildcards.cc		\
+	src/phases/squarevars.cc		\
+	src/phases/sx.cc			\
+	src/phases/xml.cc

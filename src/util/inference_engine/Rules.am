@@ -1,7 +1,7 @@
-libmakepp_a_SOURCES +=		\
-	inference_prereq.cc
+libmakepp_a_SOURCES +=					\
+	src/util/inference_engine/inference_prereq.cc
 
-EXTRA_DIST +=			\
-	regex.h			\
-	string.h		\
-	wildcard.h
+EXTRA_DIST +=						\
+	src/util/inference_engine/regex.h		\
+	src/util/inference_engine/string.h		\
+	src/util/inference_engine/wildcard.h

@@ -1,1 +1,1 @@
-include unit/Rules.am
+include testsuite/unit/Rules.am

@@ -1,7 +1,7 @@
-libmakepp_a_SOURCES +=		\
-	error_log.cc		\
-	file_list.cc		\
-	output_file.cc		\
-	rule_info.cc		\
-	symbol_table.cc		\
-	target_objects.cc
+libmakepp_a_SOURCES +=				\
+	src/annotations/error_log.cc		\
+	src/annotations/file_list.cc		\
+	src/annotations/output_file.cc		\
+	src/annotations/rule_info.cc		\
+	src/annotations/symbol_table.cc		\
+	src/annotations/target_objects.cc

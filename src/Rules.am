@@ -1,40 +1,40 @@
 noinst_LIBRARIES = libmakepp.a
 
 libmakepp_a_SOURCES =		\
-	annotation_map.cc	\
-	colours.cc		\
-	exception.cc		\
-	file_lexer.cc		\
-	lexer.cc		\
-	node.cc			\
-	node_factory.cc		\
-	parser.cc		\
-	parseutil.cc		\
-	phases.cc		\
-	serialisation.cc	\
-	sighandler.cc		\
-	string_lexer.cc		\
-	visitor.cc		\
-	yylex.ll		\
-	yyparse.yy
+	src/annotation_map.cc	\
+	src/colours.cc		\
+	src/exception.cc	\
+	src/file_lexer.cc	\
+	src/lexer.cc		\
+	src/node.cc		\
+	src/node_factory.cc	\
+	src/parser.cc		\
+	src/parseutil.cc	\
+	src/phases.cc		\
+	src/serialisation.cc	\
+	src/sighandler.cc	\
+	src/string_lexer.cc	\
+	src/visitor.cc		\
+	src/yylex.ll		\
+	src/yyparse.yy
 
 nodist_libmakepp_a_SOURCES =	\
 	node_type.cc		\
 	nodes.pb.cc
 
-include annotations/Rules.am
-include util/Rules.am
+include src/annotations/Rules.am
+include src/util/Rules.am
 
 bin_PROGRAMS = makepp
 
 makepp_SOURCES =			\
 	$(libmakepp_a_SOURCES)		\
-	main.cc
+	src/main.cc
 
 nodist_makepp_SOURCES =			\
 	$(nodist_libmakepp_a_SOURCES)
 
-include phases/Rules.am
+include src/phases/Rules.am
 
 
 GENFILES = yystate.h rule_init.h node_type.h node_switch.h node_visit.h node_t.h node_cc.h visitor_t.h node_fwd.h visitor_cc.h nodes.pb.h
@@ -53,7 +53,7 @@ yystate.h: yylex.h
 	@echo '}; }' >> $@
 
 yylex.h: yylex.cc
-yylex.cc: $(CURDIR)/yylex.ll
+yylex.cc: src/yylex.ll
 	$(AM_V_LEX)flex -o$@ $<
 	@grep -v '^static yyconst flex_int16_t yy_nxt' /tmp/${@:.cc=.h}	\
 		| grep -v '^    \({\|},\|} ;\)$$'	\
@@ -68,7 +68,7 @@ yylex.cc: $(CURDIR)/yylex.ll
 %.h: include/gen/%.pl include/gen/nodes.pm
 	$(AM_V_GEN)perl $< > $@
 
-rule_init.h: $(CURDIR)/yyparse.yy
+rule_init.h: src/yyparse.yy
 	@echo 'enum rule_init {' > $@
 	$(AM_V_GEN)\
 	L=`grep -o '^[a-z_]\+$$' $<`;	\
@@ -79,7 +79,7 @@ rule_init.h: $(CURDIR)/yyparse.yy
 	@echo '  RULE_INITS' >> $@
 	@echo '};' >> $@
 
-node_type.h: $(CURDIR)/yyparse.yy
+node_type.h: src/yyparse.yy
 	@echo 'namespace nodes { enum node_type {' > $@
 	$(AM_V_GEN)\
 	L=`grep -o 'make_node<n_\w*' $<	\
