@@ -21,6 +21,10 @@ AC_PROG_RANLIB
 AC_PROG_LEX
 AC_PROG_YACC
 
+# TODO: check that lex and yacc are flex and bison
+
+AC_CHECK_HEADERS([boost/filesystem/path.hpp boost/scoped_ptr.hpp boost/regex.hpp boost/graph/adjacency_list.hpp])
+
 AP_PKG_CHECK([protobuf],[2.4.0])
 
 AC_CONFIG_FILES([Makefile])
