@@ -3,6 +3,7 @@ makepp_SOURCES +=				\
 	src/phases/emit/emit_SUFFIXES.cc	\
 	src/phases/emit/emit_built_sources.cc	\
 	src/phases/emit/emit_flags.cc		\
+	src/phases/emit/emit_headers.cc		\
 	src/phases/emit/emit_link.cc		\
 	src/phases/emit/emit_rules.cc		\
 	src/phases/emit/emit_targets.cc		\

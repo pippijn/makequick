@@ -57,13 +57,19 @@ graph::sorted () const
   std::vector<node_type> result;
   foreach (Vertex const &v, sorted)
     {
-      if (v >= nodes.size ())
-        break;
+      if (v < nodes.size ())
+        {
 #if 0
-      printf ("%ld[%s]\n", v, nodes[v].c_str ());
+          printf ("%ld[%s]\n", v, nodes[v].c_str ());
 #endif
-      result.push_back (nodes[v]);
+          result.push_back (nodes[v]);
+        }
     }
+
+  foreach (node_type const &node, nodes)
+    assert (find (result.begin (), result.end (), node) != result.end ());
+  foreach (node_type const &node, result)
+    assert (find (nodes.begin (), nodes.end (), node) != nodes.end ());
 
   return result;
 }

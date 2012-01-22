@@ -18,6 +18,17 @@ struct emit_rules
   bool in_first_line;
   bool in_prereq;
   output_file const &out;
+  std::tr1::unordered_set<std::string> seen;
+
+  bool done (std::string const &name) const
+  {
+    return seen.find (name) != seen.end ();
+  }
+
+  void mark (std::string const &name)
+  {
+    seen.insert (name);
+  }
 
   emit_rules (annotation_map &annots)
     : in_rule (false)
@@ -69,6 +80,11 @@ emit_rules::visit (t_rule &n)
 
   if (target_file.size () == 1 && n.code ())
     {
+      std::string const &target = id (target_file[0]);
+      if (done (target))
+        return;
+      mark (target);
+
       in_rule = true;
       resume (n.target ());
       fprintf (out.Makefile, ":");

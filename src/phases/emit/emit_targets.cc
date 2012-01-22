@@ -111,20 +111,27 @@ emit_targets::visit (t_document &n)
           {
             targets[lib.name] = lib;
             t_target_definition &target = symtab.lookup<t_target_definition> (T_LIBRARY, lib.name);
+
+            bool has_dependencies = false;
             foreach (t_link &links, grep<t_link> (target.body ()))
-              {
-                foreach (token &link, grep<token> (links.items ()))
+              foreach (token &link, grep<token> (links.items ()))
+                if (link.tok == TK_INT_LIB)
                   {
-                    if (link.tok == TK_INT_LIB)
-                      {
-                        G.insert (lib.name, link.string);
-                      }
+                    G.insert (lib.name, link.string);
+                    has_dependencies = true;
                   }
-              }
+            // if it has no dependencies, it won't appear in the graph otherwise
+            if (!has_dependencies)
+              G.insert (lib.name, std::string ());
           }
+        std::vector<std::string> const &sorted = G.sorted ();
+        foreach (target const &lib, pair.second)
+          if (find (sorted.begin (), sorted.end (), lib.name) == sorted.end ())
+            throw std::runtime_error ("sorted list did not contain `" + lib.name + "'");
         pair.second.clear ();
-        foreach (std::string const &target, G.sorted ())
-          pair.second.push_back (targets[target]);
+        foreach (std::string const &target, sorted)
+          if (!target.empty ())
+            pair.second.push_back (targets[target]);
       }
 
   print_targets (out.Makefile, libraries, "LTLIBRARIES", library_makeise);

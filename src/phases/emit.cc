@@ -63,6 +63,7 @@ emit::visit (t_document &n)
 
   phases::run ("emit_test", &n, annots);
   phases::run ("emit_SUFFIXES", &n, annots);
+  phases::run ("emit_headers", &n, annots);
   phases::run ("emit_built_sources", &n, annots);
   phases::run ("emit_targets", &n, annots);
   phases::run ("emit_link", &n, annots);

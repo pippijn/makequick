@@ -47,6 +47,11 @@ struct inference
       engine.add_file (f);
   }
 
+  static bool allow_doubles (std::string const &target)
+  {
+    return target == "clean";
+  }
+
   ~inference ()
   {
     engine.infer ();
@@ -65,6 +70,7 @@ struct inference
           prereq.push_back (pr.str ());
         assert (prereq.size () == r.prereqs.size ());
 
+        assert (!rules.find (r.target) || allow_doubles (r.target));
         rules.rules.insert (rule_info::rule (r.target, prereq, r.stem, r.code));
       }
   }
