@@ -38,7 +38,9 @@ file_lexer::close_file ()
 static bool
 is_rule_file (fs::path const &file)
 {
-  return file.extension () == ".mq";
+  fs::path const &filename = file.filename ();
+  return filename == "Rules.mq"
+      || filename == "configure.mq";
 }
 
 int

@@ -66,7 +66,7 @@ static char const *const all_phases[] = {
 #if EMIT
   "emit",
 #endif
-  "sx",
+  //"sx",
 };
 
 static fs::path
