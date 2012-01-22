@@ -44,7 +44,7 @@ CLEANFILES += $(GENFILES) $(nodist_libmakepp_a_SOURCES)
 
 nodes.pb.h: nodes.pb.cc
 nodes.pb.cc: include/gen/nodes.proto
-	$(AM_V_PROTO)protoc --cpp_out=$(builddir) --proto_path=$(<D) $<
+	$(AM_V_GEN)protoc --cpp_out=$(builddir) --proto_path=$(<D) $<
 
 yystate.h: yylex.h
 	@echo 'namespace yy { enum state {' > $@
