@@ -12,9 +12,6 @@
 /configure
 /INSTALL
 /m4
-/configure.ac
-rules.am
-Makefile.am
 Makefile.in
 
 # Clang completion

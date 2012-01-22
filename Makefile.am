@@ -1,5 +1,22 @@
-include automake/init.am
-include automake/cppinc.am
+ACLOCAL_AMFLAGS		= -I m4
+AUTOMAKE_OPTIONS	= -Wall
+
+BUILT_SOURCES		= # empty
+
+EXTRA_DIST		= # empty
+
+AM_CFLAGS		= # empty
+AM_CPPFLAGS		= # empty
+AM_CXXFLAGS		= # empty
+AM_LDFLAGS		= # empty
+AM_YFLAGS		= # empty
+
+TESTS			= # empty
+XFAIL_TESTS		= # empty
+
+# Standard includes
+AM_CPPFLAGS		+= -I$(top_srcdir) -I$(top_srcdir)/include
+AM_CPPFLAGS		+= -I$(top_builddir) -I$(top_builddir)/include
 
 AM_YFLAGS += -d --verbose
 AM_CPPFLAGS += -ggdb3
@@ -26,9 +43,7 @@ AM_CXXFLAGS += -fopenmp -DOPENMP
 #AM_CXXFLAGS += -finline-small-functions
 #AM_CXXFLAGS += -fno-unroll-loops
 
-include automake/stdinc.am
-
-CLEANFILES +=		\
+CLEANFILES =		\
 	nodes.bin	\
 	nodes.txt	\
 	nodes.xml
