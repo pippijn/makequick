@@ -1,3 +1,8 @@
+check_PROGRAMS += graph_t
+TESTS += graph_t
+graph_t_SOURCES = testsuite/unit/graph_t.cc
+graph_t_LDADD = libmakepp.a
+
 check_PROGRAMS += inference_engine_t
 TESTS += inference_engine_t
 inference_engine_t_SOURCES = testsuite/unit/inference_engine_t.cc

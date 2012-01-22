@@ -4,6 +4,8 @@
 #include "annotations/symbol_table.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/graph.h"
+#include "util/grep.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
@@ -19,6 +21,10 @@ struct emit_targets
   {
     std::string name;
     std::string cond;
+
+    target ()
+    {
+    }
 
     target (std::string const &name, std::string const &cond)
       : name (name)
@@ -94,6 +100,33 @@ emit_targets::visit (t_document &n)
   symbol_visitor::visit (n);
   print_targets (out.Makefile, programs, "PROGRAMS", program_makeise);
   fprintf (out.Makefile, "\n");
+
+  // topologically sort libraries
+  foreach (emit_targets::target_map::value_type &pair, libraries)
+    if (pair.second.size () > 1)
+      {
+        graph G;
+        std::map<std::string, target> targets;
+        foreach (target const &lib, pair.second)
+          {
+            targets[lib.name] = lib;
+            t_target_definition &target = symtab.lookup<t_target_definition> (T_LIBRARY, lib.name);
+            foreach (t_link &links, grep<t_link> (target.body ()))
+              {
+                foreach (token &link, grep<token> (links.items ()))
+                  {
+                    if (link.tok == TK_INT_LIB)
+                      {
+                        G.insert (lib.name, link.string);
+                      }
+                  }
+              }
+          }
+        pair.second.clear ();
+        foreach (std::string const &target, G.sorted ())
+          pair.second.push_back (targets[target]);
+      }
+
   print_targets (out.Makefile, libraries, "LTLIBRARIES", library_makeise);
   fprintf (out.Makefile, "\n");
 }

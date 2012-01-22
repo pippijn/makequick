@@ -2,10 +2,10 @@
 
 #include "annotations/output_file.h"
 #include "annotations/symbol_table.h"
+#include "util/canonical.h"
 #include "util/colours.h"
 #include "util/foreach.h"
 #include "util/symbol_visitor.h"
-#include "util/canonical.h"
 
 #include <stdexcept>
 #include <tr1/unordered_set>

@@ -4,6 +4,7 @@ EXTRA_DIST +=				\
 	include/util/colours.h		\
 	include/util/extract_string.h	\
 	include/util/foreach.h		\
+	include/util/graph.h		\
 	include/util/grep.h		\
 	include/util/inference_engine.h	\
 	include/util/local.h		\

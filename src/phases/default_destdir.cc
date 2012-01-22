@@ -6,6 +6,7 @@ struct default_destdir
   void visit (t_target_definition &n);
   void visit (t_program &n);
   void visit (t_library &n);
+  void visit (t_headers &n);
 
   enum visit_state
   {
@@ -53,4 +54,11 @@ default_destdir::visit (t_library &n)
   state = S_LIBRARY;
   visitor::visit (n);
   state = S_NONE;
+}
+
+void
+default_destdir::visit (t_headers &n)
+{
+  if (!n.dest ())
+    n.dest (make_dest ("include"));
 }
