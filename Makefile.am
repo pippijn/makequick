@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS		= -I m4
-AUTOMAKE_OPTIONS	= -Wall
+AUTOMAKE_OPTIONS	= -Wall -Wno-portability -Wno-override
 
 BUILT_SOURCES		= # empty
 
@@ -47,3 +47,7 @@ CLEANFILES =		\
 	nodes.bin	\
 	nodes.txt	\
 	nodes.xml
+
+include include/Rules.am
+include src/Rules.am
+include testsuite/Rules.am

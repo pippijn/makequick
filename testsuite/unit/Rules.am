@@ -1,3 +1,5 @@
+check_PROGRAMS = # empty
+
 include testsuite/unit/Sources.am
 
 UNITDIR = testsuite/unit

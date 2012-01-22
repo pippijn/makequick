@@ -113,6 +113,15 @@ collect (fs::path const &path, file_vec &files)
     files.push_back (fs::path (path));
 }
 
+static bool
+exists (file_vec const &files)
+{
+  foreach (fs::path const &path, files)
+    if (!exists (path))
+      return false;
+  return true;
+}
+
 struct unbase
 {
   unbase (fs::path const &base)
@@ -206,6 +215,12 @@ try
   file_vec filevec;
   filevec.push_back (path / "Rules.mq");
   filevec.push_back (path / "configure.mq");
+  if (!exists (filevec))
+    {
+      printf ("path is not a %s project (missing Rules.mq or configure.mq)\n", PACKAGE_TARNAME);
+      return EXIT_FAILURE;
+    }
+
   collect (path / "extra", filevec);
   collect (path / "include", filevec);
   collect (path / "src", filevec);
