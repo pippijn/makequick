@@ -34,6 +34,8 @@ makepp_SOURCES =			\
 nodist_makepp_SOURCES =			\
 	$(nodist_libmakepp_a_SOURCES)
 
+makepp_LDADD = $(COMLIB)
+
 include src/phases/Rules.am
 
 

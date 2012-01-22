@@ -1,15 +1,15 @@
 check_PROGRAMS += graph_t
 TESTS += graph_t
-graph_t_SOURCES = testsuite/unit/graph_t.cc
-graph_t_LDADD = libmakepp.a
+graph_t_SOURCES = $(UNITDIR)/graph_t.cc
+graph_t_LDADD = libmakepp.a $(COMLIB)
 
 check_PROGRAMS += inference_engine_t
 TESTS += inference_engine_t
-inference_engine_t_SOURCES = testsuite/unit/inference_engine_t.cc
-inference_engine_t_LDADD = libmakepp.a
+inference_engine_t_SOURCES = $(UNITDIR)/inference_engine_t.cc
+inference_engine_t_LDADD = libmakepp.a $(COMLIB)
 
 check_PROGRAMS += symbol_table_t
 TESTS += symbol_table_t
-symbol_table_t_SOURCES = testsuite/unit/symbol_table_t.cc
-symbol_table_t_LDADD = libmakepp.a
+symbol_table_t_SOURCES = $(UNITDIR)/symbol_table_t.cc
+symbol_table_t_LDADD = libmakepp.a $(COMLIB)
 

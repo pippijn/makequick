@@ -27,10 +27,6 @@ AM_CPPFLAGS += -ggdb3
 AM_CPPFLAGS += -DVISIBLE='__attribute__ ((__visibility__ ("default")))'
 AM_CXXFLAGS += -fnon-call-exceptions
 AM_CXXFLAGS += -fvisibility=hidden
-AM_LDFLAGS += -lboost_filesystem-mt
-AM_LDFLAGS += -lboost_regex-mt
-AM_LDFLAGS += -lboost_system-mt
-AM_LDFLAGS += $(PROTOBUF_LIBS)
 
 AM_CXXFLAGS += -O3
 AM_CXXFLAGS += -march=native
@@ -42,6 +38,8 @@ AM_CXXFLAGS += -fopenmp -DOPENMP
 #AM_CXXFLAGS += -fno-inline
 #AM_CXXFLAGS += -finline-small-functions
 #AM_CXXFLAGS += -fno-unroll-loops
+
+COMLIB = -lboost_filesystem-mt -lboost_regex-mt -lboost_system-mt $(PROTOBUF_LIBS)
 
 CLEANFILES =		\
 	nodes.bin	\

@@ -11,6 +11,6 @@ $(UNITSRC)/Sources.am: $(wildcard $(UNITSRC)/*_t.cc) $(UNITSRC)/Rules.am
 		echo "check_PROGRAMS += $$T";			\
 		echo "TESTS += $$T";				\
 		echo "$${T}_SOURCES = $(UNITDIR)/$$T.cc";	\
-		echo "$${T}_LDADD = libmakepp.a";		\
+		echo "$${T}_LDADD = libmakepp.a \$$(COMLIB)";	\
 		echo;						\
 	done) > $@
