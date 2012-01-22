@@ -32,7 +32,6 @@ makepp_SOURCES +=		\
 	resolve_shortvars.cc	\
 	resolve_sourcesref.cc	\
 	resolve_sources.cc	\
-	resolve_sources_fs.cc	\
 	resolve_tools.cc	\
 	resolve_wildcards.cc	\
 	squarevars.cc		\

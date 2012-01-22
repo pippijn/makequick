@@ -18,16 +18,19 @@ struct resolve_shortvars
 
   virtual void visit (t_rule_line &n);
   virtual void visit (t_rule &n);
+  virtual void visit (t_log_compiler &n);
 
   error_log &errors;
 
   node_ptr replacement;
   t_filename_ptr target;
   t_filenames_ptr prereq;
+  bool in_log_compiler;
 
   resolve_shortvars (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
     , errors (annots.get ("errors"))
+    , in_log_compiler (false)
   {
   }
 
@@ -89,14 +92,7 @@ modify (node_ptr const &n, char modifier, bool builddir)
 void
 resolve_shortvars::visit (t_shortvar &n)
 {
-  assert (target);
-  assert (prereq);
-
   token const &tok = n.var ()->as<token> ();
-
-  // uninstantiated rule:
-  if (target->size () > 1)
-    return;
 
   char const *name = tok.string.c_str ();
 
@@ -107,26 +103,45 @@ resolve_shortvars::visit (t_shortvar &n)
       modifier = name[2];
       name++;
     }
-  switch (name[0])
+  if (in_log_compiler)
+    switch (name[0])
+      {
+      case '@':
+        replacement = make_code ("$@");
+        break;
+      default:
+        throw name;
+      }
+  else
     {
-    case '@':
-      replacement = target;
-      builddir = true;
-      break;
-    case '<':
-      if (prereq->size () == 0)
+      assert (target);
+      assert (prereq);
+
+      // uninstantiated rule:
+      if (target->size () > 1)
+        return;
+
+      switch (name[0])
         {
-          errors.add<semantic_error> (&n, "no prerequisites found to resolve $<");
-          return;
+        case '@':
+          replacement = target;
+          builddir = true;
+          break;
+        case '<':
+          if (prereq->size () == 0)
+            {
+              errors.add<semantic_error> (&n, "no prerequisites found to resolve $<");
+              return;
+            }
+          replacement = prereq->list[0];
+          break;
+        case '$':
+          replacement = make_code (n.loc, "$$");
+          break;
         }
-      replacement = prereq->list[0];
-      break;
-    case '$':
-      replacement = make_code (n.loc, "$$");
-      break;
+      if (replacement && name[0] != '$')
+        replacement = modify (replacement, modifier, builddir);
     }
-  if (replacement && name[0] != '$')
-    replacement = modify (replacement, modifier, builddir);
 }
 
 void
@@ -168,4 +183,12 @@ resolve_shortvars::visit (t_rule &n)
 
   prereq = 0;
   target = 0;
+}
+
+void
+resolve_shortvars::visit (t_log_compiler &n)
+{
+  in_log_compiler = true;
+  symbol_visitor::visit (n);
+  in_log_compiler = false;
 }

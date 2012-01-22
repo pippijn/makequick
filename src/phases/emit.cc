@@ -57,6 +57,11 @@ emit::visit (t_document &n)
   fprintf (out.Makefile, "pkglib_LTLIBRARIES	= # empty\n");
   fprintf (out.Makefile, "\n");
 
+  fprintf (out.Makefile, "TESTS			= # empty\n");
+  fprintf (out.Makefile, "XFAIL_TESTS		= # empty\n");
+  fprintf (out.Makefile, "\n");
+
+  phases::run ("emit_test", &n, annots);
   phases::run ("emit_SUFFIXES", &n, annots);
   phases::run ("emit_built_sources", &n, annots);
   phases::run ("emit_targets", &n, annots);

@@ -25,6 +25,7 @@ struct instantiate_rules
 
   virtual void visit (t_built_sources &n);
   virtual void visit (t_data &n);
+  virtual void visit (t_test &n);
 
   void instantiate (t_sources_members &n, bool accept_existing = false);
 
@@ -112,7 +113,7 @@ instantiate_rules::instantiate (rule_info::rule const &r)
 {
   if (done.find (r.target) != done.end ())
     {
-      printf ("RULE %s\n", r.target.c_str ());
+      //printf ("RULE %s\n", r.target.c_str ());
       return;
     }
 
@@ -140,7 +141,7 @@ instantiate_rules::instantiate (node &n,
 {
   foreach (fs::path const &obj, targets)
     {
-      printf ("rule for %s\n", obj.c_str ());
+      //printf ("rule for %s\n", obj.c_str ());
       if (rules.files.find (obj) == rules.files.end ())
         {
           errors.add<semantic_error> (&n, "no rule to build " + C::filename (obj));
@@ -159,7 +160,7 @@ instantiate_rules::instantiate (node &n,
 
       assert (r->target == obj);
 
-      printf ("instantiate rule for %s\n", obj.c_str ());
+      //printf ("instantiate rule for %s\n", obj.c_str ());
       instantiate (*r);
 
       instantiate (n, r->prereq, true);
@@ -224,6 +225,12 @@ instantiate_rules::visit (t_built_sources &n)
 
 void
 instantiate_rules::visit (t_data &n)
+{
+  instantiate (n.sources ()->as<t_sources_members> (), true);
+}
+
+void
+instantiate_rules::visit (t_test &n)
 {
   instantiate (n.sources ()->as<t_sources_members> (), true);
 }

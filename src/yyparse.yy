@@ -575,9 +575,9 @@ log_compiler
 
 log_compilers
 	: rule
-		{ $$ = make_node<n_log_compilers> (@$, $1); }
+		{ t_rule_ptr rule = &$1->as<t_rule> (); $$ = make_node<n_log_compilers> (@$, make_node<n_log_compiler> (@1, rule->target (), rule->code ())); }
 	| log_compilers rule
-		{ ($$ = $1)->add ($2)->loc = @$; }
+		{ t_rule_ptr rule = &$2->as<t_rule> (); ($$ = $1)->add (make_node<n_log_compiler> (@2, rule->target (), rule->code ()))->loc = @$; }
 	;
 
 /****************************************************************************

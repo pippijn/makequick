@@ -28,6 +28,7 @@
    error => ['msg'],
    exclude => ['sources'],
    log_compilers => ['+'],
+   log_compiler => ['ext', 'rule'],
    filename => ['+'],
    filenames_0 => ['*'],
    filenames_1 => ['+'],

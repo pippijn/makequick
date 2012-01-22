@@ -20,3 +20,17 @@ object_name (symbol_type type, std::string const &target_name, fs::path const &p
       throw std::runtime_error ("invalid sources container");
     }
 }
+
+static std::string
+object_name (symbol_type type, fs::path const &path)
+{
+  switch (type)
+    {
+    case T_LIBRARY:
+      return fs::path (path).replace_extension (".lo").native ();
+    case T_PROGRAM:
+      return fs::path (path).replace_extension (".o").native ();
+    default:
+      throw std::runtime_error ("invalid sources container");
+    }
+}

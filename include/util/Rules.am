@@ -11,8 +11,10 @@ EXTRA_DIST +=			\
 	make_filename.h		\
 	make_var.h		\
 	move.h			\
+	object_name.h		\
 	regex_escape.h		\
 	symbol_visitor.h	\
 	timer.h			\
+	uc.h			\
 	unique_visitor.h	\
 	unlink.h

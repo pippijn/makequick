@@ -18,6 +18,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#define EMIT 1
+
 static char const *const all_phases[] = {
   "audit",
 
@@ -38,11 +40,9 @@ static char const *const all_phases[] = {
 
   "multirule",
   "flatten_filenames",
-  "resolve_sources_fs",
-  "resolve_sourcesref",
-  "resolve_wildcards",
   "inference",
   "resolve_sources",
+  "resolve_wildcards",
   "resolve_sourcesref",
   "remove_patrules",
   "exclude",
@@ -63,8 +63,10 @@ static char const *const all_phases[] = {
   "flatten_rules",
   "remove_templates",
   "merge_blocks",
+#if EMIT
   "emit",
-  "sx",
+#endif
+  //"sx",
 };
 
 static fs::path
@@ -225,8 +227,10 @@ try
 
       annotation_map annots;
       annots.put ("files", files.release ());
+#if EMIT
       annots.put ("output", new output_file ((path / "Rules.am").c_str (),
                                              (path / "configure.ac").c_str ()));
+#endif
       annots.put ("errors", errors.release ());
       annots.put ("symtab", new symbol_table);
 

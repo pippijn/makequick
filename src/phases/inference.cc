@@ -22,28 +22,18 @@ struct inference
   void visit (t_rule &n);
 
   void visit (t_target_definition &n);
-  void visit (t_program &n);
-  void visit (t_library &n);
-
-  void visit (t_sources &n);
-  void visit (t_nodist_sources &n);
 
   enum state
   {
-    S_NONE    = 0x0,
-    S_TARGET  = 0x1,
-    S_PREREQ  = 0x2,
-    S_PROGRAM = 0x3,
-    S_LIBRARY = 0x4,
-    S_SOURCES = 0x8
+    S_NONE,
+    S_TARGET,
+    S_PREREQ
   } state;
 
   typedef std::vector<inference_engine::prerequisite> prereq_vec;
 
   inference_engine engine;
   rule_info &rules;
-
-  std::string current_target;
 
   std::string target;
   prereq_vec prereq;
@@ -221,31 +211,13 @@ inference::visit (t_filename &n)
     case S_PREREQ:
       prereq.push_back (make_prereq (n.list));
       break;
-
-    case S_PROGRAM | S_SOURCES:
-      type = T_PROGRAM;
-
-      if (false)
-    case S_LIBRARY | S_SOURCES:
-      type = T_LIBRARY;
-      {
-        std::string const &source = make_target (n.list);
-        std::string const &o = object_name (type, current_target, source);
-
-        prereq_vec prereq;
-        prereq.push_back (source);
-
-        engine.add_file (o);
-        engine.add_rule (o, prereq, NULL);
-        break;
-      }
     }
 }
 
 void
 inference::visit (t_rule &n)
 {
-  local (state) = S_TARGET;
+  state = S_TARGET;
   n.target ()->accept (*this);
   state = S_PREREQ;
   n.prereq ()->accept (*this);
@@ -260,36 +232,6 @@ inference::visit (t_rule &n)
 void
 inference::visit (t_target_definition &n)
 {
-  current_target = id (n.name ());
-  engine.add_file (current_target);
-  visitor::visit (n);
-}
-
-void
-inference::visit (t_program &n)
-{
-  local (state) = S_PROGRAM;
-  visitor::visit (n);
-}
-
-void
-inference::visit (t_library &n)
-{
-  local (state) = S_LIBRARY;
-  visitor::visit (n);
-}
-
-
-void
-inference::visit (t_sources &n)
-{
-  local (state) |= S_SOURCES;
-  visitor::visit (n);
-}
-
-void
-inference::visit (t_nodist_sources &n)
-{
-  local (state) |= S_SOURCES;
+  engine.add_file (id (n.name ()));
   visitor::visit (n);
 }

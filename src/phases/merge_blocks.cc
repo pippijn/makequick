@@ -86,7 +86,7 @@ struct merge_blocks
 
   merger<t_extra_dist, &t_extra_dist::sources, t_sources_members> extra_dist_merger;
   merger<t_built_sources, &t_built_sources::sources, t_sources_members> built_sources_merger;
-  merger<t_test, &t_test::sources, t_sources_members> test_merger;
+  std::map<std::string, merger<t_test, &t_test::sources, t_sources_members> > test_mergers;
 };
 
 static phase<merge_blocks> thisphase ("merge_blocks", "expand_vars");
@@ -95,10 +95,11 @@ static phase<merge_blocks> thisphase ("merge_blocks", "expand_vars");
 void
 merge_blocks::visit (t_target_definition &n)
 {
-  // extra_dist, built_sources and test are not reset, as they are global
+  // extra_dist and built_sources are not reset, as they are global
   link_merger.clear ();
   sources_merger.clear ();
   tool_flags_mergers.clear ();
+  test_mergers.clear ();
   visitor::visit (n);
 }
 
@@ -142,8 +143,14 @@ merge_blocks::visit (t_built_sources &n)
   built_sources_merger.visit (n);
 }
 
+static std::string
+id_opt (node_ptr const &p)
+{
+  return p ? id (p) : std::string ();
+}
+
 void
 merge_blocks::visit (t_test &n)
 {
-  test_merger.visit (n);
+  test_mergers[id_opt (n.type ())].visit (n);
 }

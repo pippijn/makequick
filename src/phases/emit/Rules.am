@@ -5,4 +5,5 @@ makepp_SOURCES +=		\
 	emit_flags.cc		\
 	emit_link.cc		\
 	emit_rules.cc		\
-	emit_targets.cc
+	emit_targets.cc		\
+	emit_tests.cc
