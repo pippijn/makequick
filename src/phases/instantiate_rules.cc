@@ -127,6 +127,10 @@ instantiate_rules::instantiate (rule_info::rule const &r)
       t_rule_ptr rule = new t_rule (location::generated, target, prereq,
                                     resolve_stem (r.stem) (r.code->clone ()));
 
+      // additional condition information
+      if (r.cond)
+        rule->add (r.cond->clone ());
+
       members->add (rule);
     }
 

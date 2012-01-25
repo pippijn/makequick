@@ -85,7 +85,7 @@ infer_target_objects::visit (t_filename &n)
         prereq.push_back (subdir_o);
 
       rules.files.insert (root_o);
-      rules.rules.insert (rule_info::rule (root_o, prereq, std::string (), NULL));
+      rules.rules.insert (rule_info::rule (root_o, prereq, std::string (), NULL, NULL));
     }
 }
 

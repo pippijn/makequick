@@ -80,6 +80,12 @@ emit_rules::visit (t_rule &n)
 
   if (target_file.size () == 1 && n.code ())
     {
+      // has additional information
+      bool has_cond = n.size () >= 4;
+
+      if (has_cond)
+        fprintf (out.Makefile, "if %s\n", id (n[3]->as<t_if> ().cond ()).c_str ());
+
       std::string const &target = id (target_file[0]);
       if (done (target))
         return;
@@ -98,6 +104,9 @@ emit_rules::visit (t_rule &n)
       resume (n.code ());
       fprintf (out.Makefile, "\n");
       in_rule = false;
+
+      if (has_cond)
+        fprintf (out.Makefile, "endif\n");
     }
 }
 

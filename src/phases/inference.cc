@@ -37,6 +37,7 @@ struct inference
 
   std::string target;
   prereq_vec prereq;
+  node_ptr cond;
 
   inference (annotation_map &annots)
     : rules (annots.put ("rule_info", new rule_info))
@@ -71,7 +72,7 @@ struct inference
         assert (prereq.size () == r.prereqs.size ());
 
         assert (!rules.find (r.target) || allow_doubles (r.target));
-        rules.rules.insert (rule_info::rule (r.target, prereq, r.stem, r.code));
+        rules.rules.insert (rule_info::rule (r.target, prereq, r.stem, r.code, r.cond));
       }
   }
 };
@@ -229,7 +230,7 @@ inference::visit (t_rule &n)
   n.prereq ()->accept (*this);
   state = S_NONE;
 
-  engine.add_rule (target, prereq, n.code ());
+  engine.add_rule (target, prereq, n.code (), cond);
   target.clear ();
   prereq.clear ();
 }
@@ -239,5 +240,7 @@ void
 inference::visit (t_target_definition &n)
 {
   engine.add_file (id (n.name ()));
+  cond = n.cond ();
   visitor::visit (n);
+  cond = NULL;
 }

@@ -26,7 +26,7 @@ namespace std { namespace tr1 {
 rule_info::rule const *
 rule_info::find (std::string const &target) const
 {
-  rule_set::const_iterator found = rules.find (rule (target, std::vector<fs::path> (), std::string (), NULL));
+  rule_set::const_iterator found = rules.find (rule (target, std::vector<fs::path> (), std::string (), NULL, NULL));
   if (found != rules.end ())
     return &*found;
   return NULL;

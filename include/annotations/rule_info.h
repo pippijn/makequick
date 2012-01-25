@@ -18,14 +18,16 @@ struct rule_info
     file_vec prereq;
     std::string stem;
     node_ptr code;
+    node_ptr cond;
 
     void print () const;
 
-    rule (std::string const &target, file_vec const &prereq, std::string const &stem, node_ptr code)
+    rule (std::string const &target, file_vec const &prereq, std::string const &stem, node_ptr const &code, node_ptr const &cond)
       : target (target)
       , prereq (prereq)
       , stem (stem)
       , code (code)
+      , cond (cond)
     {
     }
   };

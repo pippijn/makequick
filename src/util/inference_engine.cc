@@ -56,9 +56,10 @@ inference_engine::add_file (fs::path const &file)
 void
 inference_engine::add_rule (std::string const &target,
                             std::vector<prerequisite> const &prereqs,
-                            node_ptr const &code)
+                            node_ptr const &code,
+                            node_ptr const &cond)
 {
-  rule r (target, prereqs, code);
+  rule r (target, prereqs, code, cond);
 
   if (prereqs.empty ())
     {

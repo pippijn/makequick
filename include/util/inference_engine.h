@@ -118,13 +118,15 @@ struct inference_engine
     std::vector<prerequisite> prereqs;
     std::string stem;
     node_ptr code;
+    node_ptr cond;
 
     void print () const;
 
-    rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code)
+    rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code, node_ptr const &cond)
       : target (target)
       , prereqs (prereqs)
       , code (code)
+      , cond (cond)
     {
     }
   };
@@ -141,7 +143,7 @@ struct inference_engine
   void add_file (fs::path const &file);
 
   /// Add a rule to the initial rule list.
-  void add_rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code);
+  void add_rule (std::string const &target, std::vector<prerequisite> const &prereqs, node_ptr const &code, node_ptr const &cond);
 
   void add_rule (std::string const &target, prerequisite const &dep0) { std::vector<prerequisite> v; v.push_back (dep0); add_rule (target, v, 0); }
   void add_rule (std::string const &target, prerequisite const &dep0, prerequisite const &dep1) { std::vector<prerequisite> v; v.push_back (dep0); v.push_back (dep1); add_rule (target, v, 0); }
