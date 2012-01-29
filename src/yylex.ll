@@ -75,7 +75,6 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 "if"					{ RetKeyword (KW_IF); }
 "library"				{ RetKeyword (KW_LIBRARY); }
 "link"					{ RetKeyword (KW_LINK); }
-"test"					{ RetKeyword (KW_TEST); }
 "log_compiler"				{ RetKeyword (KW_LOG_COMPILER); }
 "mans"					{ RetKeyword (KW_MANS); }
 "nodist_sources"			{ RetKeyword (KW_NODIST_SOURCES); }
@@ -83,11 +82,13 @@ STRING	({SSTRING}|{DSTRING}|{BSTRING})
 "options"				{ RetKeyword (KW_OPTIONS); }
 "program"				{ RetKeyword (KW_PROGRAM); }
 "project"				{ RetKeyword (KW_PROJECT); }
+"scripts"				{ RetKeyword (KW_SCRIPTS); }
 "section"				{ RetKeyword (KW_SECTION); }
 "sizeof"				{ RetKeyword (KW_SIZEOF); }
 "sources"				{ RetKeyword (KW_SOURCES); }
 "symbol:"				{ RetKeyword (KW_SYMBOL); }
 "template"				{ RetKeyword (KW_TEMPLATE); }
+"test"					{ RetKeyword (KW_TEST); }
 "version:"				{ RetKeyword (KW_VERSION); }
 
 <INITWS>{

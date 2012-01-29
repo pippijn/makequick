@@ -4,6 +4,7 @@ makepp_SOURCES +=				\
 	src/phases/audit.cc			\
 	src/phases/clean_rules.cc		\
 	src/phases/default_destdir.cc		\
+	src/phases/default_flags.cc		\
 	src/phases/default_prereq.cc		\
 	src/phases/emit.cc			\
 	src/phases/exclude.cc			\

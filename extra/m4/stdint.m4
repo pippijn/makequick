@@ -1,0 +1,27 @@
+AC_DEFUN([AP_STDINT_H],[
+   AC_CHECK_SIZEOF([char])
+   AC_CHECK_SIZEOF([short])
+   AC_CHECK_SIZEOF([int])
+   AC_CHECK_SIZEOF([long])
+   AC_CHECK_SIZEOF([void *])
+
+   if test $ac_cv_sizeof_char != 1; then
+      AC_MSG_ERROR([sizeof (char) != 1])
+   fi
+
+   AC_TYPE_SIZE_T
+
+   AC_TYPE_UINT8_T
+   AC_TYPE_UINT16_T
+   AC_TYPE_UINT32_T
+   AC_TYPE_UINT64_T
+   AC_TYPE_UINTMAX_T
+   AC_TYPE_UINTPTR_T
+
+   AC_TYPE_INT8_T
+   AC_TYPE_INT16_T
+   AC_TYPE_INT32_T
+   AC_TYPE_INT64_T
+   AC_TYPE_INTMAX_T
+   AC_TYPE_INTPTR_T
+])

@@ -7,11 +7,13 @@
 #include "util/graph.h"
 #include "util/grep.h"
 #include "util/symbol_visitor.h"
+#include "util/plus_writer.h"
 
 #include <stdexcept>
 
 struct emit_targets
   : symbol_visitor
+  , plus_writer
 {
   virtual void visit (t_document &n);
   virtual void visit (t_destination &n);
@@ -40,6 +42,9 @@ struct emit_targets
   std::string cond;
   bool in_target;
 
+  void print_targets (FILE *out, emit_targets::target_map const &targets,
+                      char const *kind, std::string makeise (std::string const &s));
+
   emit_targets (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
     , out (annots.get ("output"))
@@ -57,9 +62,9 @@ tabbed (FILE *out, std::string const &s)
   fprintf (out, "\t\\\n\t%s", s.c_str ());
 }
 
-static void
-print_targets (FILE *out, emit_targets::target_map const &targets,
-               char const *kind, std::string makeise (std::string const &s))
+void
+emit_targets::print_targets (FILE *out, emit_targets::target_map const &targets,
+                             char const *kind, std::string makeise (std::string const &s))
 {
   foreach (emit_targets::target_map::const_reference pair, targets)
     {
@@ -77,8 +82,9 @@ print_targets (FILE *out, emit_targets::target_map const &targets,
                 fprintf (out, "if %s\n", it->cond.c_str ());
             }
 
-          fprintf (out, "%s_%s += %s\n",
-                   pair.first.c_str (), kind, makeise (it->name).c_str ());
+          plus (out, pair.first, kind);
+          fprintf (out, "%s\n",
+                   makeise (it->name).c_str ());
 
           cond = it->cond;
           ++it;

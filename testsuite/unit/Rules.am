@@ -6,11 +6,11 @@ UNITDIR = testsuite/unit
 UNITSRC = $(srcdir)/$(UNITDIR)
 
 $(UNITSRC)/Sources.am: $(wildcard $(UNITSRC)/*_t.cc) $(UNITSRC)/Rules.am
-	$(AM_V_GEN)(for i in $(UNITSRC)/*_t.cc; do		\
+	$(AM_V_GEN)(for i in $(UNITSRC)/*_t.cc; do			\
 		T=`echo $$i | sed -e 's|^$(UNITSRC)/||;s|\.cc$$||'`;	\
-		echo "check_PROGRAMS += $$T";			\
-		echo "TESTS += $$T";				\
-		echo "$${T}_SOURCES = $(UNITDIR)/$$T.cc";	\
-		echo "$${T}_LDADD = libmakepp.a \$$(COMLIB)";	\
-		echo;						\
+		echo "check_PROGRAMS += testsuite/$$T";			\
+		echo "TESTS += testsuite/$$T";				\
+		echo "testsuite_$${T}_SOURCES = $(UNITDIR)/$$T.cc";	\
+		echo "testsuite_$${T}_LDADD = libmakepp.a \$$(COMLIB)";	\
+		echo;							\
 	done) > $@

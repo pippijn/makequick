@@ -2,9 +2,12 @@ makepp_SOURCES +=				\
 	src/phases/emit/emit_SOURCES.cc		\
 	src/phases/emit/emit_SUFFIXES.cc	\
 	src/phases/emit/emit_built_sources.cc	\
+	src/phases/emit/emit_dirs.cc		\
 	src/phases/emit/emit_flags.cc		\
 	src/phases/emit/emit_headers.cc		\
+	src/phases/emit/emit_import.cc		\
 	src/phases/emit/emit_link.cc		\
+	src/phases/emit/emit_m4.cc		\
 	src/phases/emit/emit_rules.cc		\
 	src/phases/emit/emit_targets.cc		\
 	src/phases/emit/emit_tests.cc

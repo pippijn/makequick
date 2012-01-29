@@ -10,6 +10,13 @@ struct string_extractor
     s += n.string;
   }
 
+  virtual void visit (t_roundvar &n)
+  {
+    s += "$(";
+    visitor::visit (n);
+    s += ")";
+  }
+
   std::string s;
 };
 

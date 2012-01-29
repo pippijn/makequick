@@ -25,8 +25,9 @@ open_if_mine (char const *name)
   return fh;
 }
 
-output_file::output_file (char const *mname, char const *cname)
-  : Makefile (open_if_mine (mname))
+output_file::output_file (char const *base, char const *mname, char const *cname)
+  : base (base)
+  , Makefile (open_if_mine (mname))
   , configure (open_if_mine (cname))
 {
   assert (Makefile);
@@ -35,6 +36,12 @@ output_file::output_file (char const *mname, char const *cname)
 
 output_file::~output_file ()
 {
-  //fclose (configure);
-  fclose (Makefile);
+  close ();
+}
+
+void
+output_file::close ()
+{
+  if (configure) fclose (configure); configure = 0;
+  if (Makefile ) fclose (Makefile ); Makefile  = 0;
 }

@@ -27,6 +27,8 @@ AM_CPPFLAGS += -ggdb3
 AM_CPPFLAGS += -DVISIBLE='__attribute__ ((__visibility__ ("default")))'
 AM_CXXFLAGS += -fnon-call-exceptions
 AM_CXXFLAGS += -fvisibility=hidden
+AM_CXXFLAGS += -DM4DIR='"$(m4dir)"'
+AM_CXXFLAGS += -DPKGDATADIR='"$(pkgdatadir)"'
 
 AM_CXXFLAGS += -O3
 AM_CXXFLAGS += -march=native
@@ -46,6 +48,7 @@ CLEANFILES =		\
 	nodes.txt	\
 	nodes.xml
 
+include extra/Rules.am
 include include/Rules.am
 include src/Rules.am
 include testsuite/Rules.am

@@ -1,0 +1,24 @@
+m4dir = $(pkgdatadir)/m4
+
+m4_DATA =					\
+	extra/m4/compiler/ebcdic.m4		\
+	extra/m4/compiler/enum-fwdecl.m4	\
+	extra/m4/compiler/lambda.m4		\
+	extra/m4/compiler/late-expansion.m4	\
+	extra/m4/compiler/stmt-exprs.m4		\
+	extra/m4/compiler/token-paste.m4	\
+	extra/m4/compiler/variadic-templates.m4	\
+	extra/m4/cflags.m4			\
+	extra/m4/float.m4			\
+	extra/m4/libraries.m4			\
+	extra/m4/make.m4			\
+	extra/m4/mudflap.m4			\
+	extra/m4/options.m4			\
+	extra/m4/perl.m4			\
+	extra/m4/pkgconfig.m4			\
+	extra/m4/status.m4			\
+	extra/m4/stdint.m4			\
+	extra/m4/strict.m4			\
+	extra/m4/summary.m4
+
+EXTRA_DIST += $(m4_DATA)

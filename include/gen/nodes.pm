@@ -8,6 +8,7 @@
    headers => ['cond', 'dest', 'sources'],
    mans => ['cond', 'dest', 'sources'],
    data => ['cond', 'dest', 'sources'],
+   scripts => ['cond', 'dest', 'sources'],
 
    flag_import => ['tool', 'target'],
 

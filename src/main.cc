@@ -23,6 +23,8 @@
 static char const *const all_phases[] = {
   "audit",
 
+  "default_flags",
+
   "insert_this_syms",
   "default_prereq",
   "expand_vars",
@@ -243,7 +245,8 @@ try
       annotation_map annots;
       annots.put ("files", files.release ());
 #if EMIT
-      annots.put ("output", new output_file ((path / "Rules.am").c_str (),
+      annots.put ("output", new output_file (path.c_str (),
+                                             (path / "Makefile.am").c_str (),
                                              (path / "configure.ac").c_str ()));
 #endif
       annots.put ("errors", errors.release ());
@@ -288,6 +291,12 @@ try
       errors->print (path, argv[0]);
       return EXIT_FAILURE;
     }
+
+  fs::path const &gitignore = path / ".gitignore";
+  remove (gitignore);
+  copy_file (PKGDATADIR "/gitignore", gitignore);
+  current_path (path);
+  system ("autoreconf");
 
   char const *const mem_high = (char const *)sbrk (0);
   printf ("%%%% memory used: %ld MiB\n", (mem_high - mem_low) / 1024 / 1024);

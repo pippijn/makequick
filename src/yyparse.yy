@@ -82,18 +82,19 @@ using namespace nodes;
 %token KW_LIBRARY			"library"
 %token KW_LINK				"link"
 %token KW_LOG_COMPILER			"log_compiler"
-%token KW_TEST				"test"
 %token KW_MANS				"mans"
 %token KW_NODIST_SOURCES		"nodist_sources"
 %token KW_NOTFOUND			"notfound:"
 %token KW_OPTIONS			"options"
 %token KW_PROGRAM			"program"
 %token KW_PROJECT			"project"
+%token KW_SCRIPTS			"scripts"
 %token KW_SECTION			"section"
 %token KW_SIZEOF			"sizeof"
 %token KW_SOURCES			"sources"
 %token KW_SYMBOL			"symbol:"
 %token KW_TEMPLATE			"template"
+%token KW_TEST				"test"
 %token KW_VERSION			"version:"
 
 %token TK_LSQBRACK			"["
@@ -139,7 +140,7 @@ using namespace nodes;
 %token R_FILENAME
 %token R_SOURCES
 
-%type<node> sources headers mans data target_definition
+%type<node> sources headers mans data scripts target_definition
 %type<node> program library template target_members toplevel_declarations toplevel_declaration
 %type<node> single_filename filename filenames.0 filenames.1 sources_member sources_members sources_braces extra_dist
 %type<node> rule rule_lines rule_line link link_body vardecl vardecl_body nodist_sources built_sources
@@ -185,6 +186,7 @@ toplevel_declaration
 	| headers
 	| mans
 	| data
+	| scripts
 	| log_compiler
 	| "extern" sources_braces
 		{ $$ = make_node<n_extern> (@$, $2); }
@@ -450,6 +452,11 @@ mans
 data
 	: "data" if.opt destination.opt sources_braces
 		{ $$ = make_node<n_data> (@$, $2, $3, $4); }
+	;
+
+scripts
+	: "scripts" if.opt destination.opt sources_braces
+		{ $$ = make_node<n_scripts> (@$, $2, $3, $4); }
 	;
 
 

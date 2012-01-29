@@ -1,9 +1,0 @@
-library general_termtype {
-	sources {
-		termtype.c
-	}
-
-	link {
-		port_cport
-	}
-}

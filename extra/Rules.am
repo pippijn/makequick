@@ -1,0 +1,6 @@
+include extra/m4/Rules.am
+
+pkgdata_DATA =		\
+	extra/gitignore
+
+EXTRA_DIST += $(pkgdata_DATA)

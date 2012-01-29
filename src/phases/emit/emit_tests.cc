@@ -7,6 +7,7 @@
 #include "util/extract_string.h"
 #include "util/foreach.h"
 #include "util/grep.h"
+#include "util/plus_writer.h"
 #include "util/symbol_visitor.h"
 #include "util/uc.h"
 
@@ -15,6 +16,7 @@
 
 struct emit_test
   : symbol_visitor
+  , plus_writer
 {
   virtual void visit (t_log_compilers &n);
   virtual void visit (t_target_definition &n);
@@ -25,13 +27,16 @@ struct emit_test
   bool emit;
   t_if_ptr cond;
   output_file const &out;
-  std::tr1::unordered_set<std::string> seen;
 
   emit_test (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
     , emit (false)
     , out (annots.get ("output"))
   {
+    plus (out.Makefile, "", "TESTS");
+    fprintf (out.Makefile, "# added to, later\n");
+    plus (out.Makefile, "XFAIL", "TESTS");
+    fprintf (out.Makefile, "# added to, later\n");
   }
 };
 
@@ -67,7 +72,7 @@ emit_test::visit (t_target_definition &n)
 static std::string
 type_opt (node_ptr const &p)
 {
-  return p ? uc (id (p)) + "_" : std::string ();
+  return p ? uc (id (p)) : std::string ();
 }
 
 void
@@ -78,7 +83,7 @@ emit_test::visit (t_test &n)
   if (n.cond ())
     fprintf (out.Makefile, "if %s\n", id (n.cond ()->as<t_if> ().cond ()).c_str ());
   emit = true;
-  fprintf (out.Makefile, "%sTESTS +=", type_opt (n.type ()).c_str ());
+  plus (out.Makefile, type_opt (n.type ()), "TESTS");
   resume (n.sources ());
   fprintf (out.Makefile, "\n");
   emit = false;

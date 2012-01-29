@@ -5,13 +5,14 @@
 #include "util/canonical.h"
 #include "util/colours.h"
 #include "util/foreach.h"
+#include "util/plus_writer.h"
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
-#include <tr1/unordered_set>
 
 struct emit_link
   : symbol_visitor
+  , plus_writer
 {
   virtual void visit (t_link &n);
   virtual void visit (t_link_body &n);
@@ -19,7 +20,6 @@ struct emit_link
   virtual void visit (token &n);
 
   output_file const &out;
-  std::tr1::unordered_set<std::string> seen;
 
   emit_link (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))
@@ -56,12 +56,8 @@ emit_link::visit (t_link_body &n)
 {
   t_target_definition &target = symtab.lookup<t_target_definition> (T_PROGRAM, T_LIBRARY, "TARGET");
   std::string const &name = canonical (id (target.name ()), current_symtype);
-  fprintf (out.Makefile, "%s_%s ", name.c_str (), ldadd (current_symtype));
-  if (seen.find (name) != seen.end ())
-    fprintf (out.Makefile, "+");
-  else
-    seen.insert (name);
-  fprintf (out.Makefile, "=");
+
+  plus (out.Makefile, name, ldadd (current_symtype));
   symbol_visitor::visit (n);
   fprintf (out.Makefile, "\n\n");
 }

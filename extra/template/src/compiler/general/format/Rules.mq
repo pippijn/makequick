@@ -1,9 +1,0 @@
-library general_format {
-	sources {
-		format.c
-	}
-
-	link {
-		port_cport
-	}
-}
