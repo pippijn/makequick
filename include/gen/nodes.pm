@@ -36,7 +36,7 @@
    flags => ['*'],
    identifiers => ['+'],
    if => ['cond'],
-   extern => ['files'],
+   extern => ['import'],
    inheritance => ['base'],
    library => ['defn'],
    link => ['cond', 'items'],

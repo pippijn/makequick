@@ -56,7 +56,7 @@ file_lexer::wrap ()
   if (close_file ())
     yyset_lineno (1, yyscanner);
 
-  while (cur != files.end && !is_rule_file (*cur))
+  while (cur != files.end && (files.base != RULESDIR && !is_rule_file (*cur)))
     ++cur;
 
   if (cur == files.end)

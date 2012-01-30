@@ -1,0 +1,10 @@
+rulesdir = $(pkgdatadir)/rules
+
+rules_DATA =			\
+	extra/rules/c.mq	\
+	extra/rules/c++.mq	\
+	extra/rules/flex.mq	\
+	extra/rules/lex.mq	\
+	extra/rules/yacc.mq
+
+EXTRA_DIST += $(rules_DATA)

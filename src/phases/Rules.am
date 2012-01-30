@@ -13,6 +13,7 @@ makepp_SOURCES +=				\
 	src/phases/flatten_filenames.cc		\
 	src/phases/flatten_rules.cc		\
 	src/phases/flatten_vars.cc		\
+	src/phases/imports.cc			\
 	src/phases/inference.cc			\
 	src/phases/infer_target_objects.cc	\
 	src/phases/inheritance.cc		\

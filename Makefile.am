@@ -29,6 +29,7 @@ AM_CXXFLAGS += -fnon-call-exceptions
 AM_CXXFLAGS += -fvisibility=hidden
 AM_CXXFLAGS += -DM4DIR='"$(m4dir)"'
 AM_CXXFLAGS += -DPKGDATADIR='"$(pkgdatadir)"'
+AM_CXXFLAGS += -DRULESDIR='"$(rulesdir)"'
 
 AM_CXXFLAGS += -O3
 AM_CXXFLAGS += -march=native

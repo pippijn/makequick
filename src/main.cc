@@ -23,6 +23,7 @@
 static char const *const all_phases[] = {
   "audit",
 
+  "imports",
   "default_flags",
 
   "insert_this_syms",

@@ -1,0 +1,7 @@
+%.{h c}: %%.l {
+	$(AM_V_LEX)$(LEX) -o$*.c $[LFLAGS] --header-file="$*.h" $<
+}
+
+%.{h cc}: %%.ll {
+	$(AM_V_LEX)$(LEX) -o$*.cc $[LFLAGS] --header-file="$*.h" $<
+}

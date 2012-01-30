@@ -188,7 +188,7 @@ toplevel_declaration
 	| data
 	| scripts
 	| log_compiler
-	| "extern" sources_braces
+	| "extern" TK_STRING
 		{ $$ = make_node<n_extern> (@$, $2); }
 	| global_or_target_member
 	;
