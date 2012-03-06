@@ -32,11 +32,18 @@ static phase<emit> thisphase ("emit", "merge_blocks");
 void
 emit::visit (t_document &n)
 {
-  fprintf (out.Makefile, "ACLOCAL_AMFLAGS	= -I m4\n");
-  fprintf (out.Makefile, "AUTOMAKE_OPTIONS	= -Wall\n");
+  FILE *prelude = fopen (PKGDATADIR "/prelude.am", "r");
+  if (prelude == NULL)
+    throw 0;
 
-  // pkg-config output
-  fprintf (out.Makefile, "pkgconfigdir		= $(libdir)/pkgconfig\n");
+  while (!feof (prelude))
+    {
+      char buf[64];
+      fwrite (buf, 1, fread (buf, 1, sizeof buf, prelude), out.Makefile);
+    }
+
+  fclose (prelude);
+
   fprintf (out.Makefile, "\n");
 
   phases::run ("emit_m4", &n, annots);

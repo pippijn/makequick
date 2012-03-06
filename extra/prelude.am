@@ -1,0 +1,25 @@
+ACLOCAL_AMFLAGS		= -I m4
+AUTOMAKE_OPTIONS	= -Wall
+
+# pkg-config output
+pkgconfigdir		= $(libdir)/pkgconfig
+
+BUILDINFO	= '{name => "$(PACKAGE_NAME)", distdir => "$(distdir)"}'
+
+distupload: $(PACKAGE).git.tar.gz $(PACKAGE).git.build
+	scp $^ ra:/home/www/apps/autobuild/root/static/packages/
+	rm -f $^
+
+$(PACKAGE).git.tar.gz: dist
+	mv $(distdir).tar.gz $@
+
+$(PACKAGE).git.build:
+	$(AM_V_GEN)perl -MData::Dumper				\
+		-e '$$V = do "$(srcdir)/extra/$(PACKAGE).build";'\
+		-e '$$V->{name} = "$(PACKAGE_NAME)";'		\
+		-e '$$V->{distdir} = "$(distdir)";'		\
+		-e '$$Data::Dumper::Indent = 0;'		\
+		-e '$$Data::Dumper::Purity = 1;'		\
+		-e '$$Data::Dumper::Terse = 1;'			\
+		-e 'print ((Dumper $$V), "\n");'		\
+		> $@

@@ -19,6 +19,7 @@
 #include <boost/filesystem/path.hpp>
 
 #define EMIT 1
+#define AUTORECONF 1
 
 static char const *const all_phases[] = {
   "audit",
@@ -297,7 +298,9 @@ try
   remove (gitignore);
   copy_file (PKGDATADIR "/gitignore", gitignore);
   current_path (path);
+#if AUTORECONF
   system ("autoreconf");
+#endif
 
   char const *const mem_high = (char const *)sbrk (0);
   printf ("%%%% memory used: %ld MiB\n", (mem_high - mem_low) / 1024 / 1024);

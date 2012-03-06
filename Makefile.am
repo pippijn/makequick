@@ -1,5 +1,7 @@
-ACLOCAL_AMFLAGS		= -I m4
-AUTOMAKE_OPTIONS	= -Wall -Wno-portability -Wno-override
+include extra/prelude.am
+
+ACLOCAL_AMFLAGS		+= -I m4
+AUTOMAKE_OPTIONS	+= -Wno-portability -Wno-override
 
 BUILT_SOURCES		= # empty
 
@@ -25,7 +27,7 @@ AM_CPPFLAGS += -ggdb3
 #AM_CPPFLAGS += -include-pch stdafx.h.pch
 #AM_CPPFLAGS += -D_GLIBCXX_DEBUG
 AM_CPPFLAGS += -DVISIBLE='__attribute__ ((__visibility__ ("default")))'
-AM_CXXFLAGS += -fnon-call-exceptions
+#AM_CXXFLAGS += -fnon-call-exceptions
 AM_CXXFLAGS += -fvisibility=hidden
 AM_CXXFLAGS += -DM4DIR='"$(m4dir)"'
 AM_CXXFLAGS += -DPKGDATADIR='"$(pkgdatadir)"'
@@ -33,7 +35,7 @@ AM_CXXFLAGS += -DRULESDIR='"$(rulesdir)"'
 
 AM_CXXFLAGS += -O3
 AM_CXXFLAGS += -march=native
-AM_CXXFLAGS += -fopenmp -DOPENMP
+#AM_CXXFLAGS += -fopenmp -DOPENMP
 #AM_CXXFLAGS += -fweb
 #AM_CXXFLAGS += -ffast-math
 #AM_CXXFLAGS += -fprofile-generate
