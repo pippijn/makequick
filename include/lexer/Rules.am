@@ -1,3 +1,0 @@
-EXTRA_DIST +=			\
-	include/lexer/pimpl.h	\
-	include/lexer/util.h

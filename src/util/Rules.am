@@ -1,9 +1,0 @@
-include src/util/inference_engine/Rules.am
-
-libmakepp_a_SOURCES +=			\
-	src/util/extract_string.cc	\
-	src/util/inference_engine.cc	\
-	src/util/graph.cc		\
-	src/util/regex_escape.cc	\
-	src/util/symbol_visitor.cc	\
-	src/util/timer.cc

@@ -1,0 +1,5 @@
+#define PKGDATADIR "."
+#define M4DIR "."
+#define PACKAGE_STRING "makequick"
+#define PACKAGE_TARNAME "makequick"
+#define RULESDIR "."

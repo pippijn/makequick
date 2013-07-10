@@ -1,2 +1,0 @@
-EXTRA_DIST +=				\
-	include/boost/filesystem_fwd.hpp

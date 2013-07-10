@@ -1,0 +1,65 @@
+%.h: gen/%.pl gen/nodes.pm
+  $(PERL) $< > $@
+
+
+private.node-types (parser) =
+  TYPES = $(EMPTY)
+  awk ($(parser))
+  case $"make_node<n_\(\w*\)":
+    TYPES += $1
+    export
+  value $(set $(TYPES))
+
+
+node_type.h: yyparse.ypp
+  echo 'namespace nodes { enum node_type {' > $@
+  foreach (t, $(node-types $<)):
+    echo "  n_$t," >> $@
+  echo '  NODE_TYPES' >> $@
+  echo '};' >> $@
+  echo 'extern char const *const node_type_name[];' >> $@
+  echo '}' >> $@
+
+
+node_type.cpp: yyparse.ypp
+  echo '#include "node_type.h"' > $@
+  echo 'char const *const nodes::node_type_name[] = {' >> $@
+  foreach (t, $(node-types $<)):
+    echo "  \"$t\"," >> $@
+  echo '};' >> $@
+
+
+private.nonterminals (parser) =
+  NTERMS = $(EMPTY)
+  awk ($(parser))
+  case $'^\([a-z_]*\)$':
+    NTERMS += $1
+    export
+  value $(set $(NTERMS))
+
+
+rule_init.h: yyparse.ypp
+  echo 'enum rule_init {' > $@
+  foreach (t, $(nonterminals $<)):
+    echo "  r_$t," >> $@
+  echo '  RULE_INITS' >> $@
+  echo '};' >> $@
+
+
+private.yystates (lexer) =
+  STATES = $(EMPTY)
+  awk (b, $(lexer))
+  case $'^#define YY_':
+  case $'^#define \([A-Z][A-Z_]*\) \([0-9]+\)$':
+    STATES += $1
+    export
+  value $(STATES)
+
+
+yystate.h: yylex.hpp
+  echo 'namespace yy { enum state {' > $@
+  foreach (t, $(yystates $<)):
+    echo "  $t," >> $@
+  echo '  NSTATE' >> $@
+  echo '}; }' >> $@
+

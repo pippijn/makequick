@@ -1,8 +1,0 @@
-EXTRA_DIST +=				\
-	include/gen/node_cc.pl		\
-	include/gen/node_fwd.pl		\
-	include/gen/node_t.pl		\
-	include/gen/nodes.pm		\
-	include/gen/nodes.proto		\
-	include/gen/visitor_cc.pl	\
-	include/gen/visitor_t.pl
