@@ -10,8 +10,8 @@
 #include "util/canonical.h"
 
 #include <stdexcept>
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
+#include <unordered_set>
+#include <unordered_map>
 
 struct emit_flags
   : symbol_visitor
@@ -21,7 +21,7 @@ struct emit_flags
   virtual void visit (token &n);
 
   output_file const &out;
-  std::tr1::unordered_map<std::string, std::tr1::unordered_set<std::string> > seen;
+  std::unordered_map<std::string, std::unordered_set<std::string> > seen;
   bool in_flags;
 
   emit_flags (annotation_map &annots)

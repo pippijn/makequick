@@ -8,7 +8,7 @@
 #include "util/canonical.h"
 
 #include <stdexcept>
-#include <tr1/unordered_set>
+#include <unordered_set>
 
 struct emit_SOURCES
   : symbol_visitor
@@ -33,7 +33,7 @@ struct emit_SOURCES
 
   bool in_filename;
   output_file const &out;
-  std::tr1::unordered_set<std::string> seen[2];
+  std::unordered_set<std::string> seen[2];
 
   emit_SOURCES (annotation_map &annots)
     : symbol_visitor (annots.get<symbol_table> ("symtab"))

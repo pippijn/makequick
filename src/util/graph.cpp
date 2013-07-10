@@ -5,7 +5,7 @@
 #include <boost/graph/topological_sort.hpp>
 
 #include <cstdio>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 void
 graph::insert (std::string const &from, std::string const &to)

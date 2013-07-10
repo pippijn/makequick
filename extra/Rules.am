@@ -1,8 +1,0 @@
-include extra/m4/Rules.am
-include extra/rules/Rules.am
-
-pkgdata_DATA =		\
-	extra/gitignore	\
-	extra/prelude.am
-
-EXTRA_DIST += $(pkgdata_DATA)

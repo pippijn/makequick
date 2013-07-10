@@ -18,7 +18,7 @@ struct emit_rules
   bool in_first_line;
   bool in_prereq;
   output_file const &out;
-  std::tr1::unordered_set<std::string> seen;
+  std::unordered_set<std::string> seen;
 
   bool done (std::string const &name) const
   {

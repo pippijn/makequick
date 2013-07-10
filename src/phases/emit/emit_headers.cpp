@@ -12,7 +12,7 @@
 #include "util/uc.h"
 
 #include <stdexcept>
-#include <tr1/unordered_set>
+#include <unordered_set>
 
 struct emit_headers
   : symbol_visitor

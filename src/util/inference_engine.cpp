@@ -3,12 +3,8 @@
 #define USE_UNORDERED_SET 1
 
 #include <cstdio>
-#if USE_UNORDERED_SET
-#  include <tr1/unordered_set>
-#else
-#  include <set>
-#endif
-#include <tr1/unordered_map>
+#include <unordered_set>
+#include <unordered_map>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/path.hpp>
@@ -23,26 +19,6 @@
 #if HAVE_VALGRIND_CALLGRIND_H
 #  include <valgrind/callgrind.h>
 #endif
-
-
-template<typename T>
-static inline size_t
-hash (T const &v)
-{
-  return std::tr1::hash<T const &> () (v);
-}
-
-
-namespace std { namespace tr1 {
-
-  template<>
-  size_t
-  hash<fs::path>::operator () (fs::path path) const
-  {
-    return ::hash (path.native ());
-  }
-
-} }
 
 
 typedef inference_engine::rule rule;
@@ -116,13 +92,9 @@ class inference_engine::engine
     }
   };
 
-  typedef std::tr1::unordered_map<std::string, std::vector<rule> > partial_map;
+  typedef std::unordered_map<std::string, std::vector<rule> > partial_map;
   typedef std::vector<partial_map> partial_vec;
-#if USE_UNORDERED_SET
-  typedef std::tr1::unordered_multiset<rule, rule_hash, rule_eq> rule_set;
-#else
-  typedef std::multiset<rule, rule_less> rule_set;
-#endif
+  typedef std::unordered_multiset<rule, rule_hash, rule_eq> rule_set;
 
   struct inferred
   {

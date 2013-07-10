@@ -1,4 +1,4 @@
-#include <tr1/unordered_set>
+#include <unordered_set>
 
 struct plus_writer
 {
@@ -17,13 +17,13 @@ struct plus_writer
     {
       size_t operator () (target_pair const &p) const
       {
-        std::tr1::hash<std::string> hash;
+        std::hash<std::string> hash;
         return hash (p.first) ^ hash (p.second);
       }
     };
   };
 
-  std::tr1::unordered_set<target_pair, target_pair::hash> seen;
+  std::unordered_set<target_pair, target_pair::hash> seen;
 
   char const *plus (target_pair const &pair)
   {

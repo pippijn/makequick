@@ -32,12 +32,30 @@ struct rule_info
     }
   };
 
-  typedef std::tr1::unordered_set<rule> rule_set;
+  struct rule_hash
+  {
+    size_t operator () (rule const &rule) const
+    {
+      return std::hash<std::string> () (rule.target);
+    }
+  };
+
+  typedef std::unordered_set<rule, rule_hash> rule_set;
 
   rule const *find (std::string const &target) const;
 
   file_set files;
   rule_set rules;
 };
+
+namespace std {
+
+  template<>
+  struct hash<rule_info::rule>
+    : rule_info::rule_hash
+  {
+  };
+
+}
 
 bool operator == (rule_info::rule const &a, rule_info::rule const &b);

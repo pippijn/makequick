@@ -7,19 +7,19 @@
 #include "util/timer.h"
 
 #include <cstdio>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
-typedef std::tr1::unordered_map<std::string, phases *> phase_map;
+typedef std::unordered_map<std::string, phases *> phase_map;
 
-static phase_map map;
+static phase_map *map;
 
 struct phases::pimpl
 {
-  std::tr1::unordered_set<std::string> dependencies;
+  std::unordered_set<std::string> dependencies;
 };
 
 void
@@ -28,7 +28,7 @@ phases::print_each (std::string const &name, phases *phase, node_ptr const &doc,
   std::cout << "    " << name;
   if (!phase->autorun)
     std::cout << " (no autorun)";
-  std::tr1::unordered_set<std::string> const &deps = phase->self->dependencies;
+  std::unordered_set<std::string> const &deps = phase->self->dependencies;
   if (!deps.empty ())
     std::cout << ':';
   foreach (std::string const &dep, deps)
@@ -47,7 +47,9 @@ phases::phases (std::string const &name, bool autorun)
   : autorun (autorun)
   , self (new pimpl)
 {
-  phases *&phase = map[name];
+  if (!map)
+    map = new phase_map;
+  phases *&phase = (*map)[name];
   if (phase)
     throw std::invalid_argument ("phase " + C::filename (name) + " already registered");
   phase = this;
@@ -60,7 +62,7 @@ phases::~phases ()
 void
 phases::run (std::string const &name, node_ptr const &doc, annotation_map &annots)
 {
-  phases *phase = map[name];
+  phases *phase = (*map)[name];
   if (!phase)
     throw std::invalid_argument ("phase " + C::filename (name) + " does not exist");
 
@@ -97,8 +99,8 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
   using namespace boost;
 
   typedef std::vector<std::pair<std::string, phases *> > phase_vec;
-  phase_vec phases (map.size ());
-  copy (map.begin (), map.end (),
+  phase_vec phases (map->size ());
+  copy (map->begin (), map->end (),
         phases.begin ());
 
   typedef adjacency_list<vecS, vecS, directedS> Graph;
@@ -108,7 +110,7 @@ phases::for_each_phase (phase_fn fn, node_ptr const &doc, annotation_map *annots
       add_edge (et - it, 0, G);
       foreach (std::string const &dep, it->second->self->dependencies)
         {
-          if (!map[dep])
+          if (!(*map)[dep])
             throw std::invalid_argument ("phase " + C::filename (dep) + " does not exist");
           add_edge (et - it, et - find_if (phases.rbegin (), phases.rend (), pair_equals (dep)), G);
         }

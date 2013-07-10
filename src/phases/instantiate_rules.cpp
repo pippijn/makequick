@@ -29,7 +29,7 @@ struct instantiate_rules
 
   void instantiate (t_sources_members &n, bool accept_existing = false);
 
-  std::tr1::unordered_set<std::string> done;
+  std::unordered_set<std::string> done;
 
   enum target_type
   {

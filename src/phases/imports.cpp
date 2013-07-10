@@ -12,7 +12,7 @@ struct imports
 {
   void visit (t_extern &n);
 
-  std::tr1::unordered_set<std::string> imported;
+  std::unordered_set<std::string> imported;
 
   bool seen (std::string const &import)
   {

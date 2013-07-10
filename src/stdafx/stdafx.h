@@ -10,8 +10,8 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <boost/archive/detail/basic_iarchive.hpp>

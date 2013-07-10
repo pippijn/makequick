@@ -8,6 +8,7 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
+
 /** \brief Pattern rule inference engine.
  *
  * This file implements the inference engine. Inference rules are modelled

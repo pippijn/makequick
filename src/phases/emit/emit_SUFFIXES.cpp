@@ -7,8 +7,8 @@
 #include "util/symbol_visitor.h"
 
 #include <stdexcept>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <boost/filesystem/path.hpp>
 
@@ -20,8 +20,8 @@ struct emit_SUFFIXES
   virtual void visit (t_rule &n);
 
 
-  typedef std::tr1::unordered_set<std::string> string_set;
-  typedef std::tr1::unordered_map<std::string, string_set> suffix_map;
+  typedef std::unordered_set<std::string> string_set;
+  typedef std::unordered_map<std::string, string_set> suffix_map;
 
   output_file const &out;
   suffix_map suffix_rules;
