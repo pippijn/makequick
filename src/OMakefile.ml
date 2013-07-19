@@ -135,15 +135,15 @@ install Program ".DEFAULT" [
 
     "annotation.h";
     "annotation_map.h";
+    "config.h";
     "exception.h";
     "file_lexer.h";
     "lexer.h";
     "node_cc.h";
     "node_fwd.h";
     "node.h";
-    "nodes.pb.h";
     "node_ptr.h";
-    "rule_init.h";
+    "nodes.pb.h";
     "node_t.h";
     "node_type.h";
     "object_pool.h";
@@ -151,15 +151,15 @@ install Program ".DEFAULT" [
     "parseutil.h";
     "phase.h";
     "phases.h";
+    "rule_init.h";
     "string_lexer.h";
     "visitor_cc.h";
     "visitor.h";
     "visitor_t.h";
     "ylcode.h";
     "y.tab.h";
-    "yyparse.hpp";
-    "config.h";
     "yylex.hpp";
+    "yyparse.hpp";
     "yystate.h";
   ];
 
