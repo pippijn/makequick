@@ -1,8 +1,8 @@
 =head1 Rules
 
-C<Autocomb> defines a few rules itself and has knowledge about automake-defined
+C<MakeQuick> defines a few rules itself and has knowledge about automake-defined
 rules, so that e.g. rules for compiling C sources are not emitted again. The
-rules feature in C<Autocomb> is the reason this project was actually started. The
+rules feature in C<MakeQuick> is the reason this project was actually started. The
 syntax is basically the same as GNU Make pattern rules with some extensions, but
 the way they are expanded makes them much more useful.
 
@@ -43,7 +43,7 @@ time.
 
 =head2 Pattern matching
 
-The introductory example is already a pattern rule. Patterns in C<Autocomb> are
+The introductory example is already a pattern rule. Patterns in C<MakeQuick> are
 slightly more advanced than in GNU Make. There is a set of rules defining which
 pattern is matched. Simply speaking, the most special pattern is matched.
 
@@ -215,7 +215,7 @@ current directory.
 =head2 Silencing rules
 
 Similar to C<make>, lines of a recipe may be silenced by prepending them with
-C<@>. C<Autocomb> extends this to automake C<silent-rules>.
+C<@>. C<MakeQuick> extends this to automake C<silent-rules>.
 
 =begin code MakePP
 
@@ -233,7 +233,7 @@ print the actual command instead of the single-line message.
 
 =head2 External rules
 
-If C<Autocomb> is not flexible enough for the use case, external rules may be
+If C<MakeQuick> is not flexible enough for the use case, external rules may be
 imported using the C<extern> keyword. You may optionally add rule stubs
 declaring patterns or explicit graph edges that may be assumed as being
 implemented. Note that these rules are not special and more exact rules can
@@ -266,9 +266,9 @@ object files from C sources can be written as follows:
 =end code MakePP
 
 Automake still provides many useful tools, such as its C<distcheck> and
-C<parallel-tests> facilities. These tools are the reason C<Autocomb> targets automake
+C<parallel-tests> facilities. These tools are the reason C<MakeQuick> targets automake
 and not make, directly.
 
 Also note that it's not useful to actually rewrite the automake rules, as the
 resulting Makefile will not be any shorter. Automake may do optimisations at a
-lower level than C<Autocomb>, so it is not advisable to override many of its rules.
+lower level than C<MakeQuick>, so it is not advisable to override many of its rules.
