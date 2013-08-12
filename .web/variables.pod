@@ -4,13 +4,13 @@ Variables are actually wrongly named "variable", as they are really constants,
 but everybody always calls them variables, so here they shall be called
 variables, as well.
 
-=begin code MakePP
+=begin code mq
 
    SRCEXTS = c h
    OBJEXTS = o obj
    EXTS = $(SRCEXTS) $(OBJEXTS)
 
-=end code MakePP
+=end code
 
 
 =head2 Scopes
@@ -18,20 +18,20 @@ variables, as well.
 Variable definitions may be scoped. These are not visible outside the scope of
 the enclosing target, project or template.
 
-=begin code MakePP
+=begin code mq
 
    program prog {
       VARIABLE = a b c d
    }
 
-=end code MakePP
+=end code
 
 =head2 Line continuations
 
 Variable definitions may span multiple lines. The line continues as long as the
 indentation level is higher than the variable definition.
 
-=begin code MakePP
+=begin code mq
 
    VARIABLE = some values
       the values
@@ -41,7 +41,7 @@ indentation level is higher than the variable definition.
       the variable definition
    OTHERVAR = this is a new variable definition
 
-=end code MakePP
+=end code
 
 =head2 Expansion
 
@@ -54,7 +54,7 @@ expanded in an eager context. Variables are not expanded in rule bodies.
 
 Pseudo-variables can be used to query declarations or to call functions on data.
 
-=begin code MakePP
+=begin code mq
 
    program prog {
       sources {
@@ -71,7 +71,7 @@ Pseudo-variables can be used to query declarations or to call functions on data.
    # filter by locally built libraries
    PROGLIBS = $(prog.link:library)
 
-=end code MakePP
+=end code
 
 The above filter syntax can be used to filter out system libraries such as, in
 this example, C<-lm>. Thus, the C<PROGLIBS> variable would be expanded to

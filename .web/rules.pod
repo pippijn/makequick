@@ -6,13 +6,13 @@ rules feature in C<MakeQuick> is the reason this project was actually started. T
 syntax is basically the same as GNU Make pattern rules with some extensions, but
 the way they are expanded makes them much more useful.
 
-=begin code MakePP
+=begin code mq
 
    %.o: %.c {
       $(CC) $< -o $@
    }
 
-=end code MakePP
+=end code
 
 The above example is a simple rule to build object files from C sources. The
 rule is instantiated for each match, so that the resulting Makefile has only
@@ -27,7 +27,7 @@ C<$(THIS)> expands to the program location with C<$(EXEEXT)> appended. Thus, in
 this case, the C<$(THIS)> variable used in rules is expanded to
 C<$(builddir)/msgcat$(EXEEXT)>
 
-=begin code MakePP
+=begin code mq
 
    program msgcat {
       %.c: %.msg {
@@ -35,7 +35,7 @@ C<$(builddir)/msgcat$(EXEEXT)>
       }
    }
 
-=end code MakePP
+=end code
 
 Rules inside programs are always considered for match, but are disabled in the
 resulting Makefile, if the program was conditional and disabled at configure
@@ -47,7 +47,7 @@ The introductory example is already a pattern rule. Patterns in C<MakeQuick> are
 slightly more advanced than in GNU Make. There is a set of rules defining which
 pattern is matched. Simply speaking, the most special pattern is matched.
 
-=begin code MakePP
+=begin code mq
 
    %.c: %.y {
       ...
@@ -56,7 +56,7 @@ pattern is matched. Simply speaking, the most special pattern is matched.
       ...
    }
 
-=end code MakePP
+=end code
 
 In the above example, the second rule is matched for all C<.y> files under
 C<src/>. All other C<.y> files are matched by the first rule.
@@ -66,7 +66,7 @@ C<src/>. All other C<.y> files are matched by the first rule.
 
 Rules can span multiple lines, just like L<variables>.
 
-=begin code MakePP
+=begin code mq
 
    %.c: %.y {
       echo This is the first line
@@ -78,7 +78,7 @@ Rules can span multiple lines, just like L<variables>.
          the third line
    }
 
-=end code MakePP
+=end code
 
 
 =head2 Special variables in rules
@@ -123,7 +123,7 @@ of flags for the tool. The variable syntax C<$[VAR]> roughly expands to
 C<$(AM_VAR) $(VAR) $($(target)_VAR)>, where C<$(target)> is the C<program> or
 C<library> the target file is being built for.
 
-=begin code MakePP
+=begin code mq
 
    %.c: %.y {
       $(YACC) $[YFLAGS] -o $@ $<
@@ -135,19 +135,19 @@ C<library> the target file is being built for.
       }
    }
 
-=end code MakePP
+=end code
 
 The pattern rule in the above example might be expanded to roughly the following
 make code:
 
-=begin code MakePP
+=begin code mq
 
    src/parser.c: src/parser.y
       $(MKDIR_P) src/
       $(YACC) $(AM_YFLAGS) $(YFLAGS) $(myparser_YFLAGS) -o src/parser.c \
          `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y
 
-=end code MakePP
+=end code
 
 The C<test> makes sure that vpath builds work correctly. The first line will
 make the target directory, if it does not yet exist.
@@ -158,7 +158,7 @@ The special variable C<$(TARGET)> will expand to the library or program name.
 Not only that, but you can also access its declarations using the syntax
 described in L<variables>.
 
-=begin code MakePP
+=begin code mq
 
    %.c: %.cx {
       $(CPP)
@@ -177,7 +177,7 @@ described in L<variables>.
       }
    }
 
-=end code MakePP
+=end code
 
 In the above example, C<$(TARGET.link : library)> will be expanded to C<mylib1>.
 
@@ -187,26 +187,26 @@ In the above example, C<$(TARGET.link : library)> will be expanded to C<mylib1>.
 You may want to output the resulting files directly into the C<$(builddir)>,
 instead of a subdirectory. For this use case, the C<%%> pattern may be used.
 
-=begin code MakePP
+=begin code mq
 
    %%.c: %%.y {
       $(YACC) $[YFLAGS] -o $@ $<
    }
 
-=end code MakePP
+=end code
 
 The C<%%> pattern on the left will match exactly one path segment, i.e. without
 any path separators (C</>). A C<%%> on the right matches any number of path
 segments before matching the final path segment, i.e. the file, which was
 matched by the C<%%> on the left. The above example might be expanded to:
 
-=begin code MakePP
+=begin code mq
 
    parser.c: src/parser.y
       $(YACC) $(AM_YFLAGS) $(YFLAGS) $(myparser_YFLAGS) -o parser.c \
          `test -f 'src/parser.y' || echo '$(srcdir)/'`src/parser.y
 
-=end code MakePP
+=end code
 
 As you can see, a C<mkdir> is no longer necessary and the output is now in the
 current directory.
@@ -217,14 +217,14 @@ current directory.
 Similar to C<make>, lines of a recipe may be silenced by prepending them with
 C<@>. C<MakeQuick> extends this to automake C<silent-rules>.
 
-=begin code MakePP
+=begin code mq
 
    %.c: %.y {
       @echo Calling bison
       @(YACC)bison $< -o $@
    }
 
-=end code MakePP
+=end code
 
 The C<@(NAME)> syntax emits an C<$(AM_V_GEN)>-like variable that prints C<YACC>
 and the target (C<$@>) in the C<silent-rules> style. Calling C<make V=1> will
@@ -239,7 +239,7 @@ declaring patterns or explicit graph edges that may be assumed as being
 implemented. Note that these rules are not special and more exact rules can
 still be matched.
 
-=begin code MakePP
+=begin code mq
 
    extern 'lex-rules.am' %.c: %.l
    extern 'yacc-rules.am' {
@@ -248,7 +248,7 @@ still be matched.
    }
    extern 'more-rules.am'
 
-=end code MakePP
+=end code
 
 
 =head2 Replacing automake rules
@@ -257,13 +257,13 @@ The power gained with the introduction of these pattern rules can be used to
 replace large parts of automake. E.g. a simplified automake rule for building
 object files from C sources can be written as follows:
 
-=begin code MakePP
+=begin code mq
 
    %%.o: %%.c {
       @(CC)$(CC) $[CPPFLAGS] $[CFLAGS] -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
    }
 
-=end code MakePP
+=end code
 
 Automake still provides many useful tools, such as its C<distcheck> and
 C<parallel-tests> facilities. These tools are the reason C<MakeQuick> targets automake

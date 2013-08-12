@@ -10,7 +10,7 @@ the same order and comparisons are easier.
 Currently supported targets are programs and libraries. The simplest possible
 target is a program with a single source file.
 
-=begin code MakePP
+=begin code mq
 
    program make {
       sources {
@@ -18,7 +18,7 @@ target is a program with a single source file.
       }
    }
 
-=end code MakePP
+=end code
 
 If you wanted to build a library called C<libmake.la>, instead, you would
 substitute C<library> for C<program>. Programs and libraries are exactly the
@@ -44,7 +44,7 @@ Unlike pattern rules, these wildcards only match on the actual file system, more
 specifically the source directory. It does not match built files. If you want to
 distribute built sources, you need to list them, explicitly.
 
-=begin code MakePP
+=begin code mq
 
    sources {
       # All .c files in the current directory and descendants
@@ -55,25 +55,25 @@ distribute built sources, you need to list them, explicitly.
       main.cpp
    }
 
-=end code MakePP
+=end code
 
 Explicitly listed sources must either exist in the file system or be buildable
 via an explicit or pattern rule. Filenames can either be specified relative to
 the currently processed rules file or relative to the source root.
 
 We recommend I<not> to use wildcards too much for several
-L<reasons|http://www.gnu.org/s/hello/manual/automake/Wildcards.html>. You may
-freely mix wildcard matches and explicit sources. The C<-Wwildcard-match> flag
-warns for every file matched by a wildcard that was not explicitly listed. This
-way, you can be notified if you create a new file without adding it to the
-sources list.
+L<reasons|http://www.gnu.org/savannah-checkouts/gnu/automake/manual/html_node/Wildcards.html>.
+You may freely mix wildcard matches and explicit sources. The
+C<-Wwildcard-match> flag warns for every file matched by a wildcard that was not
+explicitly listed. This way, you can be notified if you create a new file
+without adding it to the sources list.
 
 Sources from other targets can be imported via a C<sources> directive within the
 sources list. Optionally, an C<exclude> directive can prevent one or more
 sources from being imported. Excluded files can either be specified in full or
 just with the base name.
 
-=begin code MakePP
+=begin code mq
 
    # sources for the math lib with emulated SSE
    sources {
@@ -86,7 +86,7 @@ just with the base name.
       math_see_emu.c
    }
 
-=end code MakePP
+=end code
 
 A warning is issued if the imported set is empty after exclusions. It is an
 error to list the same file twice or to list a file that was already imported.
@@ -105,7 +105,7 @@ These files are added to the distribution produced by C<make dist>. They are not
 scoped and the files are also added, if the target containing them is not built.
 This directive may also appear outside a target description.
 
-=begin code MakePP
+=begin code mq
 
    # include/Rules
    extra_dist {
@@ -113,7 +113,7 @@ This directive may also appear outside a target description.
       **.h
    }
 
-=end code MakePP
+=end code
 
 =head3 link
 
@@ -127,7 +127,7 @@ Libraries linked like this are automatically checked in configure. If you also
 want to check whether certain symbols are defined in the library, you need to
 add those checks, manually.
 
-=begin code MakePP
+=begin code mq
 
    link {
       # Link against the locally built libmylib.la
@@ -137,7 +137,7 @@ add those checks, manually.
       -lgmp
    }
 
-=end code MakePP
+=end code
 
 You may import C<link> sections the same way as sources can be imported. Global
 C<link> sections apply to all targets without a C<link> section. They are not
@@ -145,7 +145,7 @@ imported by default, if a C<link> section is present. In order to import the
 global link section, the C<link ()> directive must be present in the target's
 link section.
 
-=begin code MakePP
+=begin code mq
 
    link {
       # Import global libraries
@@ -156,7 +156,7 @@ link section.
       }
    }
 
-=end code MakePP
+=end code
 
 If the global link section links against a locally built library, that library
 excludes itself, automatically. Care must be taken with locally built libraries
@@ -169,7 +169,7 @@ If inside a target, these are target-specific C<CPPFLAGS>. If you define
 target-specific C<cppflags>, the global C<cppflags> are overridden. You may
 import global C<cppflags> as with link and sources.
 
-=begin code MakePP
+=begin code mq
 
    cppflags {
       # Import global CPPFLAGS
@@ -178,7 +178,7 @@ import global C<cppflags> as with link and sources.
       -D_GNU_SOURCE
    }
 
-=end code MakePP
+=end code
 
 =head2 Conditions
 
@@ -186,38 +186,38 @@ All sections in a target description may be conditionalised. The condition must
 be explicitly (via C<arg_enable>) or implicitly (e.g. via C<library>) defined by
 the C<project> section.
 
-=begin code MakePP
+=begin code mq
 
    # Add these sources iff GMP is available and enabled
    sources if GMP {
       gmp_math.c
    }
 
-=end code MakePP
+=end code
 
 You may even conditionalise the entire target. Then all sections inside the
 target, except C<extra_dist>, are implicitly conditionalised.
 
-=begin code MakePP
+=begin code mq
 
    program pcregrep if PCRE {
       ...
    }
 
-=end code MakePP
+=end code
 
 =head2 Install targets
 
 By default, programs are installed into C<$bindir> and libraries are installed
 into C<$libdir>. You can change this by using the arrow operator.
 
-=begin code MakePP
+=begin code mq
 
    # install to $pkglibexecdir
    program cc1plus -> pkglibexec {
       ...
    }
 
-=end code MakePP
+=end code
 
 TODO: There is no way to define custom install directories, for now.

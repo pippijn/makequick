@@ -6,7 +6,7 @@ one. While the rule translator is free to move around declarations, the project
 block defines an order in which requirements are tested. This order is honoured
 by the translator.
 
-=begin code MakePP
+=begin code mq
 
    project 'MakePP' {
       version: '0.1'
@@ -19,7 +19,7 @@ by the translator.
       }
    }
 
-=end code MakePP
+=end code
 
 =head3 section
 
@@ -31,7 +31,7 @@ section is introduced with a message in the configure script output.
 In a C<project> context, C<library> checks whether a library is installed and a
 program can be linked against it.
 
-=begin code MakePP
+=begin code mq
 
    # GNU Multiprecision Library, can be disabled with --without-gmp,
    # if all targets defined in Rules files that link to it are optional.
@@ -43,7 +43,7 @@ program can be linked against it.
       'Build with GNU Multiprecision Library support'
    }
 
-=end code MakePP
+=end code
 
 The above C<library> directive defines the following variables:
 
@@ -74,7 +74,7 @@ library availability. This macro is defined to 0 or 1.
 The C<headers> section can be used to check for additional headers. C<functions>
 checks whether a list of functions is available.
 
-=begin code MakePP
+=begin code mq
 
    headers {
       # Valgrind runtime support
@@ -85,7 +85,7 @@ checks whether a list of functions is available.
       sigaction
    }
 
-=end code MakePP
+=end code
 
 This directive only defines C<HAVE_> variables in the config header.
 
@@ -98,12 +98,12 @@ C<yes>. A default may be given. This default may be C<yes> or C<no> or a
 backtick-string, which is evaluated at configure time. Thus, the following two
 are equivalent:
 
-=begin code MakePP
+=begin code mq
 
    arg_enable my-sub-package = yes { 'Also build sub-package' }
    arg_enable my-sub-package = `echo yes` { 'Also build sub-package' }
 
-=end code MakePP
+=end code
 
 This adds the option C<--enable-my-sub-package> and defines the following
 variables:
@@ -135,7 +135,7 @@ or 1, depending on the user's choice.
 
 Instead of a yes/no, you can define your own options.
 
-=begin code MakePP
+=begin code mq
 
    arg_enable app = iphone {
       'Build an app for this software. Only one app can be chosen'
@@ -156,7 +156,7 @@ Instead of a yes/no, you can define your own options.
       }
    }
 
-=end code MakePP
+=end code
 
 The defined variables and macros are the same as with the normal yes/no
 C<arg_enable>, except that the config header gets one macro per option, which is
@@ -168,7 +168,7 @@ define C<APP_ANDROID> to 1.
 The C<cflags> directive tries to compile a simple program with the passed flags
 and adds them to the named variable or C<CFLAGS> by default.
 
-=begin code MakePP
+=begin code mq
 
    # Adds to CFLAGS
    cflags {
@@ -182,7 +182,7 @@ and adds them to the named variable or C<CFLAGS> by default.
       -fvisibility=hidden
    }
 
-=end code MakePP
+=end code
 
 Each of the flags is tested separately in the order listed. The set added to the
 variable is the subset of flags that work together.

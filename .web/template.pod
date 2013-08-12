@@ -4,7 +4,7 @@ Templates define common flags and sources for targets. They do not define
 targets, by themselves. Templates offer a better structured way to inheriting
 sources and libraries.
 
-=begin code MakePP
+=begin code mq
 
    # Build a program that does some math
    program prog {
@@ -34,11 +34,11 @@ sources and libraries.
       }
    }
 
-=end code MakePP
+=end code
 
 The above example can be better written as follows:
 
-=begin code MakePP
+=begin code mq
 
    template math-program {
       sources {
@@ -63,7 +63,7 @@ The above example can be better written as follows:
       }
    }
 
-=end code MakePP
+=end code
 
 Both programs inherit the sources and link blocks from C<math-program> and add
 their own sources to it. This method is better structured but less flexible.
@@ -85,7 +85,7 @@ serve as a base, so a target or template cannot inherit from another target,
 only from templates. Inheriting from a template more than once, even implicitly
 through another base, is an error.
 
-=begin code MakePP
+=begin code mq
 
    template math-program {
       sources {
@@ -109,7 +109,7 @@ through another base, is an error.
       }
    }
 
-=end code MakePP
+=end code
 
 
 =head2 Filtering
@@ -118,7 +118,7 @@ As we learned in L<variables>, one may filter the C<$(prog.link)> variable by
 locally built libraries. Templates take this one step further by allowing you to
 filter by template.
 
-=begin code MakePP
+=begin code mq
 
    template math-library {
       ...
@@ -137,7 +137,7 @@ filter by template.
       }
    }
 
-=end code MakePP
+=end code
 
 In the above example, the C<$(mathprog.link)> variable would expand to
 "C<mathsupport support -lm>". The expansion of C<$(mathprog.link : library)>
