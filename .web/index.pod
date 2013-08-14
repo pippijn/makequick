@@ -13,8 +13,12 @@ in topological order with respect to internal dependencies. This is still a
 problem with automake. It basically means that the following automake code fails
 during installation:
 
+=begin code automake
+
    lib_LTLIBRARIES = liba.la libb.la
    liba_la_LIBADD = libb.la
+
+=end
 
 C<lib_LTLIBRARIES> must list the libraries in topological order, so that a
 definition as C<libb.la liba.la> would work. C<MakeQuick> solves this problem by
