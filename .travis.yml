@@ -1,0 +1,11 @@
+language: c++
+script: dpkg-buildpackage -b -us -uc
+
+install:
+   - sudo apt-get install omake protobuf-compiler libprotobuf-dev libboost-filesystem-dev libboost-regex-dev libboost-system-dev
+
+# whitelist
+branches:
+   only:
+      - master
+      - /.*\/staging/
