@@ -11,7 +11,7 @@ throw_signal (int signum)
 }
 
 static void
-maybe_exit (int signum)
+try_exit (int signum)
 {
   puts ("\ninterrupt caught - terminating");
   signal (signum, SIG_DFL);
@@ -21,7 +21,7 @@ maybe_exit (int signum)
 static bool
 init ()
 {
-  signal (SIGINT, maybe_exit);
+  signal (SIGINT, try_exit);
   signal (SIGSEGV, throw_signal);
   return true;
 }
