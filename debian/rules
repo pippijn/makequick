@@ -5,37 +5,8 @@
 #export DH_VERBOSE=1
 
 DESTDIR = $(CURDIR)/debian/tmp
-FLAGS =
 
-prefix = /usr
+include $(shell obuild --where)/debian/rules.common
 
 %:
 	dh $@
-
-.PHONY: override_dh_auto_configure
-override_dh_auto_configure:
-	if [ ! -d obuild ]; then					\
-	  git clone --depth=1 https://github.com/pippijn/obuild;	\
-	fi
-	obuild/script/prepare-tree .
-
-.PHONY: override_dh_auto_build
-override_dh_auto_build:
-	cd obuild && omake
-
-.PHONY: override_dh_auto_test
-override_dh_auto_test:
-	cd obuild && omake check
-
-.PHONY: override_dh_auto_install
-override_dh_auto_install:
-	mkdir -p '$(DESTDIR)$(prefix)'
-	cd obuild && omake install prefix='$(prefix)' DESTDIR='$(DESTDIR)'
-
-.PHONY: override_dh_install
-override_dh_install:
-	dh_install --fail-missing
-
-.PHONY: override_dh_auto_clean
-override_dh_auto_clean:
-	rm -rf obuild
