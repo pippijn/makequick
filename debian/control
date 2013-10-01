@@ -11,7 +11,9 @@ Build-Depends:
   libboost-regex-dev,
   libboost-system-dev,
   libprotobuf-dev,
-  protobuf-compiler
+  protobuf-compiler,
+  bison,
+  flex
 Standards-Version: 3.9.2
 Homepage: https://github.com/pippijn/makequick
 Vcs-Git: git://github.com/pippijn/makequick
