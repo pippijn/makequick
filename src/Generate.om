@@ -13,7 +13,7 @@ private.node-types (parser) =
 
 node_type.h: yyparse.ypp
   echo 'namespace nodes { enum node_type {' > $@
-  foreach (t, $(node-types $<)):
+  foreach (t => ..., $(node-types $<)):
     echo "  n_$t," >> $@
   echo '  NODE_TYPES' >> $@
   echo '};' >> $@
@@ -24,7 +24,7 @@ node_type.h: yyparse.ypp
 node_type.cpp: yyparse.ypp
   echo '#include "node_type.h"' > $@
   echo 'char const *const nodes::node_type_name[] = {' >> $@
-  foreach (t, $(node-types $<)):
+  foreach (t => ..., $(node-types $<)):
     echo "  \"$t\"," >> $@
   echo '};' >> $@
 
@@ -40,7 +40,7 @@ private.nonterminals (parser) =
 
 rule_init.h: yyparse.ypp
   echo 'enum rule_init {' > $@
-  foreach (t, $(nonterminals $<)):
+  foreach (t => ..., $(nonterminals $<)):
     echo "  r_$t," >> $@
   echo '  RULE_INITS' >> $@
   echo '};' >> $@
@@ -58,7 +58,7 @@ private.yystates (lexer) =
 
 yystate.h: yylex.hpp
   echo 'namespace yy { enum state {' > $@
-  foreach (t, $(yystates $<)):
+  foreach (t => ..., $(yystates $<)):
     echo "  $t," >> $@
   echo '  NSTATE' >> $@
   echo '}; }' >> $@
