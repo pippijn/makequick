@@ -5,13 +5,13 @@ Maintainer: Pippijn van Steenhoven <pip88nl@gmail.com>
 Uploaders: 
   Pippijn van Steenhoven <pip88nl@gmail.com>
 Build-Depends:
-  omake,
+  debhelper (>= 8.0.0),
+  obuild,
   libboost-filesystem-dev,
   libboost-regex-dev,
   libboost-system-dev,
-  protobuf-compiler,
   libprotobuf-dev,
-  debhelper (>= 8.0.0)
+  protobuf-compiler
 Standards-Version: 3.9.2
 Homepage: https://github.com/pippijn/makequick
 Vcs-Git: git://github.com/pippijn/makequick
