@@ -2,18 +2,16 @@ Source: makequick
 Section: devel
 Priority: optional
 Maintainer: Pippijn van Steenhoven <pip88nl@gmail.com>
-Uploaders: 
-  Pippijn van Steenhoven <pip88nl@gmail.com>
 Build-Depends:
-  debhelper (>= 8.0.0),
-  obuild,
-  libboost-filesystem-dev,
-  libboost-regex-dev,
-  libboost-system-dev,
-  libprotobuf-dev,
-  protobuf-compiler,
-  bison,
-  flex
+ debhelper (>= 8.0.0),
+ obuild,
+ libboost-filesystem-dev,
+ libboost-regex-dev,
+ libboost-system-dev,
+ libprotobuf-dev,
+ protobuf-compiler,
+ bison,
+ flex
 Standards-Version: 3.9.2
 Homepage: https://github.com/pippijn/makequick
 Vcs-Git: git://github.com/pippijn/makequick
@@ -23,4 +21,7 @@ Package: makequick
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Build system on top of autotools
- TODO.
+ MakeQuick compiles a purely declarative build definition to POSIX-compliant
+ and thus fairly portable automake input. It solves a few problems with
+ automake, such as the fact that libraries must appear in topological order
+ with respect to internal dependencies.
