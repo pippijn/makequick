@@ -1,1 +1,4 @@
+# Generated from OMakefile.ml
+Version = 0.1
+
 recurse-into ($(glob D, *))
