@@ -1,3 +1,9 @@
+makequick (0.1+1) precise; urgency=low
+
+  * Use new obuild.
+
+ -- Pippijn van Steenhoven <pip88nl@gmail.com>  Fri, 04 Oct 2013 13:25:02 +0200
+
 makequick (0.1) precise; urgency=low
 
   * Initial release. (Closes: #9999)

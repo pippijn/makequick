@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Pippijn van Steenhoven <pip88nl@gmail.com>
 Build-Depends:
  debhelper (>= 8.0.0),
- obuild,
+ obuild (>= 0.1.4),
  libboost-filesystem-dev,
  libboost-regex-dev,
  libboost-system-dev,
