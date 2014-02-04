@@ -1,0 +1,9 @@
+Name		= mq-test
+
+C-Sources[] =
+  graph_t.cc
+  inference_engine_t.cc
+  symbol_table_t.cc
+
+TARGET = $(program-install)
+.DEFAULT: $(TARGET)
