@@ -1,4 +1,4 @@
-Name = makequick
+Name		= makequick
 
 C-Sources[] =
   annotations/error_log.cpp
@@ -157,9 +157,11 @@ C-Requires[] =
   pthread
   protobuf
 
-OM_YFLAGS = -d
-OM_CPPFLAGS = -I$(dir .)
+OM_YFLAGS	= -d
+OM_CPPFLAGS	= -I$(dir .)
+
 include ./Generate.om
+
 recurse-subdirs = util util/inference_engine annotations phases phases/emit lexer
 
 TARGET = $(program-install)
