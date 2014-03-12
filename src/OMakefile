@@ -162,7 +162,6 @@ OM_CPPFLAGS	= -I$(dir .)
 
 include ./Generate.om
 
-recurse-subdirs = util util/inference_engine annotations phases phases/emit lexer
-
+compute-recurse-subdirs ($(C-Sources))
 TARGET = $(program-install)
 .DEFAULT: $(TARGET)
