@@ -25,7 +25,7 @@ yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
 #define YYLLOC_DEFAULT(Current, Rhs, N)					\
     do {								\
       (Current) = YYRHSLOC (Rhs, 1);					\
-      if (YYID (N))							\
+      if (N)							\
 	{								\
 	  (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;	\
 	  (Current).first_column = YYRHSLOC (Rhs, 1).first_column;	\
@@ -39,7 +39,7 @@ yylex (YYSTYPE *yylval, YYLTYPE *yylloc, parser *self)
 	  (Current).first_column = (Current).last_column =		\
 	    YYRHSLOC (Rhs, 0).last_column;				\
 	}								\
-    } while (YYID (0))
+    } while (0)
 
 /* YY_LOCATION_PRINT -- Print the location on the stream. */
 #define YY_LOCATION_PRINT(File, Loc)			\
